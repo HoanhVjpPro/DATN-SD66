@@ -20,9 +20,6 @@ public class ForgotPasswordController {
     @Autowired
     private JavaMailSender mailSender;
 
-    // ════════════════════════════════════════
-    // BƯỚC 1 — Hiện form nhập email
-    // ════════════════════════════════════════
     @GetMapping("/forgot-password")
     public String showForgotPassword() {
         return "forgot-password"; // templates/forgot-password.html
@@ -62,9 +59,6 @@ public class ForgotPasswordController {
         return "redirect:/verify-otp";
     }
 
-    // ════════════════════════════════════════
-    // BƯỚC 2 — Hiện form nhập OTP + mật khẩu mới
-    // ════════════════════════════════════════
     @GetMapping("/verify-otp")
     public String showVerifyOtp(HttpSession session, RedirectAttributes ra) {
 
