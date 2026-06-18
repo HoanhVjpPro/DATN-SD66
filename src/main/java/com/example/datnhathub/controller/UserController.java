@@ -122,8 +122,4 @@ public class UserController {
         };
     }
 
-    @GetMapping("/order-history")
-    public String showOrderHistoryPage() {
-        return "order-history";
-    }
 }
