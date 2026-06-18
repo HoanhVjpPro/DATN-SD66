@@ -166,7 +166,7 @@
                                placeholder="Nhập mật khẩu"
                                autocomplete="new-password"
                                oninput="checkStrength(this.value)" required/>
-                        <button type="button" class="password-toggle" onclick="togglePass('password',this)">👁</button>
+                        <button type="button" class="password-toggle" onclick="togglePass('password',this)">Hiện</button>
                     </div>
                     <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
                     <span class="strength-text" id="strengthText"></span>
@@ -180,7 +180,7 @@
                         <input type="password" id="confirmPassword" name="confirmPassword" class="form-input"
                                placeholder="Nhập lại mật khẩu"
                                autocomplete="new-password" required/>
-                        <button type="button" class="password-toggle" onclick="togglePass('confirmPassword',this)">👁</button>
+                        <button type="button" class="password-toggle" onclick="togglePass('confirmPassword',this)">Hiện</button>
                     </div>
                     <span class="field-error" id="confirmError"></span>
                 </div>
@@ -209,7 +209,7 @@
     function togglePass(id, btn) {
         const input = document.getElementById(id);
         input.type = input.type === 'password' ? 'text' : 'password';
-        btn.textContent = input.type === 'password' ? '👁' : '🙈';
+        btn.textContent = input.type === 'password' ? 'Hiện' : 'Ẩn';
     }
 
     function checkStrength(val) {

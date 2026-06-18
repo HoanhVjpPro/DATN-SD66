@@ -48,7 +48,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String handleLogin(@RequestParam String username,
+    public String Login(@RequestParam String username,
                               @RequestParam String password,
                               HttpSession session,
                               RedirectAttributes redirectAttrs) {
@@ -83,7 +83,7 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public String handleRegister(@ModelAttribute RegisterDto dto,
+    public String Register(@ModelAttribute RegisterDto dto,
                                  Model model,
                                  RedirectAttributes redirectAttrs) {
 
@@ -122,4 +122,8 @@ public class UserController {
         };
     }
 
+    @GetMapping("/order-history")
+    public String showOrderHistoryPage() {
+        return "order-history";
+    }
 }
