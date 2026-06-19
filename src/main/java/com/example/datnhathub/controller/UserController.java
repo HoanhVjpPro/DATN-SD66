@@ -109,9 +109,6 @@ public class UserController {
         return "redirect:/login";
     }
 
-    // ════════════════════════════════════════
-    // HELPER: redirect theo role
-    // ════════════════════════════════════════
     private String redirectByRole(HttpSession session) {
         String role = (String) session.getAttribute("roleName");
         if (role == null) return "redirect:/login";
