@@ -67,6 +67,7 @@ public class UserController {
         session.setAttribute("username",     user.getUsername());
         session.setAttribute("roleName",     user.getRole().getRoleName());
 
+        session.setAttribute("user", user);
         // Redirect theo role
         return redirectByRole(session);
     }
