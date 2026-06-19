@@ -65,7 +65,9 @@
       cursor: pointer; transition: background 0.2s !important;
     }
     .btn-cart:hover { background: var(--rust-dark) !important; }
-
+    a{
+      text-decoration: none;
+    }
     /* ── HERO ── */
     .hero {
       background: var(--black);
@@ -365,7 +367,8 @@
     <button title="Tìm kiếm">🔍</button>
     <button title="Yêu thích">♡</button>
     <button class="btn-cart">Giỏ (0)</button>
-    <a class="btn-cart" href="/logout">đăng xuất</a>
+    <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
+    <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
   </div>
 
 </nav>
