@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" fill="none">
+  <rect width="200" height="160" fill="#f0efee"/>
+  <path d="M30 100 C30 100 32 62 100 57 C168 52 170 100 170 100" fill="#1a1a1a"/>
+  <path d="M100 20 L70 62 L100 57 L130 62 Z" fill="#111"/>
+  <path d="M30 100 Q50 120 80 122 Q100 124 120 122 Q150 120 170 100" fill="#0d0d0d"/>
+  <text x="100" y="92" text-anchor="middle" font-size="14" fill="#C0633A" font-family="sans-serif" font-weight="bold">HH</text>
+</svg>

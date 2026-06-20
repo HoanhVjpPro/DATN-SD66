@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Đơn hàng | HatHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family:'Nunito',sans-serif; background:#F5F0EA; margin:0; }
+    nav { background:#111; padding:1rem 2rem; }
+    nav a { color:#fff; text-decoration:none; font-weight:700; }
+    .container { max-width:900px; margin:2rem auto; padding:0 1rem; }
+    table { width:100%; background:#fff; border-radius:8px; border-collapse:collapse; overflow:hidden; }
+    th, td { padding:1rem; text-align:left; border-bottom:1px solid #eee; }
+    th { background:#111; color:#fff; }
+    .status { padding:4px 10px; border-radius:4px; font-size:0.8rem; font-weight:700; background:#C0633A; color:#fff; }
+  </style>
+</head>
+<body>
+<nav><a href="/">← HatHub</a></nav>
+<div class="container">
+  <h1>Đơn hàng của tôi</h1>
+  <table th:if="${!#lists.isEmpty(orders)}">
+    <thead><tr><th>Mã đơn</th><th>Ngày</th><th>Tổng tiền</th><th>Trạng thái</th><th></th></tr></thead>
+    <tbody>
+      <tr th:each="o : ${orders}">
+        <td th:text="'#' + ${o.orderId}">#1</td>
+        <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy HH:mm')}">date</td>
+        <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
+        <td><span class="status" th:text="${o.status}">status</span></td>
+        <td><a th:href="@{/orders/{id}(id=${o.orderId})}">Chi tiết</a></td>
+      </tr>
+    </tbody>
+  </table>
+  <p th:if="${#lists.isEmpty(orders)}">Bạn chưa có đơn hàng nào. <a href="/">Mua sắm ngay</a></p>
+</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Quản lý danh mục | HatHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
+    aside { width:220px; background:#111; color:#fff; padding:1.5rem; }
+    aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
+    aside a:hover, aside a.active { color:#C0633A; }
+    main { flex:1; padding:2rem; background:#F5F0EA; }
+    table { width:100%; background:#fff; border-collapse:collapse; border-radius:8px; overflow:hidden; }
+    th, td { padding:0.75rem 1rem; text-align:left; border-bottom:1px solid #eee; }
+    th { background:#111; color:#fff; }
+    form { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; }
+    input { padding:8px; border:1px solid #ddd; border-radius:4px; margin-right:0.5rem; }
+    button { background:#C0633A; color:#fff; border:none; padding:8px 16px; cursor:pointer; border-radius:4px; }
+    .alert { background:#f8d7da; color:#721c24; padding:1rem; border-radius:4px; margin-bottom:1rem; }
+  </style>
+</head>
+<body>
+<aside>
+  <h2 style="color:#C0633A;">HatHub Admin</h2>
+  <a href="/admin/dashboard">Dashboard</a>
+  <a href="/admin/products">Sản phẩm</a>
+  <a href="/admin/categories" class="active">Danh mục</a>
+  <a href="/admin/orders">Đơn hàng</a>
+  <a href="/admin/vouchers">Voucher</a>
+  <a href="/admin/users">Người dùng</a>
+  <a href="/logout">Đăng xuất</a>
+</aside>
+<main>
+  <h1>Danh mục</h1>
+  <div th:if="${error}" class="alert" th:text="${error}"></div>
+  <form action="/admin/categories" method="post">
+    <input type="hidden" name="categoryId" th:value="${category.categoryId}"/>
+    <input type="text" name="categoryName" placeholder="Tên danh mục" required/>
+    <button type="submit">Thêm / Cập nhật</button>
+  </form>
+  <table>
+    <thead><tr><th>ID</th><th>Tên</th><th></th></tr></thead>
+    <tbody>
+      <tr th:each="c : ${categories}">
+        <td th:text="${c.categoryId}">1</td>
+        <td th:text="${c.categoryName}">Name</td>
+        <td>
+          <form action="/admin/categories/delete/{id}" th:action="@{/admin/categories/delete/{id}(id=${c.categoryId})}" method="post" style="display:inline;">
+            <button type="submit" style="background:#c00;">Xóa</button>
+          </form>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>
