@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="'Đơn #' + ${order.orderId} + ' | HatHub'">Order</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family:'Nunito',sans-serif; background:#F5F0EA; margin:0; }
+    nav { background:#111; padding:1rem 2rem; }
+    nav a { color:#fff; text-decoration:none; font-weight:700; }
+    .container { max-width:800px; margin:2rem auto; padding:0 1rem; }
+    .card { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1rem; }
+    .success { background:#d4edda; color:#155724; padding:1rem; border-radius:4px; margin-bottom:1rem; }
+    table { width:100%; border-collapse:collapse; }
+    td, th { padding:0.75rem; border-bottom:1px solid #eee; text-align:left; }
+  </style>
+</head>
+<body>
+<nav><a href="/orders">← Đơn hàng</a></nav>
+<div class="container">
+  <div th:if="${success}" class="success" th:text="${success}"></div>
+  <h1 th:text="'Đơn hàng #' + ${order.orderId}">Order</h1>
+  <div class="card">
+    <p><strong>Trạng thái:</strong> <span th:text="${order.status}">status</span></p>
+    <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">date</span></p>
+    <p><strong>Tổng tiền:</strong> <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</span></p>
+    <p th:if="${order.shipping != null}"><strong>Địa chỉ:</strong> <span th:text="${order.shipping.shippingAddress}">addr</span></p>
+    <p th:if="${order.payment != null}"><strong>Thanh toán:</strong> <span th:text="${order.payment.paymentMethod} + ' - ' + ${order.payment.paymentStatus}">pay</span></p>
+  </div>
+  <div class="card">
+    <h3>Sản phẩm</h3>
+    <table>
+      <tr th:each="d : ${order.details}">
+        <td th:text="${d.productDetail.product.productName}">Product</td>
+        <td th:text="${d.productDetail.size} + ' / ' + ${d.productDetail.color}">variant</td>
+        <td th:text="${d.quantity} + ' x ' + ${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">qty</td>
+      </tr>
+    </table>
+  </div>
+</div>
+</body>
+</html>
