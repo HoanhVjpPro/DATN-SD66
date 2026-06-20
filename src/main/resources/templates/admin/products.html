@@ -31,15 +31,15 @@
   <h1>Sản phẩm</h1>
   <a href="/admin/products/new" class="btn">+ Thêm sản phẩm</a>
   <table>
-    <thead><tr><th>ID</th><th>Tên</th><th>Danh mục</th><th>Trạng thái</th><th></th></tr></thead>
+    <thead><tr><th>#</th><th>Tên</th><th>Danh mục</th><th>Trạng thái</th><th></th></tr></thead>
     <tbody>
-      <tr th:each="p : ${products}">
-        <td th:text="${p.productId}">1</td>
+      <tr th:each="p, index : ${products}">
+        <td th:text="${index.count}">1</td>
         <td th:text="${p.productName}">Name</td>
         <td th:text="${p.category.categoryName}">Cat</td>
         <td th:text="${p.status ? 'Đang bán' : 'Ẩn'}">status</td>
         <td>
-          <a th:href="@{/admin/products/edit/{id}(id=${p.productId})}">Sửa</a>
+          <a class="btn btn-primary" th:href="@{/admin/products/edit/{id}(id=${p.productId})}">Sửa</a>
           <form th:action="@{/admin/products/delete/{id}(id=${p.productId})}" method="post" style="display:inline;">
             <button type="submit" style="background:#c00;color:#fff;border:none;padding:4px 8px;cursor:pointer;">Xóa</button>
           </form>
