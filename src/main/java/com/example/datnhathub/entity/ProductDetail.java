@@ -35,4 +35,7 @@ public class ProductDetail {
 
     @Column(name = "SKU", length = 50)
     private String sku;
+
+    @Column(name = "StockQuantity", nullable = false)
+    private Integer stockQuantity = 0;
 }

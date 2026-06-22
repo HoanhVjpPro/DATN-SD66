@@ -37,14 +37,12 @@ public class ForgotPasswordController {
             return "redirect:/forgot-password";
         }
 
-        // Tạo OTP 6 chữ số
         int otp = (int) (Math.random() * 900000) + 100000;
 
         // Lưu OTP và email vào session
         session.setAttribute("otp",        String.valueOf(otp));
         session.setAttribute("resetEmail", email);
 
-        // Gửi email
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
         message.setSubject("HatHub – Mã xác nhận đặt lại mật khẩu");

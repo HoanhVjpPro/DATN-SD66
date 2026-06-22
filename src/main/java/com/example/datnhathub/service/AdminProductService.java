@@ -94,7 +94,8 @@ public class AdminProductService {
                           String size,
                           String color,
                           BigDecimal price,
-                          String sku) {
+                          String sku,
+                          Integer stockQuantity) {   // FIX: thêm param tồn kho
 
         Product product = getProductById(productId);
 
@@ -104,6 +105,7 @@ public class AdminProductService {
         detail.setColor(color);
         detail.setPrice(price);
         detail.setSku(sku);
+        detail.setStockQuantity(stockQuantity != null ? stockQuantity : 0); // FIX
 
         productDetailRepository.save(detail);
     }
@@ -154,5 +156,25 @@ public class AdminProductService {
         image.setImageURL("/uploads/products/" + fileName); // URL truy cập
         image.setIsDefault(isDefault);
         productImageRepository.save(image);
+    }
+
+    // ════════════════════════════════════════
+// UC12 — Ẩn / Hiện sản phẩm
+// Lý do dùng toggle status thay vì xóa cứng: Product đang được
+// Product_Detail / Order_Detail tham chiếu qua FK. Nếu sản phẩm đã từng
+// nằm trong 1 đơn hàng, xóa cứng (deleteById) sẽ ném DataIntegrityViolationException.
+// → Ẩn (Status = false) là cách an toàn, không mất dữ liệu lịch sử đơn hàng.
+// ════════════════════════════════════════
+    public void toggleProductStatus(Integer productId) {
+        Product product = getProductById(productId);
+        product.setStatus(!Boolean.TRUE.equals(product.getStatus()));
+        productRepository.save(product);
+    }
+
+    // ════════════════════════════════════════
+// UC14 — Xóa ảnh sản phẩm
+// ════════════════════════════════════════
+    public void deleteImage(Integer imageId) {
+        productImageRepository.deleteById(imageId);
     }
 }
