@@ -13,10 +13,15 @@
     table { width:100%; background:#fff; border-collapse:collapse; border-radius:8px; overflow:hidden; }
     th, td { padding:0.75rem 1rem; text-align:left; border-bottom:1px solid #eee; }
     th { background:#111; color:#fff; }
-    form { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; }
+    form.inline-form { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; }
     input { padding:8px; border:1px solid #ddd; border-radius:4px; margin-right:0.5rem; }
     button { background:#C0633A; color:#fff; border:none; padding:8px 16px; cursor:pointer; border-radius:4px; }
-    .alert { background:#f8d7da; color:#721c24; padding:1rem; border-radius:4px; margin-bottom:1rem; }
+    .alert { padding:1rem; border-radius:4px; margin-bottom:1rem; }
+    .alert-error { background:#f8d7da; color:#721c24; }
+    .alert-success { background:#d4edda; color:#155724; }
+    .row-actions { display:flex; gap:6px; }
+    .btn-edit { background:#444; }
+    .btn-delete { background:#c00; }
   </style>
 </head>
 <body>
@@ -32,24 +37,32 @@
 </aside>
 <main>
   <h1>Danh mục</h1>
-  <div th:if="${error}" class="alert" th:text="${error}"></div>
-  <form action="/admin/categories" method="post">
+  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+  <form class="inline-form" action="/admin/categories" method="post">
     <input type="hidden" name="categoryId" th:value="${category.categoryId}"/>
-    <input type="text" name="categoryName" placeholder="Tên danh mục" required/>
-    <button type="submit">Thêm / Cập nhật</button>
+    <input type="text" name="categoryName" placeholder="Tên danh mục" th:value="${category.categoryName}" required/>
+    <button type="submit" th:text="${category.categoryId != null ? 'Cập nhật' : 'Thêm'}">Thêm / Cập nhật</button>
+    <a th:if="${category.categoryId != null}" href="/admin/categories" style="margin-left:8px;color:#888;">Hủy sửa</a>
   </form>
+
   <table>
-    <thead><tr><th>ID</th><th>Tên</th><th></th></tr></thead>
+    <thead><tr><th>ID</th><th>Tên</th><th>Thao tác</th></tr></thead>
     <tbody>
-      <tr th:each="c : ${categories}">
-        <td th:text="${c.categoryId}">1</td>
-        <td th:text="${c.categoryName}">Name</td>
-        <td>
-          <form action="/admin/categories/delete/{id}" th:action="@{/admin/categories/delete/{id}(id=${c.categoryId})}" method="post" style="display:inline;">
-            <button type="submit" style="background:#c00;">Xóa</button>
-          </form>
-        </td>
-      </tr>
+    <tr th:each="c, index : ${categories}">
+      <td th:text="${index.count}"></td>
+      <td th:text="${c.categoryName}">Name</td>
+      <td class="row-actions">
+        <a th:href="@{/admin/categories(editId=${c.categoryId})}">
+          <button type="button" class="btn-edit">Sửa</button>
+        </a>
+        <form th:action="@{/admin/categories/delete/{id}(id=${c.categoryId})}" method="post" style="display:inline;"
+              onsubmit="return confirm('Xóa danh mục này?');">
+          <button type="submit" class="btn-delete">Xóa</button>
+        </form>
+      </td>
+    </tr>
     </tbody>
   </table>
 </main>

@@ -101,16 +101,6 @@ public class AdminProductController {
     }
 
     // ════════════════════════════════════════
-    // POST /admin/products/delete/{id} — Xóa sản phẩm
-    // ════════════════════════════════════════
-    @PostMapping("/delete/{id}")
-    public String deleteProduct(@PathVariable Integer id, RedirectAttributes ra) {
-        adminProductService.deleteProduct(id);
-        ra.addFlashAttribute("success", "Đã xóa sản phẩm!");
-        return "redirect:/admin/products";
-    }
-
-    // ════════════════════════════════════════
     // POST /admin/products/{id}/detail — Thêm biến thể
     // ════════════════════════════════════════
     @PostMapping("/{id}/detail")
@@ -119,9 +109,10 @@ public class AdminProductController {
                             @RequestParam String color,
                             @RequestParam BigDecimal price,
                             @RequestParam String sku,
+                            @RequestParam Integer stockQuantity,   // FIX: nhận thêm tồn kho từ form
                             RedirectAttributes ra) {
 
-        adminProductService.addDetail(id, size, color, price, sku);
+        adminProductService.addDetail(id, size, color, price, sku, stockQuantity);
         ra.addFlashAttribute("success", "Đã thêm biến thể!");
         return "redirect:/admin/products/edit/" + id;
     }
@@ -157,5 +148,44 @@ public class AdminProductController {
         }
 
         return "redirect:/admin/products/edit/" + id;
+    }
+
+    // ════════════════════════════════════════
+// UC12 — Ẩn / Hiện sản phẩm (an toàn, không xóa dữ liệu)
+// POST /admin/products/toggle/{id}
+// ════════════════════════════════════════
+    @PostMapping("/toggle/{id}")
+    public String toggleProductStatus(@PathVariable Integer id, RedirectAttributes ra) {
+        adminProductService.toggleProductStatus(id);
+        ra.addFlashAttribute("success", "Đã đổi trạng thái sản phẩm!");
+        return "redirect:/admin/products";
+    }
+
+    // ════════════════════════════════════════
+// UC14 — Xóa ảnh sản phẩm
+// POST /admin/products/image/delete/{imageId}
+// ════════════════════════════════════════
+    @PostMapping("/image/delete/{imageId}")
+    public String deleteImage(@PathVariable Integer imageId,
+                              @RequestParam Integer productId,
+                              RedirectAttributes ra) {
+        adminProductService.deleteImage(imageId);
+        ra.addFlashAttribute("success", "Đã xóa ảnh!");
+        return "redirect:/admin/products/edit/" + productId;
+    }
+
+
+    // ====== SỬA LẠI deleteProduct() hiện có — bắt lỗi khóa ngoại để không crash app ======
+    @PostMapping("/delete/{id}")
+    public String deleteProduct(@PathVariable Integer id, RedirectAttributes ra) {
+        try {
+            adminProductService.deleteProduct(id);
+            ra.addFlashAttribute("success", "Đã xóa sản phẩm!");
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Sản phẩm đã có biến thể nằm trong đơn hàng -> không thể xóa cứng
+            ra.addFlashAttribute("error",
+                    "Không thể xóa: sản phẩm đã có trong đơn hàng. Hãy dùng nút Ẩn để ngừng bán thay thế.");
+        }
+        return "redirect:/admin/products";
     }
 }

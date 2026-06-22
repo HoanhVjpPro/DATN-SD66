@@ -16,6 +16,8 @@
     table { width:100%; border-collapse:collapse; margin-top:1rem; }
     td, th { padding:0.5rem; border-bottom:1px solid #eee; text-align:left; }
     .success { background:#d4edda; padding:1rem; border-radius:4px; margin-bottom:1rem; }
+    .stock-low { color:#c0392b; font-weight:700; }
+    .stock-out { color:#fff; background:#c0392b; padding:2px 8px; border-radius:4px; font-size:0.8rem; }
   </style>
 </head>
 <body>
@@ -39,30 +41,41 @@
       </select>
       <label>Mô tả</label>
       <textarea name="description" rows="4" th:text="${product.description}"></textarea>
-      <label><input type="checkbox" name="status" value="true" th:checked="${product.status == null or product.status}"/> Đang bán</label>
+      <label><input type="checkbox" name="status" value="true" th:checked="${product.status == null or product.status}" style="width:auto;"/> Đang bán</label>
       <button type="submit">Lưu sản phẩm</button>
     </form>
   </div>
 
   <div class="card" th:if="${product.productId != null}">
-    <h3>Biến thể (Size / Màu / Giá)</h3>
+    <h3>Biến thể (Size / Màu / Giá / Tồn kho)</h3>
     <form th:action="@{/admin/products/{id}/detail(id=${product.productId})}" method="post">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:0.5rem;align-items:end;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr auto;gap:0.5rem;align-items:end;">
         <div><label>Size</label><input name="size" required/></div>
         <div><label>Màu</label><input name="color" required/></div>
         <div><label>Giá</label><input name="price" type="number" step="1000" required/></div>
         <div><label>SKU</label><input name="sku" required/></div>
+        <!-- FIX: thêm ô nhập số lượng tồn kho cho biến thể mới -->
+        <div><label>Tồn kho</label><input name="stockQuantity" type="number" min="0" step="1" value="0" required/></div>
         <button type="submit">Thêm</button>
       </div>
     </form>
     <table th:if="${details != null}">
+      <tr>
+        <th>Size</th><th>Màu</th><th>Giá</th><th>SKU</th><th>Tồn kho</th><th></th>
+      </tr>
       <tr th:each="d : ${details}">
         <td th:text="${d.size}">M</td>
         <td th:text="${d.color}">Black</td>
         <td th:text="${#numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT')}">0</td>
         <td th:text="${d.sku}">SKU</td>
+        <!-- FIX: hiển thị tồn kho, cảnh báo nếu sắp hết / đã hết -->
         <td>
-          <form th:action="@{/admin/products/detail/delete/{id}(id=${d.productDetailId})}" method="post">
+          <span th:if="${d.stockQuantity != null and d.stockQuantity == 0}" class="stock-out">Hết hàng</span>
+          <span th:if="${d.stockQuantity != null and d.stockQuantity > 0 and d.stockQuantity <= 5}" class="stock-low" th:text="${d.stockQuantity}">0</span>
+          <span th:if="${d.stockQuantity != null and d.stockQuantity > 5}" th:text="${d.stockQuantity}">0</span>
+        </td>
+        <td>
+          <form th:action="@{/admin/products/detail/delete/{id}(id=${d.productDetailId})}" method="post" style="display:inline;">
             <input type="hidden" name="productId" th:value="${product.productId}"/>
             <button type="submit" style="background:#c00;color:#fff;border:none;padding:4px 8px;">Xóa</button>
           </form>
@@ -73,7 +86,7 @@
     <h3 style="margin-top:1.5rem;">Upload ảnh</h3>
     <form th:action="@{/admin/products/{id}/image(id=${product.productId})}" method="post" enctype="multipart/form-data">
       <input type="file" name="file" accept="image/*" required/>
-      <label><input type="checkbox" name="isDefault" value="true" checked/> Ảnh mặc định</label>
+      <label><input type="checkbox" name="isDefault" value="true" checked style="width:auto;"/> Ảnh mặc định</label>
       <button type="submit">Upload</button>
     </form>
   </div>

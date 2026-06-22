@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thanh toán | HatHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Oswald:wght@500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" th:href="@{/shop.css}" />
+</head>
+<body class="page">
+<div class="promo-bar">Kiểm tra thông tin giao hàng trước khi đặt đơn</div>
+<nav class="shop-nav">
+    <a href="/" class="brand"><span class="brand-mark">H</span><span>HatHub</span></a>
+    <ul class="nav-menu"><li><a href="/cart">Quay lại giỏ</a></li><li><a th:href="@{/products}">Tiếp tục mua</a></li></ul>
+    <div class="nav-actions"><a class="cart-link" href="/cart">Giỏ</a></div>
+</nav>
+<main class="page-wrap">
+    <h1 class="page-title">Checkout</h1>
+    <div th:if="${error}" class="alert error" th:text="${error}"></div>
+    <div class="checkout-layout">
+        <form class="checkout-card form-box" action="/checkout" method="post">
+            <div>
+                <label>Địa chỉ giao hàng *</label>
+                <textarea name="shippingAddress" rows="4" required
+                          placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea>
+            </div>
+            <div>
+                <label>Phương thức thanh toán *</label>
+                <div class="payment-options">
+                    <label class="payment-option"><input type="radio" name="paymentMethod" value="COD" checked /> Thanh toán khi nhận hàng (COD)</label>
+                    <label class="payment-option"><input type="radio" name="paymentMethod" value="Chuyển khoản" /> Chuyển khoản ngân hàng</label>
+                    <label class="payment-option"><input type="radio" name="paymentMethod" value="MoMo" /> Ví MoMo</label>
+                </div>
+            </div>
+            <div>
+                <label>Mã voucher</label>
+                <input type="text" name="voucherCode" placeholder="VD: HATHUB50" />
+            </div>
+            <button class="btn btn-primary" type="submit">Đặt hàng</button>
+        </form>
+
+        <aside class="summary-card">
+            <h2>Order summary</h2>
+            <div class="summary-row"><span>Sản phẩm</span><strong>HatHub cart</strong></div>
+            <div class="summary-row">
+                <span>Tổng đơn hàng</span>
+                <strong class="summary-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+            </div>
+            <p style="color:rgba(255,255,255,.68);font-size:14px;">
+                Sau khi đặt hàng, HatHub sẽ xác nhận đơn và chuẩn bị giao theo thông tin bạn cung cấp.
+            </p>
+        </aside>
+    </div>
+</main>
+</body>
+</html>
