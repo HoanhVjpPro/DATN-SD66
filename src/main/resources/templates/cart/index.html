@@ -26,7 +26,20 @@
         <form action="/cart/remove" method="post"><input type="hidden" name="cartDetailId" th:value="${item.cartDetailId}" /><button class="remove-btn" type="submit">×</button></form>
       </div>
     </section>
-    <aside class="summary-card"><h2>Tóm tắt đơn</h2><div class="summary-row"><span>Tạm tính</span><strong th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong></div><div class="summary-row"><span>Giao hàng</span><strong>Miễn phí từ 299K</strong></div><div class="summary-row"><span>Tổng cộng</span><strong class="summary-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong></div><a href="/checkout" class="btn btn-primary" style="width:100%;margin-top:16px;">Thanh toán</a><a href="/" class="btn btn-outline" style="width:100%;margin-top:10px;">Tiếp tục mua</a></aside>
+    <aside class="summary-card">
+      <h2>Tóm tắt đơn</h2>
+      <div class="summary-row">
+        <span>Tạm tính</span>
+        <strong th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+      </div>
+      <div class="summary-row">
+        <span>Giao hàng</span>
+        <strong>Miễn phí từ 299K</strong>
+      </div><div class="summary-row">
+      <span>Tổng cộng</span>
+      <strong class="summary-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+    </div><a href="/checkout" class="btn btn-primary" style="width:100%;margin-top:16px;">Thanh toán</a>
+      <a href="/" class="btn btn-outline" style="width:100%;margin-top:10px;">Tiếp tục mua</a></aside>
   </div>
 </main>
 </body>

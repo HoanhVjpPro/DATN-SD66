@@ -17,6 +17,15 @@
     .variant-options input[type=radio]:checked + .variant-chip{border-color:#C0633A;background:#C0633A;color:#fff;font-weight:700;}
     .variant-options input[type=radio]:disabled + .variant-chip{opacity:.4;cursor:not-allowed;text-decoration:line-through;}
     .reviews-placeholder{color:#999;font-size:14px;padding:24px 0;text-align:center;}
+    .btn-cart {
+      background: var(--rust) !important;
+      border: none !important; border-radius: 4px !important;
+      padding: 8px 18px !important; font-family: var(--font-body);
+      font-size: 0.8rem !important; font-weight: 700 !important;
+      letter-spacing: 0.05em; color: var(--white) !important;
+      cursor: pointer; transition: background 0.2s !important;
+    }
+    .btn-cart:hover { background: var(--rust-dark) !important; }
   </style>
 </head>
 <body class="page">
@@ -32,6 +41,8 @@
     <a class="icon-link" th:if="${loggedIn}" href="/profile" aria-label="Tài khoản">◎</a>
     <a class="icon-link" th:unless="${loggedIn}" href="/login" aria-label="Đăng nhập">◎</a>
     <a th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" class="cart-link">Giỏ</a>
+    <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
+    <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
   </div>
 </nav>
 

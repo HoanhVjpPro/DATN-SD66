@@ -117,7 +117,7 @@ public class CartController {
         }
 
         model.addAttribute("total", cartService.calculateTotal(cart));
-        return "cart/checkout"; // templates/cart/checkout.html
+        return "checkout/checkout"; // templates/cart/checkout.html
     }
 
     // ════════════════════════════════════════
@@ -144,7 +144,7 @@ public class CartController {
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("total", cartService.calculateTotal(cartService.getCart(userId)));
-            return "cart/checkout";
+            return "checkout/checkout";
         }
     }
 }
