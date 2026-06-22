@@ -13,13 +13,13 @@
 <div class="promo-bar">Giỏ hàng được giữ trong phiên đăng nhập của bạn</div>
 <nav class="shop-nav"><a href="/" class="brand"><span class="brand-mark">H</span><span>HatHub</span></a><ul class="nav-menu"><li><a href="/#products">Tiếp tục mua</a></li><li><a href="/orders">Đơn hàng</a></li></ul><div class="nav-actions"><a class="icon-link" href="/profile" aria-label="Tài khoản">◎</a></div></nav>
 <main class="page-wrap">
-  <h1 class="page-title">Shopping cart</h1>
+  <h1 class="page-title">Giỏ hàng</h1>
   <div th:if="${error}" class="alert error" th:text="${error}"></div>
   <div th:if="${cart.details == null or #lists.isEmpty(cart.details)}" class="empty-state"><h3>Giỏ hàng trống</h3><p>Chọn một chiếc mũ phù hợp rồi quay lại thanh toán.</p><a href="/" class="btn btn-primary">Mua sắm ngay</a></div>
   <div th:unless="${cart.details == null or #lists.isEmpty(cart.details)}" class="cart-layout">
     <section class="cart-card">
       <div th:each="item : ${cart.details}" class="cart-item">
-        <div class="cart-product"><strong th:text="${item.productDetail.product.productName}">Product</strong><small th:text="${item.productDetail.size} + ' / ' + ${item.productDetail.color}">Size</small></div>
+        <div class="cart-product"><strong th:text="${item.productDetail.product.productName}">SẢN PHẨM</strong><small th:text="${item.productDetail.size} + ' / ' + ${item.productDetail.color}">Size</small></div>
         <div th:text="${#numbers.formatDecimal(item.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
         <form class="qty-form" action="/cart/update" method="post"><input type="hidden" name="cartDetailId" th:value="${item.cartDetailId}" /><input type="number" name="quantity" th:value="${item.quantity}" min="1" /><button type="submit">✓</button></form>
         <strong th:text="${#numbers.formatDecimal(item.productDetail.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>

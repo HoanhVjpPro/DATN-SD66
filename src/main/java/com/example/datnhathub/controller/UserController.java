@@ -3,6 +3,7 @@ package com.example.datnhathub.controller;
 import com.example.datnhathub.dto.RegisterDto;
 import com.example.datnhathub.entity.Users;
 import com.example.datnhathub.repository.UserRepository;
+import com.example.datnhathub.service.ProductService;
 import com.example.datnhathub.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class UserController {
     private UserRepository userRepository;
 
     @Autowired
+    private ProductService productService;
+
+    @Autowired
     private UserService userService;
 
     private boolean isLoggedIn(HttpSession session) {
@@ -27,8 +31,15 @@ public class UserController {
     }
 
     @GetMapping("/")
-    public String index() {
-        return "main-menu";
+    public String home(HttpSession session, Model model) {
+
+        // 4 sản phẩm mới nhất hiển thị ở trang chủ
+        model.addAttribute("featuredProducts", productService.getFeaturedProducts(4));
+
+        model.addAttribute("loggedIn", session.getAttribute("userId") != null);
+        model.addAttribute("roleName", session.getAttribute("roleName"));
+
+        return "main-menu"; // templates/main-menu.html
     }
 
     @GetMapping("/login")

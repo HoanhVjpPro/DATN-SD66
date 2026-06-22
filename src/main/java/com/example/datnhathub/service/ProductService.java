@@ -123,4 +123,19 @@ public class ProductService {
                 .findFirst()
                 .orElseGet(() -> product.getImages().get(0).getImageURL());
     }
+
+    // Dùng cho trang chủ (HomeController) - lấy N sản phẩm mới nhất, còn đang bán (status=true)
+
+    public List<ProductDto> getFeaturedProducts(int limit) {
+        Pageable pageable = PageRequest.of(0, limit, Sort.by("productId").descending());
+
+        Page<Product> productPage = productRepository.findByFilters(
+                null, null, null, null, pageable
+        );
+
+        return productPage.getContent()
+                .stream()
+                .map(this::toDTO) // tái sử dụng method toDTO() private đã có sẵn trong class
+                .toList();
+    }
 }
