@@ -22,7 +22,9 @@
       <div><label>Mã voucher</label><input type="text" name="voucherCode" placeholder="VD: HATHUB50" /></div>
       <button class="btn btn-primary" type="submit">Đặt hàng</button>
     </form>
-    <aside class="summary-card"><h2>Order summary</h2><div class="summary-row"><span>Sản phẩm</span><strong>HatHub cart</strong></div><div class="summary-row"><span>Tổng đơn hàng</span><strong class="summary-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong></div><p style="color:rgba(255,255,255,.68);font-size:14px;">Sau khi đặt hàng, HatHub sẽ xác nhận đơn và chuẩn bị giao theo thông tin bạn cung cấp.</p></aside>
+
+    <aside class="summary-card">
+      <h2>Order summary</h2><div class="summary-row"><span>Sản phẩm</span><strong>HatHub cart</strong></div><div class="summary-row"><span>Tổng đơn hàng</span><strong class="summary-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong></div><p style="color:rgba(255,255,255,.68);font-size:14px;">Sau khi đặt hàng, HatHub sẽ xác nhận đơn và chuẩn bị giao theo thông tin bạn cung cấp.</p></aside>
   </div>
 </main>
 </body>

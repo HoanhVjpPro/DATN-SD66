@@ -83,4 +83,46 @@ public class UserService {
 
         return user;
     }
+
+    //Tri duc
+
+    public Users getById(Integer id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void updateProfile(Integer userId, String email, String phone) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại"));
+        user.setEmail(email);
+        user.setPhone(phone);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public String changePassword(Integer userId, String oldPassword, String newPassword, String confirmPassword) {
+
+        Users user = userRepository.findById(userId).orElse(null);
+
+        if (user == null) {
+            return "Người dùng không tồn tại!";
+        }
+
+        // Kiểm tra mật khẩu cũ
+        if (!user.getPassword().equals(oldPassword)) {
+            return "Mật khẩu cũ không chính xác!";
+        }
+
+        // Kiểm tra xác nhận mật khẩu
+        if (!newPassword.equals(confirmPassword)) {
+            return "Mật khẩu xác nhận không khớp!";
+        }
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(newPassword);
+
+        userRepository.save(user);
+
+        return null; // Thành công
+    }
 }

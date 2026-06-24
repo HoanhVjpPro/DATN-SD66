@@ -132,4 +132,10 @@ public class CartService {
             return 0;
         }
     }
+
+    public void clearCart(Integer userId) {
+        Customer customer = getCustomerByUserId(userId);
+        Cart cart = getOrCreateCart(customer);
+        cartDetailRepository.deleteAll(cart.getDetails());
+    }
 }

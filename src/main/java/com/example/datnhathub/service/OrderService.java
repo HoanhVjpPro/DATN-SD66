@@ -19,6 +19,7 @@ public class OrderService {
     @Autowired private CartDetailRepository cartDetailRepository;
     @Autowired private VoucherRepository voucherRepository;
     @Autowired private ProductDetailRepository productDetailRepository;
+    @Autowired private EmployeeRepository employeeRepository;
 
     // ════════════════════════════════════════
     // UC20 — Đặt hàng từ giỏ hàng
@@ -113,13 +114,49 @@ public class OrderService {
         }
 
         // Xóa hết Cart_Detail sau khi đặt hàng thành công (giỏ hàng trống lại)
-        cartDetailRepository.deleteAll(cart.getDetails());
-
+        cartDetailRepository.deleteByCartCartId(cart.getCartId());
         return savedOrder;
     }
 
     public List<Orders> getOrdersByUserId(Integer userId) {
         Customer customer = cartService.getCustomerByUserId(userId);
         return orderRepository.findByCustomerCustomerIdOrderByOrderDateDesc(customer.getCustomerId());
+    }
+//VND
+    public long countByStatus(String status) {
+        return orderRepository.countByStatus(status);
+    }
+
+    public long countAll() {
+        return orderRepository.count();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Orders> getAllOrders() {
+        return orderRepository.findAllByOrderByOrderDateDesc();
+    }
+
+    @Transactional
+    public void updateOrderStatus(Integer orderId, String status, Integer employeeUserId) {
+        Orders order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại"));
+        order.setStatus(status);
+
+        if (employeeUserId != null) {
+            employeeRepository.findByUserUserID(employeeUserId).ifPresent(order::setEmployee);
+        }
+
+        if ("Đang giao".equals(status) && order.getShipping() != null) {
+            order.getShipping().setShippingStatus("Đang giao");
+        }
+        if ("Hoàn thành".equals(status)) {
+            if (order.getShipping() != null) order.getShipping().setShippingStatus("Đã giao");
+            if (order.getPayment() != null) order.getPayment().setPaymentStatus("Đã thanh toán");
+        }
+        if ("Đã hủy".equals(status)) {
+            if (order.getShipping() != null) order.getShipping().setShippingStatus("Đã hủy");
+        }
+
+        orderRepository.save(order);
     }
 }

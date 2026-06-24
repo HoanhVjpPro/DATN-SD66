@@ -108,11 +108,11 @@ public class AdminProductController {
                             @RequestParam String size,
                             @RequestParam String color,
                             @RequestParam BigDecimal price,
-                            @RequestParam String sku,
-                            @RequestParam Integer stockQuantity,   // FIX: nhận thêm tồn kho từ form
+                            @RequestParam(required = false, defaultValue = "") String sku,
+                            @RequestParam(defaultValue = "0") Integer stockQuantity, // ← thêm
                             RedirectAttributes ra) {
 
-        adminProductService.addDetail(id, size, color, price, sku, stockQuantity);
+        adminProductService.addDetail(id, size, color, price, sku, stockQuantity); // ← thêm
         ra.addFlashAttribute("success", "Đã thêm biến thể!");
         return "redirect:/admin/products/edit/" + id;
     }
@@ -187,5 +187,20 @@ public class AdminProductController {
                     "Không thể xóa: sản phẩm đã có trong đơn hàng. Hãy dùng nút Ẩn để ngừng bán thay thế.");
         }
         return "redirect:/admin/products";
+    }
+
+    @PostMapping("/detail/update/{detailId}")
+    public String updateDetail(@PathVariable Integer detailId,
+                               @RequestParam String size,
+                               @RequestParam String color,
+                               @RequestParam BigDecimal price,
+                               @RequestParam(required = false, defaultValue = "") String sku,
+                               @RequestParam Integer stockQuantity,
+                               @RequestParam Integer productId,
+                               RedirectAttributes ra) {
+
+        adminProductService.updateDetail(detailId, size, color, price, sku, stockQuantity);
+        ra.addFlashAttribute("success", "Đã cập nhật biến thể!");
+        return "redirect:/admin/products/edit/" + productId;
     }
 }

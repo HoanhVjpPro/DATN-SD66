@@ -30,6 +30,7 @@
 <main>
   <h1>Sản phẩm</h1>
   <a href="/admin/products/new" class="btn">+ Thêm sản phẩm</a>
+  <p th:text="${error}" style="color: red"></p>
   <table>
     <thead><tr><th>#</th><th>Tên</th><th>Danh mục</th><th>Trạng thái</th><th></th></tr></thead>
     <tbody>
@@ -39,7 +40,9 @@
         <td th:text="${p.category.categoryName}">Cat</td>
         <td th:text="${p.status ? 'Đang bán' : 'Ẩn'}">status</td>
         <td>
-          <a class="btn btn-primary" th:href="@{/admin/products/edit/{id}(id=${p.productId})}">Sửa</a>
+          <a th:href="@{/admin/products/edit/{id}(id=${p.productId})}"
+             style="background:#444;color:#fff;padding:4px 8px;text-decoration:none;margin-right:4px;">Sửa</a>
+
           <form th:action="@{/admin/products/delete/{id}(id=${p.productId})}" method="post" style="display:inline;">
             <button type="submit" style="background:#c00;color:#fff;border:none;padding:4px 8px;cursor:pointer;">Xóa</button>
           </form>

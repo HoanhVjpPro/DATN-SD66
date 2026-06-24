@@ -1,13 +1,12 @@
 package com.example.datnhathub.repository;
 
-import com.example.datnhathub.entity.Voucher;
+import com.example.datnhathub.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
-    Optional<Voucher> findByCode(String code);
-
+public interface RoleRepository extends JpaRepository<Role, Integer> {
+    Optional<Role> findByRoleName(String roleName);
 }

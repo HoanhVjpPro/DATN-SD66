@@ -79,6 +79,9 @@ public class UserController {
         session.setAttribute("roleName",     user.getRole().getRoleName());
 
         session.setAttribute("user", user);
+        if (user.getCustomer() != null) {
+            session.setAttribute("customerId", user.getCustomer().getCustomerId());
+        }
         // Redirect theo role
         return redirectByRole(session);
     }
@@ -130,5 +133,4 @@ public class UserController {
             default         -> "redirect:/";           // CUSTOMER → trang chủ
         };
     }
-
 }

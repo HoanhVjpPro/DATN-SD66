@@ -59,7 +59,7 @@ public class CartController {
     // ════════════════════════════════════════
     @GetMapping("/cart")
     public String viewCart(HttpSession session, Model model) {
-        Integer userId = currentUserId(session);
+        Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null) {
             return "redirect:/login";
         }
@@ -142,9 +142,11 @@ public class CartController {
             ra.addFlashAttribute("success", "Đặt hàng thành công! Mã đơn: #" + order.getOrderId());
             return "redirect:/orders/" + order.getOrderId();
         } catch (Exception e) {
+            System.out.println("=== LỖI CHECKOUT: " + e.getMessage()); // ← thêm dòng này
+            e.printStackTrace();
             model.addAttribute("error", e.getMessage());
             model.addAttribute("total", cartService.calculateTotal(cartService.getCart(userId)));
-            return "checkout/checkout";
+            return "checkout/index";
         }
     }
 }
