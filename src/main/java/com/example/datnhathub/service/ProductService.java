@@ -138,4 +138,9 @@ public class ProductService {
                 .map(this::toDTO) // tái sử dụng method toDTO() private đã có sẵn trong class
                 .toList();
     }
+
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
 }

@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface OrderRepository extends JpaRepository<Orders, Integer> {
     List<Orders> findByCustomerCustomerIdOrderByOrderDateDesc(Integer customerId);
+    List<Orders> findAllByOrderByOrderDateDesc();
+    long countByStatus(String status);
 }

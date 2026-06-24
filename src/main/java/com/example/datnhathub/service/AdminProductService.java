@@ -90,22 +90,22 @@ public class AdminProductService {
     // ════════════════════════════════════════
     // UC13 — Thêm biến thể
     // ════════════════════════════════════════
+    // Sửa lại addDetail — thêm tham số stockQuantity
     public void addDetail(Integer productId,
                           String size,
                           String color,
                           BigDecimal price,
                           String sku,
-                          Integer stockQuantity) {   // FIX: thêm param tồn kho
+                          Integer stockQuantity) {  // ← thêm tham số này
 
         Product product = getProductById(productId);
-
         ProductDetail detail = new ProductDetail();
         detail.setProduct(product);
         detail.setSize(size);
         detail.setColor(color);
         detail.setPrice(price);
         detail.setSku(sku);
-        detail.setStockQuantity(stockQuantity != null ? stockQuantity : 0); // FIX
+        detail.setStockQuantity(stockQuantity);  // ← thêm dòng này
 
         productDetailRepository.save(detail);
     }
@@ -160,10 +160,6 @@ public class AdminProductService {
 
     // ════════════════════════════════════════
 // UC12 — Ẩn / Hiện sản phẩm
-// Lý do dùng toggle status thay vì xóa cứng: Product đang được
-// Product_Detail / Order_Detail tham chiếu qua FK. Nếu sản phẩm đã từng
-// nằm trong 1 đơn hàng, xóa cứng (deleteById) sẽ ném DataIntegrityViolationException.
-// → Ẩn (Status = false) là cách an toàn, không mất dữ liệu lịch sử đơn hàng.
 // ════════════════════════════════════════
     public void toggleProductStatus(Integer productId) {
         Product product = getProductById(productId);
@@ -176,5 +172,25 @@ public class AdminProductService {
 // ════════════════════════════════════════
     public void deleteImage(Integer imageId) {
         productImageRepository.deleteById(imageId);
+    }
+
+    // UC13 — Sửa biến thể
+    public void updateDetail(Integer detailId,
+                             String size,
+                             String color,
+                             BigDecimal price,
+                             String sku,
+                             Integer stockQuantity) {
+
+        ProductDetail detail = productDetailRepository.findById(detailId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy biến thể ID: " + detailId));
+
+        detail.setSize(size);
+        detail.setColor(color);
+        detail.setPrice(price);
+        detail.setSku(sku);
+        detail.setStockQuantity(stockQuantity);
+
+        productDetailRepository.save(detail);
     }
 }

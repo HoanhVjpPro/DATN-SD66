@@ -48,41 +48,51 @@
 
   <div class="card" th:if="${product.productId != null}">
     <h3>Biến thể (Size / Màu / Giá / Tồn kho)</h3>
+
+    <!-- FORM THÊM MỚI -->
     <form th:action="@{/admin/products/{id}/detail(id=${product.productId})}" method="post">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr auto;gap:0.5rem;align-items:end;">
         <div><label>Size</label><input name="size" required/></div>
         <div><label>Màu</label><input name="color" required/></div>
         <div><label>Giá</label><input name="price" type="number" step="1000" required/></div>
-        <div><label>SKU</label><input name="sku" required/></div>
-        <!-- FIX: thêm ô nhập số lượng tồn kho cho biến thể mới -->
-        <div><label>Tồn kho</label><input name="stockQuantity" type="number" min="0" step="1" value="0" required/></div>
-        <button type="submit">Thêm</button>
+        <div><label>SKU</label><input name="sku"/></div>
+        <div><label>Tồn kho</label><input name="stockQuantity" type="number" value="0" min="0" required/></div>
+        <button type="submit" style="margin-top:1.5rem;">Thêm</button>
       </div>
     </form>
+
+    <!-- BẢNG BIẾN THỂ -->
     <table th:if="${details != null}">
       <tr>
-        <th>Size</th><th>Màu</th><th>Giá</th><th>SKU</th><th>Tồn kho</th><th></th>
+        <th>Size</th><th>Màu</th><th>Giá</th><th>SKU</th><th>Tồn kho</th><th>Thao tác</th>
       </tr>
       <tr th:each="d : ${details}">
-        <td th:text="${d.size}">M</td>
-        <td th:text="${d.color}">Black</td>
-        <td th:text="${#numbers.formatDecimal(d.price, 0, 'COMMA', 0, 'POINT')}">0</td>
-        <td th:text="${d.sku}">SKU</td>
-        <!-- FIX: hiển thị tồn kho, cảnh báo nếu sắp hết / đã hết -->
-        <td>
-          <span th:if="${d.stockQuantity != null and d.stockQuantity == 0}" class="stock-out">Hết hàng</span>
-          <span th:if="${d.stockQuantity != null and d.stockQuantity > 0 and d.stockQuantity <= 5}" class="stock-low" th:text="${d.stockQuantity}">0</span>
-          <span th:if="${d.stockQuantity != null and d.stockQuantity > 5}" th:text="${d.stockQuantity}">0</span>
-        </td>
-        <td>
-          <form th:action="@{/admin/products/detail/delete/{id}(id=${d.productDetailId})}" method="post" style="display:inline;">
-            <input type="hidden" name="productId" th:value="${product.productId}"/>
-            <button type="submit" style="background:#c00;color:#fff;border:none;padding:4px 8px;">Xóa</button>
-          </form>
+        <form th:action="@{/admin/products/detail/update/{id}(id=${d.productDetailId})}" method="post">
+          <input type="hidden" name="productId" th:value="${product.productId}"/>
+          <td><input name="size"          type="text"   th:value="${d.size}"          required style="padding:4px;border:1px solid #ddd;width:100%;"/></td>
+          <td><input name="color"         type="text"   th:value="${d.color}"         required style="padding:4px;border:1px solid #ddd;width:100%;"/></td>
+          <td><input name="price"         type="number" th:value="${d.price}"         step="1000" required style="padding:4px;border:1px solid #ddd;width:100%;"/></td>
+          <td><input name="sku"           type="text"   th:value="${d.sku}"                   style="padding:4px;border:1px solid #ddd;width:100%;"/></td>
+          <td>
+            <input name="stockQuantity" type="number" th:value="${d.stockQuantity != null ? d.stockQuantity : 0}" min="0" required style="padding:4px;border:1px solid #ddd;width:70px;"/>
+            <span th:if="${d.stockQuantity != null and d.stockQuantity == 0}"  style="color:#c00;font-size:0.75rem;display:block;">Hết hàng</span>
+            <span th:if="${d.stockQuantity != null and d.stockQuantity > 0 and d.stockQuantity <= 5}" style="color:#e67e22;font-size:0.75rem;display:block;">Sắp hết</span>
+          </td>
+          <td style="display:flex;gap:6px;align-items:center;padding:8px 4px;">
+            <!-- NÚT LƯU -->
+            <button type="submit" style="background:#444;color:#fff;border:none;padding:4px 10px;cursor:pointer;">Lưu</button>
+        </form>
+        <!-- NÚT XÓA — form riêng ngoài form sửa -->
+        <form th:action="@{/admin/products/detail/delete/{id}(id=${d.productDetailId})}" method="post" style="display:inline;">
+          <input type="hidden" name="productId" th:value="${product.productId}"/>
+          <button type="submit" style="background:#c00;color:#fff;border:none;padding:4px 10px;cursor:pointer;"
+                  onclick="return confirm('Xóa biến thể này?')">Xóa</button>
+        </form>
         </td>
       </tr>
     </table>
 
+    <!-- UPLOAD ẢNH -->
     <h3 style="margin-top:1.5rem;">Upload ảnh</h3>
     <form th:action="@{/admin/products/{id}/image(id=${product.productId})}" method="post" enctype="multipart/form-data">
       <input type="file" name="file" accept="image/*" required/>

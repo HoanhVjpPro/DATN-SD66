@@ -68,7 +68,10 @@
 <div class="promo-bar">Miễn phí giao hàng từ 299K | Đổi trả trong 30 ngày</div>
 
 <nav class="shop-nav">
-    <a href="/" class="brand"><span class="brand-mark">H</span><span>HatHub</span></a>
+    <a href="/" class="brand">
+        <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
+        <span>HatHub</span>
+    </a>
     <ul class="nav-menu">
         <li><a th:href="@{/products}">Sản phẩm</a></li>
         <li><a href="/orders" th:if="${loggedIn and roleName == 'CUSTOMER'}">Đơn hàng</a></li>

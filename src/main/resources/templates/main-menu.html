@@ -367,6 +367,7 @@
   <div class="nav-actions">
     <button title="Tìm kiếm">🔍</button>
     <button title="Yêu thích">♡</button>
+    <a href="/profile" class="btn-cart">Profile</a>
     <a href="/cart" class="btn-cart">Giỏ</a>
     <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
     <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
@@ -498,7 +499,7 @@
     <p class="sale-tag">Khuyến mãi giới hạn</p>
     <h2 class="sale-title">
       Giảm
-      <span class="big">30%</span>
+      <span class="big">30.000VNĐ</span>
       toàn bộ
       Snapback
     </h2>
@@ -510,7 +511,7 @@
       <img class="sale-img" th:src="@{/images/banner.jpg}" alt="HatHub – Khuyến mãi Snapback"/>
       <!-- Sale tag overlay -->
       <div style="position:absolute;top:-10px;right:-10px;background:var(--rust);color:var(--white);font-family:var(--font-display);font-weight:900;font-size:1.1rem;text-transform:uppercase;padding:12px 18px;transform:rotate(8deg);">
-        -30% OFF
+        -30K OFF
       </div>
     </div>
   </div>
