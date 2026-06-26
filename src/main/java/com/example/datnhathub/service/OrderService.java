@@ -70,7 +70,9 @@ public class OrderService {
         Orders order = new Orders();
         order.setCustomer(customer);
         order.setOrderDate(LocalDateTime.now());
-        order.setStatus("Chờ xác nhận");
+        boolean needPayment = "Chuyển khoản".equals(paymentMethod)
+                && total.compareTo(BigDecimal.ZERO) > 0;
+        order.setStatus(needPayment ? "Chờ thanh toán" : "Chờ xác nhận");
         order.setTotalAmount(total);
 
         // Tạo Order_Detail từ Cart_Detail + trừ kho ngay tại đây

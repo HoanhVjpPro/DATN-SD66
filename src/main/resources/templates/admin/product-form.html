@@ -54,7 +54,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr auto;gap:0.5rem;align-items:end;">
         <div><label>Size</label><input name="size" required/></div>
         <div><label>Màu</label><input name="color" required/></div>
-        <div><label>Giá</label><input name="price" type="number" step="1000" required/></div>
+        <div><label>Giá</label><input name="price" min="0" type="number" step="1000" required/></div>
         <div><label>SKU</label><input name="sku"/></div>
         <div><label>Tồn kho</label><input name="stockQuantity" type="number" value="0" min="0" required/></div>
         <button type="submit" style="margin-top:1.5rem;">Thêm</button>
@@ -71,7 +71,7 @@
           <input type="hidden" name="productId" th:value="${product.productId}"/>
           <td><input name="size"          type="text"   th:value="${d.size}"          required style="padding:4px;border:1px solid #ddd;width:100%;"/></td>
           <td><input name="color"         type="text"   th:value="${d.color}"         required style="padding:4px;border:1px solid #ddd;width:100%;"/></td>
-          <td><input name="price"         type="number" th:value="${d.price}"         step="1000" required style="padding:4px;border:1px solid #ddd;width:100%;"/></td>
+          <td><input name="price"         type="number" th:value="${d.price}"         step="1000" required style="padding:4px;border:1px solid #ddd;width:100%;" min="0"/></td>
           <td><input name="sku"           type="text"   th:value="${d.sku}"                   style="padding:4px;border:1px solid #ddd;width:100%;"/></td>
           <td>
             <input name="stockQuantity" type="number" th:value="${d.stockQuantity != null ? d.stockQuantity : 0}" min="0" required style="padding:4px;border:1px solid #ddd;width:70px;"/>

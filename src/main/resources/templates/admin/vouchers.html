@@ -33,7 +33,7 @@
   <h1>Voucher</h1>
   <form action="/admin/vouchers" method="post">
     <input type="text" name="code" placeholder="Mã voucher" required/>
-    <input type="number" name="discountAmount" placeholder="Giảm (VNĐ)" required/>
+    <input type="number" min="0" step="1000" name="discountAmount" placeholder="Giảm (VNĐ)" required/>
     <input type="number" name="quantity" placeholder="Số lượng" required/>
     <button type="submit">Thêm</button>
   </form>

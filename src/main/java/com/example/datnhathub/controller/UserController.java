@@ -102,17 +102,14 @@ public class UserController {
                                  Model model,
                                  RedirectAttributes redirectAttrs) {
 
-        // Gọi service — trả về null nếu thành công, trả về chuỗi lỗi nếu thất bại
         String errorMsg = userService.register(dto);
 
         if (errorMsg != null) {
-            // Có lỗi → quay lại form, giữ dữ liệu đã nhập
             model.addAttribute("error",       errorMsg);
             model.addAttribute("registerDTO", dto);
             return "register";
         }
 
-        // Thành công → sang trang login kèm thông báo
         redirectAttrs.addAttribute("success", "true");
         return "redirect:/login";
     }

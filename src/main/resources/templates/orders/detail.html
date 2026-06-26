@@ -27,6 +27,34 @@
     <p th:if="${order.shipping != null}"><strong>Địa chỉ:</strong> <span th:text="${order.shipping.shippingAddress}">addr</span></p>
     <p th:if="${order.payment != null}"><strong>Thanh toán:</strong> <span th:text="${order.payment.paymentMethod} + ' - ' + ${order.payment.paymentStatus}">pay</span></p>
   </div>
+
+  <div th:if="${order.payment != null
+               and order.payment.paymentMethod == 'Chuyển khoản'
+               and order.status == 'Chờ thanh toán'}"
+         style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
+    <div class="card">
+      <p style="color:#e67e22;font-weight:700;">⚠ Đơn hàng chưa được thanh toán</p>
+      <a th:href="@{/payment/qr/{id}(id=${order.orderId})}"
+         style="display:inline-block;background:#C0633A;color:#fff;padding:10px 24px;text-decoration:none;font-weight:700;border-radius:4px;margin-top:0.5rem;">
+        💳 Thanh toán ngay
+      </a>
+    </div>
+  </div>
+
+  <div th:if="${order.status == 'Đang giao'}"
+       style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
+    <div class="card">
+      <p style="color:#2980b9;font-weight:700;">🚚 Đơn hàng đang trên đường giao đến bạn</p>
+      <form th:action="@{/orders/{id}/received(id=${order.orderId})}" method="post"
+            onsubmit="return confirm('Xác nhận đã nhận được hàng?')">
+        <button type="submit"
+                style="background:#27ae60;color:#fff;border:none;padding:10px 24px;font-weight:700;cursor:pointer;border-radius:4px;margin-top:0.5rem;">
+          ✓ Đã nhận được hàng
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div class="card">
     <h3>Sản phẩm</h3>
     <table>
