@@ -127,13 +127,13 @@
         <!-- ===== MAIN ===== -->
         <section>
             <div class="listing-toolbar">
-                <span><strong th:text="${totalProducts}">0</strong> sản phẩm</span>
+                <span style="color: black"><strong th:text="${totalProducts}">0</strong> sản phẩm</span>
                 <form th:action="@{/products}" method="get" style="display:flex;align-items:center;gap:8px;">
                     <input type="hidden" name="categoryId" th:value="${selectedCategory != null ? selectedCategory.categoryId : ''}"/>
                     <input type="hidden" name="keyword" th:value="${keyword}"/>
                     <input type="hidden" name="minPrice" th:value="${minPrice}"/>
                     <input type="hidden" name="maxPrice" th:value="${maxPrice}"/>
-                    <label for="sort" style="font-size:13px;">Sắp xếp:</label>
+                    <label for="sort" style="font-size:13px; color: black">Sắp xếp:</label>
                     <select id="sort" name="sort" onchange="this.form.submit()">
                         <option value="newest"    th:selected="${sort == 'newest'}">Mới nhất</option>
                         <option value="price-asc" th:selected="${sort == 'price-asc'}">Giá tăng dần</option>
