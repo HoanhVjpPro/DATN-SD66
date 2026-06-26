@@ -79,7 +79,7 @@ public class ProductController {
         var details = product.getDetails();
         var selectedDetail = (details != null && !details.isEmpty()) ? details.get(0) : null;
 
-        String imageUrl = productService.getDefaultImageUrl(product); // FIX: gọi từ Service, không phải Repository
+        String imageUrl = productService.getDefaultImageUrl(product);
 
         model.addAttribute("product",        product);
         model.addAttribute("details",        details);

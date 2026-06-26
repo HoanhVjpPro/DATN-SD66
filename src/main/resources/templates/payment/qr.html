@@ -76,13 +76,13 @@
     </div>
     <div class="step">
       <div class="step-num">4</div>
-      <span>Bấm nút <strong>"Tôi đã chuyển khoản"</strong> bên dưới</span>
+      <span>Bấm nút <strong>"Hoàn tất chuyển khoản"</strong> bên dưới</span>
     </div>
   </div>
 
   <!-- NÚT XÁC NHẬN -->
   <form th:action="@{/payment/confirm/{id}(id=${order.orderId})}" method="post">
-    <button type="submit" class="btn-confirm">✓ Tôi đã chuyển khoản</button>
+    <button type="submit" class="btn-confirm">✓ Hoàn tất chuyển khoản</button>
   </form>
 
   <p class="note">

@@ -148,7 +148,6 @@ public class CartController {
             ra.addFlashAttribute("success", "Đặt hàng thành công! Mã đơn: #" + order.getOrderId());
             return "redirect:/orders/" + order.getOrderId();
         } catch (Exception e) {
-            System.out.println("=== LỖI CHECKOUT: " + e.getMessage()); // ← thêm dòng này
             e.printStackTrace();
             model.addAttribute("error", e.getMessage());
             model.addAttribute("total", cartService.calculateTotal(cartService.getCart(userId)));

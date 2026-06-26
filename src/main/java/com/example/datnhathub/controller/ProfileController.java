@@ -21,7 +21,7 @@ public class ProfileController {
     public String viewProfile(HttpSession session, Model model) {
         Integer userId = (Integer) session.getAttribute("userId");
         if (userId == null) {
-            return "redirect:/login"; // Bắt buộc đăng nhập
+            return "redirect:/login";
         }
 
         Users user = userService.getById(userId);
