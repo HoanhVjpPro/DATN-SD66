@@ -12,7 +12,10 @@
 <body class="page">
 <div class="promo-bar">Kiểm tra thông tin giao hàng trước khi đặt đơn</div>
 <nav class="shop-nav">
-    <a href="/" class="brand"><span class="brand-mark">H</span><span>HatHub</span></a>
+    <a href="/" class="brand">
+        <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
+        <span>HatHub</span>
+    </a>
     <ul class="nav-menu"><li><a href="/cart">Quay lại giỏ</a></li><li><a th:href="@{/products}">Tiếp tục mua</a></li></ul>
     <div class="nav-actions"><a class="cart-link" href="/cart">Giỏ</a></div>
 </nav>

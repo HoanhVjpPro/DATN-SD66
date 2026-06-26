@@ -139,6 +139,12 @@ public class CartController {
 
         try {
             Orders order = orderService.placeOrder(userId, shippingAddress, paymentMethod, voucherCode);
+
+            if ("Chuyển khoản".equals(paymentMethod)
+                    && order.getStatus().equals("Chờ thanh toán")) {
+                return "redirect:/payment/qr/" + order.getOrderId();
+            }
+
             ra.addFlashAttribute("success", "Đặt hàng thành công! Mã đơn: #" + order.getOrderId());
             return "redirect:/orders/" + order.getOrderId();
         } catch (Exception e) {

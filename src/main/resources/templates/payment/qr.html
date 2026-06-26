@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Thanh toán chuyển khoản | HatHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family:'Nunito',sans-serif; background:#F5F0EA; margin:0; }
+    nav { background:#111; padding:1rem 2rem; }
+    nav a { color:#fff; text-decoration:none; font-weight:700; }
+    .container { max-width:500px; margin:2rem auto; padding:0 1rem; text-align:center; }
+    .card { background:#fff; padding:2rem; border-radius:8px; margin-bottom:1rem; }
+    .qr-img { width:240px; height:240px; border:3px solid #C0633A; border-radius:8px; }
+    .amount { font-size:1.8rem; font-weight:900; color:#C0633A; margin:1rem 0; }
+    .info-row { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid #eee; font-size:0.9rem; }
+    .btn-confirm { background:#C0633A; color:#fff; border:none; padding:14px 32px; font-size:1rem; font-weight:700; cursor:pointer; width:100%; margin-top:1rem; border-radius:4px; }
+    .btn-confirm:hover { background:#9B4A27; }
+    .btn-back { display:block; margin-top:0.8rem; color:#888; text-decoration:none; font-size:0.85rem; }
+    .note { font-size:0.82rem; color:#888; margin-top:0.8rem; line-height:1.6; }
+    .step { display:flex; align-items:flex-start; gap:12px; text-align:left; margin-bottom:0.8rem; }
+    .step-num { background:#C0633A; color:#fff; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0; }
+  </style>
+</head>
+<body>
+<nav><a href="/">← HatHub</a></nav>
+<div class="container">
+  <h1>Thanh toán chuyển khoản</h1>
+
+
+  <div class="card">
+    <!-- QR CODE -->
+    <img th:src="@{/images/QR-Bank.png}" class="qr-img" alt="QR Thanh toán"/>
+
+    <div class="amount"
+         th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+      0 đ
+    </div>
+
+    <!-- THÔNG TIN CHUYỂN KHOẢN -->
+    <div class="info-row">
+      <span>Ngân hàng</span>
+      <strong>MB Bank</strong>
+    </div>
+    <div class="info-row">
+      <span>Số tài khoản</span>
+      <strong>1234567890</strong>
+    </div>
+    <div class="info-row">
+      <span>Chủ tài khoản</span>
+      <strong>HATHUB</strong>
+    </div>
+    <div class="info-row">
+      <span>Số tiền</span>
+      <strong th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+    </div>
+    <div class="info-row">
+      <span>Nội dung CK</span>
+      <strong th:text="${addInfo}">HatHub1</strong>
+    </div>
+  </div>
+
+  <!-- HƯỚNG DẪN -->
+  <div class="card" style="text-align:left;">
+    <p style="font-weight:700;margin-bottom:1rem;">Hướng dẫn thanh toán:</p>
+    <div class="step">
+      <div class="step-num">1</div>
+      <span>Mở app ngân hàng và quét mã QR bên trên</span>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <span>Kiểm tra số tiền và nội dung chuyển khoản</span>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <span>Xác nhận chuyển khoản trên app ngân hàng</span>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <span>Bấm nút <strong>"Tôi đã chuyển khoản"</strong> bên dưới</span>
+    </div>
+  </div>
+
+  <!-- NÚT XÁC NHẬN -->
+  <form th:action="@{/payment/confirm/{id}(id=${order.orderId})}" method="post">
+    <button type="submit" class="btn-confirm">✓ Tôi đã chuyển khoản</button>
+  </form>
+
+  <p class="note">
+    ⚠ Đơn hàng sẽ được xác nhận sau khi chúng tôi kiểm tra giao dịch.<br/>
+    Nếu chưa chuyển khoản, đơn hàng sẽ ở trạng thái <strong>"Chờ thanh toán"</strong>.
+  </p>
+
+  <a href="/orders" class="btn-back">← Xem tất cả đơn hàng</a>
+</div>
+</body>
+</html>

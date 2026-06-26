@@ -106,8 +106,8 @@
             <form class="price-range" th:action="@{/products}" method="get">
                 <input type="hidden" name="categoryId" th:value="${selectedCategory != null ? selectedCategory.categoryId : ''}"/>
                 <input type="hidden" name="keyword" th:value="${keyword}"/>
-                <input type="number" name="minPrice" placeholder="Từ (đ)" th:value="${minPrice}"/>
-                <input type="number" name="maxPrice" placeholder="Đến (đ)" th:value="${maxPrice}"/>
+                <input type="number" min="0" step="1000" name="minPrice" placeholder="Từ (đ)" th:value="${minPrice}"/>
+                <input type="number" min="0" step="1000" name="maxPrice" placeholder="Đến (đ)" th:value="${maxPrice}"/>
                 <button type="submit">Áp dụng</button>
             </form>
 

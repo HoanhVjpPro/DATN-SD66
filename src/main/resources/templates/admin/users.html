@@ -46,15 +46,16 @@
   </form>
 
   <table>
-    <thead><tr><th>ID</th><th>Username</th><th>Email</th><th>Role</th><th>Trạng thái</th><th></th></tr></thead>
+    <thead><tr><th>#</th><th>Username</th><th>Email</th><th>Role</th><th>Trạng thái</th><th></th></tr></thead>
     <tbody>
-      <tr th:each="u : ${users}">
-        <td th:text="${u.userID}">1</td>
+      <tr th:each="u, index : ${users}">
+        <td th:text="${index.count}">1</td>
         <td th:text="${u.username}">user</td>
         <td th:text="${u.email}">email</td>
         <td th:text="${u.role.roleName}">ROLE</td>
         <td th:text="${u.status ? 'Hoạt động' : 'Khóa'}">status</td>
         <td>
+<!--          <span th:if="${session.user.userID == u.userID}">Tài khoản đang sử dụng</span>-->
           <form th:action="@{/admin/users/toggle/{id}(id=${u.userID})}" method="post">
             <button type="submit" th:text="${u.status ? 'Khóa' : 'Mở khóa'}">Toggle</button>
           </form>
