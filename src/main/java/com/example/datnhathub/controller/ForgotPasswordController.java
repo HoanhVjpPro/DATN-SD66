@@ -107,4 +107,35 @@ public class ForgotPasswordController {
         ra.addFlashAttribute("success", "Đổi mật khẩu thành công! Vui lòng đăng nhập.");
         return "redirect:/login";
     }
+
+    // Gửi lại OTP — dùng email đã có trong session
+    @GetMapping("/resend-otp")
+    public String resendOtp(HttpSession session, RedirectAttributes ra) {
+
+        String email = (String) session.getAttribute("resetEmail");
+
+        // Nếu session hết hạn → về trang nhập email
+        if (email == null) {
+            ra.addFlashAttribute("error", "Phiên làm việc đã hết hạn, vui lòng nhập lại email!");
+            return "redirect:/forgot-password";
+        }
+
+        // Tạo OTP mới
+        int otp = (int) (Math.random() * 900000) + 100000;
+        session.setAttribute("otp", String.valueOf(otp));
+
+        // Gửi email
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("HatHub – Mã OTP mới");
+        message.setText(
+                "Mã OTP mới của bạn là: " + otp + "\n\n" +
+                        "Mã có hiệu lực trong 5 phút.\n\n" +
+                        "HatHub Team"
+        );
+        mailSender.send(message);
+
+        ra.addFlashAttribute("success", "Đã gửi lại OTP đến " + email);
+        return "redirect:/verify-otp";
+    }
 }

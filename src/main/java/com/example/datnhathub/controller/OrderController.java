@@ -1,7 +1,10 @@
 package com.example.datnhathub.controller;
 
+import com.example.datnhathub.entity.OrderDetail;
 import com.example.datnhathub.entity.Orders;
+import com.example.datnhathub.entity.ProductDetail;
 import com.example.datnhathub.repository.OrderRepository;
+import com.example.datnhathub.repository.ProductDetailRepository;
 import com.example.datnhathub.service.OrderService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +21,9 @@ import java.util.List;
 public class OrderController {
     @Autowired
     private OrderRepository ordersRepository;
+
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
 
     // ── Danh sách đơn hàng của Customer ──
     @GetMapping("/orders")
@@ -100,8 +106,20 @@ public class OrderController {
             return "redirect:/orders/" + id;
         }
 
+        // ← TRỪ KHO Ở ĐÂY
+        if (order.getDetails() != null) {
+            for (OrderDetail od : order.getDetails()) {
+                ProductDetail pd = od.getProductDetail();
+                int newStock = pd.getStockQuantity() - od.getQuantity();
+                pd.setStockQuantity(Math.max(0, newStock)); // không để âm
+                productDetailRepository.save(pd);
+            }
+        }
+
+        // Đổi status
         order.setStatus("Hoàn thành");
         ordersRepository.save(order);
+
         ra.addFlashAttribute("success", "Xác nhận nhận hàng thành công!");
         return "redirect:/orders/" + id;
     }

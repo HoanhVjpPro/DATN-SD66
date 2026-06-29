@@ -30,63 +30,150 @@
 </aside>
 <main>
   <h1>Đơn hàng</h1>
+
+  <!-- BỘ LỌC TRẠNG THÁI -->
+  <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+    <button onclick="filterStatus('ALL')"
+            id="btn-ALL"
+            style="padding:8px 16px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#C0633A;color:#fff;">
+      Tất cả
+    </button>
+    <button onclick="filterStatus('Chờ thanh toán')"
+            id="btn-Chờ thanh toán"
+            style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+      Chờ thanh toán
+    </button>
+    <button onclick="filterStatus('Chờ xác nhận')"
+            id="btn-Chờ xác nhận"
+            style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+      Chờ xác nhận
+    </button>
+    <button onclick="filterStatus('Đang xử lý')"
+            id="btn-Đang xử lý"
+            style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+      Đang xử lý
+    </button>
+    <button onclick="filterStatus('Đang giao')"
+            id="btn-Đang giao"
+            style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+      Đang giao
+    </button>
+    <button onclick="filterStatus('Hoàn thành')"
+            id="btn-Hoàn thành"
+            style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+      Hoàn thành
+    </button>
+    <button onclick="filterStatus('Đã hủy')"
+            id="btn-Đã hủy"
+            style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+      Đã hủy
+    </button>
+  </div>
+
+  <!-- SỐ LƯỢNG HIỂN THỊ -->
+  <p id="countDisplay"
+     style="font-size:0.85rem;color:#666;margin-bottom:0.8rem;">
+    Đang hiển thị tất cả đơn hàng
+  </p>
+
   <table>
-    <thead><tr><th>Mã</th><th>Khách hàng</th><th>Ngày</th><th>Tổng</th><th>Trạng thái</th><th>Cập nhật</th></tr></thead>
-    <tbody>
-      <tr th:each="o : ${orders}">
-        <td th:text="'#' + ${o.orderId}">#1</td>
-        <td th:text="${o.customer.user.username}">user</td>
-        <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy')}">date</td>
-        <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
-        <td th:text="${o.status}">status</td>
-        <td>
-          <!-- Chờ xác nhận → Đang xử lý hoặc Đã hủy -->
-          <div th:if="${o.status == 'Chờ xác nhận'}" style="display:flex;gap:4px;">
-            <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post">
-              <input type="hidden" name="status" value="Đang xử lý"/>
-              <button type="submit" style="background:#2980b9;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Xác nhận</button>
-            </form>
-            <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
-                  onsubmit="return confirm('Hủy đơn hàng này?')">
-              <input type="hidden" name="status" value="Đã hủy"/>
-              <button type="submit" style="background:#c00;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Hủy</button>
-            </form>
-          </div>
-
-          <!-- Đang xử lý → Đang giao -->
-          <div th:if="${o.status == 'Đang xử lý'}">
-            <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post">
-              <input type="hidden" name="status" value="Đang giao"/>
-              <button type="submit" style="background:#e67e22;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Giao hàng</button>
-            </form>
-          </div>
-
-          <!-- Đang giao → chờ Customer xác nhận -->
-          <div th:if="${o.status == 'Đang giao'}">
-            <span style="color:#888;font-size:0.85rem;">Chờ khách nhận hàng</span>
-          </div>
-
-          <!-- Hoàn thành / Đã hủy → không có nút -->
-          <div th:if="${o.status == 'Hoàn thành'}">
-            <span style="color:green;font-weight:700;">✓ Hoàn thành</span>
-          </div>
-          <div th:if="${o.status == 'Đã hủy'}">
-            <span style="color:#c00;font-weight:700;">✗ Đã hủy</span>
-          </div>
-
-          <!-- Chờ thanh toán → chỉ hủy được -->
-          <div th:if="${o.status == 'Chờ thanh toán'}" style="display:flex;gap:4px;">
-            <span style="color:#e67e22;font-size:0.85rem;">Chờ thanh toán</span>
-            <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
-                  onsubmit="return confirm('Hủy đơn hàng này?')">
-              <input type="hidden" name="status" value="Đã hủy"/>
-              <button type="submit" style="background:#c00;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Hủy</button>
-            </form>
-          </div>
-        </td>
-      </tr>
+    <thead>
+    <tr><th>Mã</th><th>Khách hàng</th><th>Ngày</th><th>Tổng</th><th>Trạng thái</th><th>Cập nhật</th><th>Chi tiết</th></tr>
+    </thead>
+    <tbody id="orderTableBody">
+    <tr th:each="o : ${orders}" th:data-status="${o.status}">
+      <td th:text="'#' + ${o.orderId != null ? o.orderId : '#' + o.orderId}">HH001</td>
+      <td th:text="${o.customer.user.username}">user</td>
+      <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy')}">date</td>
+      <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
+      <td th:text="${o.status}">status</td>
+      <td>
+        <!-- nút theo trạng thái — giữ nguyên như cũ -->
+        <div th:if="${o.status == 'Chờ xác nhận'}" style="display:flex;gap:4px;">
+          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post">
+            <input type="hidden" name="status" value="Đang xử lý"/>
+            <button type="submit" style="background:#2980b9;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Xác nhận</button>
+          </form>
+          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
+                onsubmit="return confirm('Hủy đơn hàng này?')">
+            <input type="hidden" name="status" value="Đã hủy"/>
+            <button type="submit" style="background:#c00;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Hủy</button>
+          </form>
+        </div>
+        <div th:if="${o.status == 'Đang xử lý'}">
+          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post">
+            <input type="hidden" name="status" value="Đang giao"/>
+            <button type="submit" style="background:#e67e22;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Giao hàng</button>
+          </form>
+          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
+                onsubmit="return confirm('Hủy đơn hàng này?')">
+            <input type="hidden" name="status" value="Đã hủy"/>
+            <button type="submit" style="background:#c00;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Hủy</button>
+          </form>
+        </div>
+        <div th:if="${o.status == 'Đang giao'}">
+          <span style="color:#888;font-size:0.85rem;">Chờ khách nhận hàng</span>
+        </div>
+        <div th:if="${o.status == 'Hoàn thành'}">
+          <span style="color:green;font-weight:700;">✓ Hoàn thành</span>
+        </div>
+        <div th:if="${o.status == 'Đã hủy'}">
+          <span style="color:#c00;font-weight:700;">✗ Đã hủy</span>
+        </div>
+        <div th:if="${o.status == 'Chờ thanh toán'}" style="display:flex;gap:4px;">
+          <span style="color:#e67e22;font-size:0.85rem;">Chờ thanh toán</span>
+          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
+                onsubmit="return confirm('Hủy đơn hàng này?')">
+            <input type="hidden" name="status" value="Đã hủy"/>
+            <button type="submit" style="background:#c00;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Hủy</button>
+          </form>
+        </div>
+      </td>
+      <td><a th:href="@{/orders/{id}(id=${o.orderId})}">WIP Xem chi tiết</a></td>
+    </tr>
     </tbody>
   </table>
 </main>
 </body>
+<script>
+  function filterStatus(status) {
+    const rows    = document.querySelectorAll('#orderTableBody tr');
+    const buttons = document.querySelectorAll('[id^="btn-"]');
+    let count     = 0;
+
+    // Reset tất cả nút về màu mặc định
+    buttons.forEach(btn => {
+      btn.style.background = '#fff';
+      btn.style.color      = '#333';
+      btn.style.border     = '1px solid #ddd';
+    });
+
+    // Highlight nút đang chọn
+    const activeBtn = document.getElementById('btn-' + status);
+    if (activeBtn) {
+      activeBtn.style.background = '#C0633A';
+      activeBtn.style.color      = '#fff';
+      activeBtn.style.border     = 'none';
+    }
+
+    // Lọc rows
+    rows.forEach(row => {
+      const rowStatus = row.getAttribute('data-status');
+      if (status === 'ALL' || rowStatus === status) {
+        row.style.display = '';
+        count++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+
+    // Cập nhật số lượng
+    const countEl = document.getElementById('countDisplay');
+    if (status === 'ALL') {
+      countEl.textContent = 'Đang hiển thị tất cả ' + count + ' đơn hàng';
+    } else {
+      countEl.textContent = 'Trạng thái: ' + status + ' — ' + count + ' đơn hàng';
+    }
+  }
+</script>
 </html>
