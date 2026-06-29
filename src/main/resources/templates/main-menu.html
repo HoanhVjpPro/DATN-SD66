@@ -17,7 +17,7 @@
       --white: #ffffff;
       --cream: #F5F0EA;
       --gray-100: #f0efee;
-      --gray-200: #ffffff;
+      --gray-200: #8a8383;
       --gray-400: #9e9b96;
       --gray-700: #3e3d3a;
       --font-display: 'Barlow Condensed', sans-serif;
@@ -370,7 +370,7 @@
 <!--    <button title="Tìm kiếm">🔍</button>-->
 <!--    <button title="Yêu thích">♡</button>-->
     <a href="/profile" class="btn-cart">👤</a>
-    <a href="/cart" class="btn-cart">🛒</a>
+    <a href="/cart" th:if="${loggedIn and roleName == 'CUSTOMER'}" class="btn-cart">🛒</a>
     <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
     <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
   </div>
@@ -501,7 +501,7 @@
       Snapback
     </h2>
     <p class="sale-desc">Áp dụng đến 30 khách hàng. Không giới hạn số lượng đơn hàng. Nhập mã HATHUB30 khi thanh toán.</p>
-    <a href="#" class="btn-primary">Mua ngay với mã HATHUB30</a>
+    <a href="#products" class="btn-primary">Mua ngay với mã HATHUB30</a>
   </div>
   <div class="sale-right">
     <div class="sale-right-inner">

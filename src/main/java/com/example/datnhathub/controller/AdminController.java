@@ -1,7 +1,9 @@
 package com.example.datnhathub.controller;
 
+import com.example.datnhathub.entity.Users;
 import com.example.datnhathub.entity.Voucher;
 import com.example.datnhathub.service.*;
+import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,7 +28,14 @@ public class AdminController {
     private AdminService adminService;
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model) {
+    public String dashboard(Model model, HttpSession session) {
+//        Users user = (Users) session.getAttribute("user");
+//        if (user == null) {
+//            return "redirect:/login";
+//        }
+//        if (!"ADMIN".equals(user.getRole())) {
+//            return "access-denied";
+//        }
         model.addAttribute("totalProducts", productService.getAllProducts().size());
         model.addAttribute("totalCategories", categoryService.getAll().size());
         model.addAttribute("totalOrders", orderService.countAll());

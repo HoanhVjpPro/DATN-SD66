@@ -130,7 +130,6 @@ public class ForgotPasswordController {
         message.setSubject("HatHub – Mã OTP mới");
         message.setText(
                 "Mã OTP mới của bạn là: " + otp + "\n\n" +
-                        "Mã có hiệu lực trong 5 phút.\n\n" +
                         "HatHub Team"
         );
         mailSender.send(message);

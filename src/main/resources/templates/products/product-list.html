@@ -77,9 +77,8 @@
         <li><a href="/orders" th:if="${loggedIn and roleName == 'CUSTOMER'}">Đơn hàng</a></li>
     </ul>
     <div class="nav-actions">
-        <a class="icon-link" th:if="${loggedIn}" href="/profile" aria-label="Tài khoản">◎</a>
-        <a class="icon-link" th:unless="${loggedIn}" href="/login" aria-label="Đăng nhập">◎</a>
-        <a th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" class="cart-link">Giỏ</a>
+        <a class="icon-link" th:if="${loggedIn}" href="/profile" aria-label="Tài khoản">👤</a>
+        <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" aria-label="Tài khoản">🛒</a>
         <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
         <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
     </div>
