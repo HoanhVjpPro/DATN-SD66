@@ -50,9 +50,6 @@
         <strong th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
       </div>
       <div class="summary-row">
-        <span>Giao hàng</span>
-        <strong>Miễn phí từ 299K</strong>
-      </div><div class="summary-row">
       <span>Tổng cộng</span>
       <strong class="summary-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
     </div><a href="/checkout" class="btn btn-primary" style="width:100%;margin-top:16px;">Thanh toán</a>

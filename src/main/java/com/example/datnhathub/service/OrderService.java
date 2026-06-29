@@ -86,10 +86,6 @@ public class OrderService {
             od.setQuantity(cd.getQuantity());
             od.setUnitPrice(pd.getPrice());
             orderDetails.add(od);
-
-            // FIX: trừ kho ngay sau khi xác nhận đặt hàng thành công
-            pd.setStockQuantity(pd.getStockQuantity() - cd.getQuantity());
-            productDetailRepository.save(pd);
         }
         order.setDetails(orderDetails);
 

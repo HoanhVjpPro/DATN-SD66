@@ -17,7 +17,7 @@
       --white: #ffffff;
       --cream: #F5F0EA;
       --gray-100: #f0efee;
-      --gray-200: #dddbd7;
+      --gray-200: #ffffff;
       --gray-400: #9e9b96;
       --gray-700: #3e3d3a;
       --font-display: 'Barlow Condensed', sans-serif;
@@ -86,8 +86,9 @@
     }
     .hero-title {
       font-family: var(--font-display); font-weight: 900;
-      font-size: clamp(3.5rem, 6vw, 5.5rem); line-height: 0.95;
+      font-size: clamp(3.5rem, 6vw, 5.5rem); line-height: 1.1;
       color: var(--white); text-transform: uppercase; margin-bottom: 1.5rem;
+      letter-spacing: 0.08em;
     }
     .hero-title em { color: var(--rust); font-style: normal; }
     .hero-sub {
@@ -275,14 +276,15 @@
       padding: 3rem 5rem; border-bottom: 1px solid var(--gray-200);
       display: flex; align-items: center; gap: 3rem; justify-content: space-between;
     }
+
     .brand-strip-label { font-size: 0.7rem; color: var(--gray-400); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
     .brand-logos { display: flex; gap: 3rem; align-items: center; flex-wrap: wrap; }
+
     .brand-logo-item {
       font-family: var(--font-display); font-weight: 900; font-size: 1.2rem;
       text-transform: uppercase; color: var(--gray-200); letter-spacing: 2px;
       opacity: 0.5; transition: opacity 0.2s;
     }
-    .brand-logo-item:hover { opacity: 1; color: var(--black); }
 
     /* ── FEATURES ── */
     .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
@@ -357,18 +359,18 @@
   </a>
 
   <ul class="nav-links">
-    <li><a href="#">Bộ sưu tập</a></li>
-    <li><a href="#">Nam</a></li>
-    <li><a href="#">Nữ</a></li>
-    <li><a href="#">Sale</a></li>
-    <li><a href="#">Về chúng tôi</a></li>
+    <li><a href="#products">Sản phẩm</a></li>
+    <li><a href="#danhmuc">Bộ sưu tập</a></li>
+    <li><a href="#">Xu hướng</a></li>
+    <li><a href="#sale">Sale</a></li>
+    <li><a href="#footer">Về chúng tôi</a></li>
   </ul>
 
   <div class="nav-actions">
 <!--    <button title="Tìm kiếm">🔍</button>-->
-    <button title="Yêu thích">♡</button>
-    <a href="/profile" class="btn-cart">Profile</a>
-    <a href="/cart" class="btn-cart">Giỏ</a>
+<!--    <button title="Yêu thích">♡</button>-->
+    <a href="/profile" class="btn-cart">👤</a>
+    <a href="/cart" class="btn-cart">🛒</a>
     <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
     <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
   </div>
@@ -427,32 +429,32 @@
 <!-- CATEGORIES -->
 <section class="section" id="categories">
   <div class="section-header">
-    <h2 class="section-title">Danh mục<br/>sản phẩm</h2>
+    <h2 id="danhmuc" class="section-title">Danh mục<br/>sản phẩm</h2>
     <a href="/products" class="section-link">Xem tất cả →</a>
   </div>
   <div class="cat-grid">
     <a href="/products?categoryId=0" class="cat-card cat-1">
       <div class="cat-card-bg">🧢</div>
       <div class="cat-card-inner">
-        <div class="cat-name">Snapback</div>
+        <div class="cat-name">Mũ lưới trai</div>
       </div>
     </a>
     <a href="/products?categoryId=1" class="cat-card cat-2">
       <div class="cat-card-bg">⛑️</div>
       <div class="cat-card-inner">
-        <div class="cat-name">Bucket Hat</div>
+        <div class="cat-name">Mũ bảo hiểm</div>
       </div>
     </a>
     <a href="/products?categoryId=2" class="cat-card cat-3">
       <div class="cat-card-bg">🎩</div>
       <div class="cat-card-inner">
-        <div class="cat-name">Fitted Cap</div>
+        <div class="cat-name">Mũ tai mèo</div>
       </div>
     </a>
     <a href="/products?categoryId=3" class="cat-card cat-4">
       <div class="cat-card-bg">👒</div>
       <div class="cat-card-inner">
-        <div class="cat-name">Beret &amp; Beanie</div>
+        <div class="cat-name">Mũ rơm</div>
       </div>
     </a>
   </div>
@@ -489,7 +491,7 @@
 </section>
 
 <!-- SALE BANNER -->
-<div class="sale-banner">
+<div class="sale-banner" id="sale">
   <div class="sale-left">
     <p class="sale-tag">Khuyến mãi giới hạn</p>
     <h2 class="sale-title">
@@ -593,7 +595,7 @@
     </div>
   </div>
 
-  <div class="footer-bottom">
+  <div class="footer-bottom" id="footer">
     <span>© 2025 HatHub. Mọi quyền được bảo lưu.</span>
     <div class="footer-socials">
       <a href="#" class="social-btn" title="Facebook">f</a>
