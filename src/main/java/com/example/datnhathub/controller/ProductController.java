@@ -67,10 +67,7 @@ public class ProductController {
         return "products/product-list";
     }
 
-    // ════════════════════════════════════════
     // UC07 — Chi tiết sản phẩm
-    // GET /products/{id}
-    // ════════════════════════════════════════
     @GetMapping("/products/{id}")
     public String productDetail(@PathVariable Integer id, HttpSession session, Model model) {
 

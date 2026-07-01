@@ -43,7 +43,7 @@
       <tr th:each="v : ${vouchers}">
         <td th:text="${v.code}">CODE</td>
         <td th:text="${#numbers.formatDecimal(v.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
-        <td th:text="${v.quantity}">0</td>
+        <td  th:text="${v.quantity}"></td>
         <td>
           <form th:action="@{/admin/vouchers/delete/{id}(id=${v.voucherId})}" method="post">
             <button type="submit" style="background:#c00;">Xóa</button>

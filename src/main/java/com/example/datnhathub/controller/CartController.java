@@ -27,10 +27,7 @@ public class CartController {
         return (Integer) session.getAttribute("userId");
     }
 
-    // ════════════════════════════════════════
     // UC16 — Thêm sản phẩm vào giỏ hàng
-    // POST /products/{id}/add-to-cart  (id ở đây là productId, nhưng giỏ hàng lưu theo productDetailId)
-    // ════════════════════════════════════════
     @PostMapping("/products/{id}/add-to-cart")
     public String addToCart(@PathVariable("id") Integer productId,
                             @RequestParam Integer productDetailId,
@@ -53,10 +50,7 @@ public class CartController {
         return "redirect:/products/" + productId;
     }
 
-    // ════════════════════════════════════════
     // UC17 — Xem giỏ hàng
-    // GET /cart
-    // ════════════════════════════════════════
     @GetMapping("/cart")
     public String viewCart(HttpSession session, Model model) {
         Integer userId = (Integer) session.getAttribute("userId");
@@ -73,10 +67,7 @@ public class CartController {
         return "cart/index"; // templates/cart/index.html
     }
 
-    // ════════════════════════════════════════
     // UC18 — Cập nhật số lượng trong giỏ
-    // POST /cart/update
-    // ════════════════════════════════════════
     @PostMapping("/cart/update")
     public String updateCart(@RequestParam Integer cartDetailId,
                              @RequestParam Integer quantity,
@@ -89,10 +80,7 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    // ════════════════════════════════════════
     // UC19 — Xóa sản phẩm khỏi giỏ
-    // POST /cart/remove
-    // ════════════════════════════════════════
     @PostMapping("/cart/remove")
     public String removeFromCart(@RequestParam Integer cartDetailId, RedirectAttributes ra) {
         cartService.removeItem(cartDetailId);
@@ -100,10 +88,7 @@ public class CartController {
         return "redirect:/cart";
     }
 
-    // ════════════════════════════════════════
     // UC20 — Trang Checkout (xem trước khi đặt)
-    // GET /checkout
-    // ════════════════════════════════════════
     @GetMapping("/checkout")
     public String checkoutPage(HttpSession session, Model model) {
         Integer userId = currentUserId(session);
@@ -120,10 +105,7 @@ public class CartController {
         return "checkout/checkout"; // templates/cart/checkout.html
     }
 
-    // ════════════════════════════════════════
     // UC20 — Đặt hàng từ giỏ hàng
-    // POST /checkout
-    // ════════════════════════════════════════
     @PostMapping("/checkout")
     public String placeOrder(@RequestParam String shippingAddress,
                              @RequestParam String paymentMethod,

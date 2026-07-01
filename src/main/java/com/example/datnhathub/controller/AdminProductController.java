@@ -37,10 +37,7 @@ public class AdminProductController {
     @Autowired
     private AdminProductService adminProductService;
 
-    // ════════════════════════════════════════
     // GET /admin/products — Danh sách sản phẩm
-    // → products.html
-    // ════════════════════════════════════════
     @GetMapping
     public String listProducts(Model model) {
         List<Product> products = adminProductService.getAllProducts();
@@ -48,10 +45,7 @@ public class AdminProductController {
         return "admin/products"; // templates/admin/products.html
     }
 
-    // ════════════════════════════════════════
     // GET /admin/products/new — Form thêm mới
-    // → product-form.html (product rỗng)
-    // ════════════════════════════════════════
     @GetMapping("/new")
     public String newProductForm(Model model) {
         model.addAttribute("product",    new Product());
@@ -59,10 +53,7 @@ public class AdminProductController {
         return "admin/product-form";
     }
 
-    // ════════════════════════════════════════
     // GET /admin/products/edit/{id} — Form sửa
-    // → product-form.html (product có dữ liệu)
-    // ════════════════════════════════════════
     @GetMapping("/edit/{id}")
     public String editProductForm(@PathVariable Integer id, Model model) {
         Product product = adminProductService.getProductById(id);
@@ -74,10 +65,7 @@ public class AdminProductController {
         return "admin/product-form";
     }
 
-    // ════════════════════════════════════════
     // POST /admin/products/save — Lưu sản phẩm
-    // (dùng cho cả thêm mới lẫn sửa)
-    // ════════════════════════════════════════
     @PostMapping("/save")
     public String saveProduct(@RequestParam(required = false) Integer productId,
                               @RequestParam String productName,
@@ -100,9 +88,7 @@ public class AdminProductController {
         return "redirect:/admin/products/edit/" + saved.getProductId();
     }
 
-    // ════════════════════════════════════════
     // POST /admin/products/{id}/detail — Thêm biến thể
-    // ════════════════════════════════════════
     @PostMapping("/{id}/detail")
     public String addDetail(@PathVariable Integer id,
                             @RequestParam String size,
@@ -117,9 +103,7 @@ public class AdminProductController {
         return "redirect:/admin/products/edit/" + id;
     }
 
-    // ════════════════════════════════════════
     // POST /admin/products/detail/delete/{detailId} — Xóa biến thể
-    // ════════════════════════════════════════
     @PostMapping("/detail/delete/{detailId}")
     public String deleteDetail(@PathVariable Integer detailId,
                                @RequestParam Integer productId,
@@ -130,9 +114,7 @@ public class AdminProductController {
         return "redirect:/admin/products/edit/" + productId;
     }
 
-    // ════════════════════════════════════════
     // POST /admin/products/{id}/image — Upload ảnh
-    // ════════════════════════════════════════
     @PostMapping("/{id}/image")
     public String uploadImage(@PathVariable Integer id,
                               @RequestParam MultipartFile file,
@@ -150,10 +132,7 @@ public class AdminProductController {
         return "redirect:/admin/products/edit/" + id;
     }
 
-    // ════════════════════════════════════════
 // UC12 — Ẩn / Hiện sản phẩm (an toàn, không xóa dữ liệu)
-// POST /admin/products/toggle/{id}
-// ════════════════════════════════════════
     @PostMapping("/toggle/{id}")
     public String toggleProductStatus(@PathVariable Integer id, RedirectAttributes ra) {
         adminProductService.toggleProductStatus(id);
@@ -161,10 +140,8 @@ public class AdminProductController {
         return "redirect:/admin/products";
     }
 
-    // ════════════════════════════════════════
 // UC14 — Xóa ảnh sản phẩm
 // POST /admin/products/image/delete/{imageId}
-// ════════════════════════════════════════
     @PostMapping("/image/delete/{imageId}")
     public String deleteImage(@PathVariable Integer imageId,
                               @RequestParam Integer productId,
@@ -183,8 +160,7 @@ public class AdminProductController {
             ra.addFlashAttribute("success", "Đã xóa sản phẩm!");
         } catch (org.springframework.dao.DataIntegrityViolationException e) {
             // Sản phẩm đã có biến thể nằm trong đơn hàng -> không thể xóa cứng
-            ra.addFlashAttribute("error",
-                    "Không thể xóa: sản phẩm đã có trong đơn hàng. Hãy dùng nút Ẩn để ngừng bán thay thế.");
+            ra.addFlashAttribute("error", "Không thể xóa: sản phẩm đã có trong đơn hàng. Hãy ẩn sản phẩm để thay thế.");
         }
         return "redirect:/admin/products";
     }
