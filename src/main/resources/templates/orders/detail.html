@@ -41,6 +41,19 @@
     </div>
   </div>
 
+  <div th:if="${order.status == 'Chờ xác nhận'}"
+       style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
+    <div class="card">
+      <form th:action="@{/admin/orders/{id}(id=${order.orderId})}" method="post"
+            onsubmit="return confirm('Xác nhận hủy đơn hàng?')">
+        <button type="submit"
+                style="background:#ff0000;color:#fff;border:none;padding:10px 24px;font-weight:700;cursor:pointer;border-radius:4px;margin-top:0.5rem;">
+          Xác nhân hủy đơn
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div th:if="${order.status == 'Đang giao'}"
        style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
     <div class="card">
@@ -55,6 +68,28 @@
     </div>
   </div>
 
+  <div th:if="${order.status == 'Hoàn thành'}"
+       style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
+    <div class="card">
+        <button id="btnReturn" type="button" onclick="toggleForm()"
+                style="background:#e40000;color:#fff;border:none;padding:10px 24px;font-weight:700;cursor:pointer;border-radius:4px;margin-top:0.5rem;">
+          Yêu cầu trả hàng/ hoàn tiền
+        </button>
+      <h5>sau ##/##/202# thì quý khách không thể trả hàng được nữa!</h5>
+    </div>
+    <form class="card form-box" style="display: none" id="returnForm">
+      <select>
+        <option value="Hàng bị bể/ vỡ trong quá trình vận chuyển">Hàng bị bể/ vỡ trong quá trình vận chuyển</option>
+        <option value="Hàng không đúng trong ảnh và miêu tả">Hàng không đúng trong ảnh và miêu tả</option>
+        <option value="Bị sai kích cỡ/ màu sắc">Bị sai kích cỡ/ màu sắc</option>
+        <option value="Không đúng sản phẩm đã đặt">Không đúng sản phẩm đã đặt</option>
+        <option value="Khác...">Khác...</option>
+      </select><br><br>
+      <textarea rows="8" placeholder="Chi tiết"></textarea> <br> <br>
+      <button type="submit">Gửi yêu cầu</button>
+    </form>
+  </div>
+
   <div class="card">
     <h3>Sản phẩm</h3>
     <table>
@@ -67,4 +102,21 @@
   </div>
 </div>
 </body>
+<script>
+  function toggleForm() {
+    const form = document.getElementById("returnForm");
+
+    const btn = document.getElementById("btnReturn");
+
+    if (btn.textContent.trim() === "Yêu cầu trả hàng/ hoàn tiền") {
+      form.style.display =
+              form.style.display === "none" ? "block" : "none";
+      btn.textContent = "Hủy trả hàng";
+    } else {
+      form.style.display =
+              form.style.display === "none" ? "block" : "none";
+      btn.textContent = "Yêu cầu trả hàng/ hoàn tiền";
+    }
+  }
+</script>
 </html>

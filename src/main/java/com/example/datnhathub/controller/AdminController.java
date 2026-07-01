@@ -1,7 +1,9 @@
 package com.example.datnhathub.controller;
 
+import com.example.datnhathub.entity.Orders;
 import com.example.datnhathub.entity.Users;
 import com.example.datnhathub.entity.Voucher;
+import com.example.datnhathub.repository.OrderRepository;
 import com.example.datnhathub.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.apache.catalina.User;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Controller
 @RequestMapping("/admin")
@@ -22,6 +25,8 @@ public class AdminController {
     private CategoryService categoryService;
     @Autowired
     private OrderService orderService;
+    @Autowired
+    private OrderRepository orderRepository;
     @Autowired
     private VoucherService voucherService;
     @Autowired
@@ -105,6 +110,23 @@ public class AdminController {
     public String orders(Model model) {
         model.addAttribute("orders", orderService.getAllOrders());
         return "admin/orders";
+    }
+
+    // Chi tiết đơn hàng đang bị xung đột với trả hàng. Khi nào xong trả hàng sẽ làm tiếp
+    @GetMapping("/orders/{id}")
+    public String orderDetail(@PathVariable Integer id,
+                              Model model,
+                              RedirectAttributes ra) {
+
+        Orders order = orderRepository.findById(id).orElse(null);
+
+        if (order == null) {
+            ra.addFlashAttribute("error", "Không tìm thấy đơn hàng!");
+            return "redirect:/admin/orders";
+        }
+
+        model.addAttribute("order", order);
+        return "admin/order-detail";
     }
 
     @PostMapping("/orders/{id}/status")

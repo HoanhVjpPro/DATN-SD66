@@ -65,7 +65,7 @@ public class ForgotPasswordController {
             ra.addFlashAttribute("error", "Vui lòng nhập email trước!");
             return "redirect:/forgot-password";
         }
-        return "verify-otp"; // templates/verify-otp.html
+        return "verify-otp";
     }
 
     @PostMapping("/verify-otp")

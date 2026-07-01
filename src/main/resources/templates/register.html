@@ -136,7 +136,7 @@
                            placeholder="Tối thiểu 4 ký tự, không dấu"
                            th:value="${param.username}"
                            autocomplete="username" required/>
-                    <span class="field-error" th:if="${usernameError}" th:text="${usernameError}"></span>
+                    <span class="field-error" id="usernameError" style="display:none;"></span>
                 </div>
 
                 <!-- Email + Phone -->
@@ -147,7 +147,7 @@
                                placeholder="example@email.com"
                                th:value="${param.email}"
                                autocomplete="email" required/>
-                        <span class="field-error" th:if="${emailError}" th:text="${emailError}"></span>
+                        <span class="field-error" id="emailError" style="display: none"></span>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="phone">Số điện thoại</label>
@@ -155,6 +155,7 @@
                                placeholder="0912 345 678"
                                th:value="${param.phone}"
                                autocomplete="tel"/>
+                        <span class="field-error" id="phoneError" style="display:none;"></span>
                     </div>
                 </div>
 
@@ -194,7 +195,7 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn-submit">Tạo tài khoản</button>
+                <button type="submit" class="btn-submit" id="submitBtn">Tạo tài khoản</button>
             </form>
 
             <div class="divider">đã có tài khoản?</div>
@@ -206,57 +207,225 @@
 </div>
 
 <script>
-    function togglePass(id, btn) {
-        const input = document.getElementById(id);
-        input.type = input.type === 'password' ? 'text' : 'password';
-        btn.textContent = input.type === 'password' ? 'Hiện' : 'Ẩn';
+    // ── TRẠNG THÁI TỪNG FIELD ──
+    const state = {
+        username: false,
+        email:    false,
+        phone:    true,      // phone không bắt buộc → mặc định true
+        password: false,
+        confirm:  false,
+        terms:    false
+    };
+
+    // ── DEBOUNCE ──
+    function debounce(fn, delay) {
+        let timer;
+        return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
     }
 
-    function checkStrength(val) {
+    // ── CẬP NHẬT NÚT ĐĂNG KÝ ──
+    function updateSubmitBtn() {
+        const allOk = Object.values(state).every(v => v === true);
+        const btn   = document.getElementById('submitBtn');
+        btn.disabled      = !allOk;
+        btn.style.opacity = allOk ? '1' : '0.5';
+        btn.style.cursor  = allOk ? 'pointer' : 'not-allowed';
+    }
+
+    // ── HIỆN TRẠNG THÁI FIELD ──
+    function setFieldState(fieldId, errorId, ok, msg) {
+        const input = document.getElementById(fieldId);
+        const errEl = document.getElementById(errorId);
+        if (!input) return;
+
+        input.style.borderColor = ok ? '#48bb78' : '#e53e3e';
+        if (errEl) {
+            errEl.textContent  = ok ? '' : msg;
+            errEl.style.color  = '#e53e3e';
+            errEl.style.display = ok ? 'none' : 'block';
+        }
+    }
+
+    function setFieldOk(fieldId, okId) {
+        const input = document.getElementById(fieldId);
+        const okEl  = document.getElementById(okId);
+        if (input) input.style.borderColor = '#48bb78';
+        if (okEl)  { okEl.textContent = '✓'; okEl.style.color = '#48bb78'; okEl.style.display = 'block'; }
+    }
+
+    // ════════════════════════════════════════
+    // USERNAME — check DB
+    // ════════════════════════════════════════
+    const checkUsername = debounce(async function() {
+        const val = document.getElementById('username').value.trim();
+        const errEl = document.getElementById('usernameError');
+
+        if (!val) {
+            setFieldState('username', 'usernameError', false, 'Vui lòng nhập tên đăng nhập!');
+            state.username = false; updateSubmitBtn(); return;
+        }
+        if (val.length < 4) {
+            setFieldState('username', 'usernameError', false, 'Tối thiểu 4 ký tự!');
+            state.username = false; updateSubmitBtn(); return;
+        }
+
+        // Gọi API check DB
+        const res  = await fetch('/register/check?field=username&value=' + encodeURIComponent(val));
+        const data = await res.json();
+
+        if (data.available) {
+            setFieldState('username', 'usernameError', true, '');
+            if (errEl) { errEl.textContent = '✓ Có thể sử dụng'; errEl.style.color = '#48bb78'; errEl.style.display = 'block'; }
+            state.username = true;
+        } else {
+            setFieldState('username', 'usernameError', false, '✗ Tên đăng nhập đã tồn tại!');
+            state.username = false;
+        }
+        updateSubmitBtn();
+    }, 600);
+
+    // ════════════════════════════════════════
+    // EMAIL — check DB
+    // ════════════════════════════════════════
+    const checkEmail = debounce(async function() {
+        const val   = document.getElementById('email').value.trim();
+        const errEl = document.getElementById('emailError');
+
+        if (!val) {
+            setFieldState('email', 'emailError', false, 'Vui lòng nhập email!');
+            state.email = false; updateSubmitBtn(); return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
+            setFieldState('email', 'emailError', false, 'Email không đúng định dạng!');
+            state.email = false; updateSubmitBtn(); return;
+        }
+
+        const res  = await fetch('/register/check?field=email&value=' + encodeURIComponent(val));
+        const data = await res.json();
+
+        if (data.available) {
+            setFieldState('email', 'emailError', true, '');
+            if (errEl) { errEl.textContent = '✓ Email hợp lệ'; errEl.style.color = '#48bb78'; errEl.style.display = 'block'; }
+            state.email = true;
+        } else {
+            setFieldState('email', 'emailError', false, '✗ Email đã được sử dụng!');
+            state.email = false;
+        }
+        updateSubmitBtn();
+    }, 600);
+
+    // ════════════════════════════════════════
+    // PHONE — check DB (không bắt buộc)
+    // ════════════════════════════════════════
+    const checkPhone = debounce(async function() {
+        const val = document.getElementById('phone').value.trim();
+
+        // Nếu để trống → ok
+        if (!val) {
+            document.getElementById('phone').style.borderColor = '';
+            state.phone = true; updateSubmitBtn(); return;
+        }
+
+        const res  = await fetch('/register/check?field=phone&value=' + encodeURIComponent(val));
+        const data = await res.json();
+
+        if (data.available) {
+            document.getElementById('phone').style.borderColor = '#48bb78';
+            state.phone = true;
+        } else {
+            document.getElementById('phone').style.borderColor = '#e53e3e';
+            state.phone = false;
+            // Hiện lỗi nếu có element
+            const errEl = document.getElementById('phoneError');
+            if (errEl) { errEl.textContent = '✗ Số điện thoại đã được sử dụng!'; errEl.style.display = 'block'; }
+        }
+        updateSubmitBtn();
+    }, 600);
+
+    // ════════════════════════════════════════
+    // PASSWORD — kiểm tra độ mạnh >= trung bình
+    // ════════════════════════════════════════
+    function checkPassword() {
+        const val  = document.getElementById('password').value;
         const fill = document.getElementById('strengthFill');
         const text = document.getElementById('strengthText');
+
         let score = 0;
-        if (val.length >= 6)  score++;
-        if (val.length >= 10) score++;
-        if (/[0-9]/.test(val)) score++;
+        if (val.length >= 6)           score++;
+        if (val.length >= 10)          score++;
+        if (/[0-9]/.test(val))         score++;
         if (/[^A-Za-z0-9]/.test(val)) score++;
+
         const levels = [
-            {w:'0%',  color:'#e53e3e', label:''},
-            {w:'25%', color:'#e53e3e', label:'Yếu'},
-            {w:'50%', color:'#ed8936', label:'Trung bình'},
-            {w:'75%', color:'#ecc94b', label:'Khá'},
-            {w:'100%',color:'#48bb78', label:'Mạnh'},
+            { w:'0%',   color:'#e53e3e', label:'' },
+            { w:'25%',  color:'#e53e3e', label:'Yếu' },
+            { w:'50%',  color:'#ed8936', label:'Trung bình' },
+            { w:'75%',  color:'#ecc94b', label:'Khá' },
+            { w:'100%', color:'#48bb78', label:'Mạnh' },
         ];
-        fill.style.width   = levels[score].w;
+        fill.style.width      = levels[score].w;
         fill.style.background = levels[score].color;
-        text.textContent = val.length > 0 ? 'Độ mạnh: ' + levels[score].label : '';
+        text.textContent      = val.length > 0 ? 'Độ mạnh: ' + levels[score].label : '';
+
+        // Yêu cầu tối thiểu score >= 2 (Trung bình)
+        if (score >= 2) {
+            document.getElementById('password').style.borderColor = '#48bb78';
+            state.password = true;
+        } else {
+            document.getElementById('password').style.borderColor = val.length > 0 ? '#e53e3e' : '';
+            state.password = false;
+        }
+
+        // Kiểm tra lại confirm khi password thay đổi
+        checkConfirm();
+        updateSubmitBtn();
     }
 
-    function validateRegister() {
-        const u  = document.getElementById('username').value.trim();
-        const e  = document.getElementById('email').value.trim();
-        const p  = document.getElementById('password').value;
-        const cp = document.getElementById('confirmPassword').value;
-        const err = document.getElementById('confirmError');
+    // ════════════════════════════════════════
+    // CONFIRM PASSWORD
+    // ════════════════════════════════════════
+    function checkConfirm() {
+        const pass    = document.getElementById('password').value;
+        const confirm = document.getElementById('confirmPassword').value;
+        const errEl   = document.getElementById('confirmError');
 
-        if (!u || !e || !p || !cp) { alert('Vui lòng nhập đầy đủ thông tin bắt buộc!'); return false; }
-        if (u.length < 4) { alert('Tên đăng nhập tối thiểu 4 ký tự!'); return false; }
-        if (p !== cp) {
-            err.textContent = 'Mật khẩu xác nhận không khớp!';
-            document.getElementById('confirmPassword').classList.add('is-error');
-            return false;
+        if (!confirm) {
+            state.confirm = false; updateSubmitBtn(); return;
         }
-        err.textContent = '';
-        if (!document.getElementById('agreeTerms').checked) {
-            alert('Vui lòng đồng ý với điều khoản dịch vụ!'); return false;
+
+        if (pass === confirm) {
+            document.getElementById('confirmPassword').style.borderColor = '#48bb78';
+            if (errEl) errEl.textContent = '';
+            state.confirm = true;
+        } else {
+            document.getElementById('confirmPassword').style.borderColor = '#e53e3e';
+            if (errEl) errEl.textContent = 'Mật khẩu không khớp!';
+            state.confirm = false;
         }
-        return true;
+        updateSubmitBtn();
     }
 
-    // Clear confirm error on input
-    document.getElementById('confirmPassword').addEventListener('input', function() {
-        document.getElementById('confirmError').textContent = '';
-        this.classList.remove('is-error');
+    // ════════════════════════════════════════
+    // TERMS CHECKBOX
+    // ════════════════════════════════════════
+    document.getElementById('agreeTerms').addEventListener('change', function() {
+        state.terms = this.checked;
+        updateSubmitBtn();
+    });
+
+    // ── GẮN SỰ KIỆN ──
+    document.getElementById('username').addEventListener('input',        checkUsername);
+    document.getElementById('email').addEventListener('input',           checkEmail);
+    document.getElementById('phone').addEventListener('input',           checkPhone);
+    document.getElementById('password').addEventListener('input',        checkPassword);
+    document.getElementById('confirmPassword').addEventListener('input', checkConfirm);
+
+    // ── INIT: khóa nút ngay khi load ──
+    document.addEventListener('DOMContentLoaded', function() {
+        const btn         = document.getElementById('submitBtn');
+        btn.disabled      = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor  = 'not-allowed';
     });
 </script>
 </body>

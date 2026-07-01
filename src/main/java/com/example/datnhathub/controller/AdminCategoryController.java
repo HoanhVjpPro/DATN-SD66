@@ -11,9 +11,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-// ════════════════════════════════════════
-// UC15 — Quản lý danh mục (Admin)
-// ════════════════════════════════════════
 @Controller
 @RequestMapping("/admin/categories")
 public class AdminCategoryController {

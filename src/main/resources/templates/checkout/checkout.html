@@ -17,7 +17,8 @@
         <span>HatHub</span>
     </a>
     <ul class="nav-menu"><li><a href="/cart">Quay lại giỏ</a></li><li><a th:href="@{/products}">Tiếp tục mua</a></li></ul>
-    <div class="nav-actions"><a class="cart-link" href="/cart">Giỏ</a></div>
+    <div class="nav-actions">
+    </div>
 </nav>
 <main class="page-wrap">
     <h1 class="page-title">Checkout</h1>
@@ -25,16 +26,15 @@
     <div class="checkout-layout">
         <form class="checkout-card form-box" action="/checkout" method="post">
             <div>
-                <label>Địa chỉ giao hàng *</label>
+                <label>Địa chỉ giao hàng</label>
                 <textarea name="shippingAddress" rows="4" required
                           placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea>
             </div>
             <div>
-                <label>Phương thức thanh toán *</label>
+                <label>Phương thức thanh toán</label>
                 <div class="payment-options">
                     <label class="payment-option"><input type="radio" name="paymentMethod" value="COD" checked /> Thanh toán khi nhận hàng (COD)</label>
                     <label class="payment-option"><input type="radio" name="paymentMethod" value="Chuyển khoản" /> Chuyển khoản ngân hàng</label>
-                    <label class="payment-option"><input type="radio" name="paymentMethod" value="MoMo" /> Ví MoMo</label>
                 </div>
             </div>
             <div>
