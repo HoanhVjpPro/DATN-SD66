@@ -21,7 +21,6 @@ import java.util.List;
 @RequestMapping("/admin/products")
 public class AdminProductController {
 
-    // Phải có đủ 4 dòng này
     @Autowired
     private ProductRepository productRepository;
 
@@ -32,7 +31,7 @@ public class AdminProductController {
     private ProductImageRepository productImageRepository;
 
     @Autowired
-    private CategoryRepository categoryRepository;  // ← kiểm tra dòng này có chưa
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private AdminProductService adminProductService;
