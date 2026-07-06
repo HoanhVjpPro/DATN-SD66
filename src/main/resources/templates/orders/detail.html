@@ -44,7 +44,7 @@
   <div th:if="${order.status == 'Chờ xác nhận'}"
        style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
     <div class="card">
-      <form th:action="@{/admin/orders/{id}(id=${order.orderId})}" method="post"
+      <form th:action="@{/orders/{id}/cancel(id=${order.orderId})}" method="post"
             onsubmit="return confirm('Xác nhận hủy đơn hàng?')">
         <button type="submit"
                 style="background:#ff0000;color:#fff;border:none;padding:10px 24px;font-weight:700;cursor:pointer;border-radius:4px;margin-top:0.5rem;">
@@ -68,26 +68,32 @@
     </div>
   </div>
 
-  <div th:if="${order.status == 'Hoàn thành'}"
+  <!-- Hoàn thành → nút yêu cầu trả hàng -->
+  <div th:if="${order.status == 'Hoàn thành'}" class="card"
        style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
-    <div class="card">
-        <button id="btnReturn" type="button" onclick="toggleForm()"
-                style="background:#e40000;color:#fff;border:none;padding:10px 24px;font-weight:700;cursor:pointer;border-radius:4px;margin-top:0.5rem;">
-          Yêu cầu trả hàng/ hoàn tiền
-        </button>
-      <h5>sau ##/##/202# thì quý khách không thể trả hàng được nữa!</h5>
+    <p style="color:#27ae60;font-weight:700;">✓ Đơn hàng đã hoàn thành. Cảm ơn bạn đã mua hàng!</p>
+
+    <!-- Nếu chưa có yêu cầu trả hàng -->
+    <div th:if="${order.returnStatus == null}" style="margin-top:0.8rem;">
+      <a th:href="@{/orders/{id}/return(id=${order.orderId})}"
+         style="display:inline-block;background:#444;color:#fff;padding:10px 20px;text-decoration:none;font-weight:700;border-radius:4px;font-size:0.88rem;">
+        ↩ Yêu cầu trả hàng
+      </a>
     </div>
-    <form class="card form-box" style="display: none" id="returnForm">
-      <select>
-        <option value="Hàng bị bể/ vỡ trong quá trình vận chuyển">Hàng bị bể/ vỡ trong quá trình vận chuyển</option>
-        <option value="Hàng không đúng trong ảnh và miêu tả">Hàng không đúng trong ảnh và miêu tả</option>
-        <option value="Bị sai kích cỡ/ màu sắc">Bị sai kích cỡ/ màu sắc</option>
-        <option value="Không đúng sản phẩm đã đặt">Không đúng sản phẩm đã đặt</option>
-        <option value="Khác...">Khác...</option>
-      </select><br><br>
-      <textarea rows="8" placeholder="Chi tiết"></textarea> <br> <br>
-      <button type="submit">Gửi yêu cầu</button>
-    </form>
+
+    <!-- Nếu đã có yêu cầu → hiện trạng thái -->
+    <div th:if="${order.returnStatus != null}" style="margin-top:0.8rem;">
+      <span style="font-weight:700;font-size:0.9rem;">Trả hàng: </span>
+      <span th:text="${order.returnStatus}"
+            th:style="${order.returnStatus == 'Chờ xác nhận'} ? 'color:#856404;font-weight:700;' :
+                     (${order.returnStatus == 'Đã chấp nhận'} ? 'color:#155724;font-weight:700;' : 'color:#c00;font-weight:700;')">
+      Chờ xác nhận
+    </span>
+      <a th:href="@{/orders/{id}/return(id=${order.orderId})}"
+         style="margin-left:10px;color:#C0633A;font-size:0.85rem;text-decoration:none;font-weight:700;">
+        Xem chi tiết →
+      </a>
+    </div>
   </div>
 
   <div class="card">
@@ -102,21 +108,4 @@
   </div>
 </div>
 </body>
-<script>
-  function toggleForm() {
-    const form = document.getElementById("returnForm");
-
-    const btn = document.getElementById("btnReturn");
-
-    if (btn.textContent.trim() === "Yêu cầu trả hàng/ hoàn tiền") {
-      form.style.display =
-              form.style.display === "none" ? "block" : "none";
-      btn.textContent = "Hủy trả hàng";
-    } else {
-      form.style.display =
-              form.style.display === "none" ? "block" : "none";
-      btn.textContent = "Yêu cầu trả hàng/ hoàn tiền";
-    }
-  }
-</script>
 </html>

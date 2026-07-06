@@ -29,7 +29,7 @@
 
   <div class="card">
     <!-- QR CODE -->
-    <img th:src="@{/images/QR-Bank.png}" class="qr-img" alt="QR Thanh toán"/>
+    <img th:src="${qrUrl}" class="qr-img" alt="QR Thanh toán"/>
 
     <div class="amount"
          th:text="${#numbers.formatDecimal(amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">

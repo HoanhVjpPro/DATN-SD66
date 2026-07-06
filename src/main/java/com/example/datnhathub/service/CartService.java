@@ -15,17 +15,13 @@ public class CartService {
     @Autowired private CustomerRepository customerRepository;
     @Autowired private ProductDetailRepository productDetailRepository;
 
-    // ════════════════════════════════════════
-    // Helper: lấy Customer hiện tại từ userId trong session
-    // ════════════════════════════════════════
+    // lấy Customer hiện tại từ userId trong session
     public Customer getCustomerByUserId(Integer userId) {
         return customerRepository.findByUserUserID(userId)
                 .orElseThrow(() -> new RuntimeException("Tài khoản này không phải khách hàng (Customer)."));
     }
 
-    // ════════════════════════════════════════
-    // Helper: lấy giỏ hàng hiện tại, tự tạo mới nếu Customer chưa có giỏ
-    // ════════════════════════════════════════
+    // lấy giỏ hàng hiện tại, tự tạo mới nếu Customer chưa có giỏ
     public Cart getOrCreateCart(Customer customer) {
         return cartRepository.findByCustomerCustomerId(customer.getCustomerId())
                 .orElseGet(() -> {
@@ -35,10 +31,7 @@ public class CartService {
                 });
     }
 
-    // ════════════════════════════════════════
     // UC16 — Thêm sản phẩm vào giỏ hàng
-    // FIX: validate stockQuantity trước khi thêm / cộng dồn
-    // ════════════════════════════════════════
     public void addToCart(Integer userId, Integer productDetailId, int quantity) {
         if (quantity < 1) quantity = 1;
 
@@ -75,9 +68,7 @@ public class CartService {
         }
     }
 
-    // ════════════════════════════════════════
     // UC17 — Xem giỏ hàng
-    // ════════════════════════════════════════
     public Cart getCart(Integer userId) {
         Customer customer = getCustomerByUserId(userId);
         return getOrCreateCart(customer);
@@ -92,10 +83,7 @@ public class CartService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // ════════════════════════════════════════
     // UC18 — Cập nhật số lượng trong giỏ
-    // FIX: validate không vượt tồn kho
-    // ════════════════════════════════════════
     public void updateQuantity(Integer cartDetailId, int quantity) {
         if (quantity < 1) {
             // Số lượng <= 0 -> coi như xóa luôn dòng đó khỏi giỏ
@@ -115,9 +103,7 @@ public class CartService {
         cartDetailRepository.save(detail);
     }
 
-    // ════════════════════════════════════════
     // UC19 — Xóa sản phẩm khỏi giỏ
-    // ════════════════════════════════════════
     public void removeItem(Integer cartDetailId) {
         cartDetailRepository.deleteById(cartDetailId);
     }

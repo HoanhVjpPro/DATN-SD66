@@ -1,10 +1,12 @@
 package com.example.datnhathub.controller;
 
 import com.example.datnhathub.dto.ProductDto;
-import com.example.datnhathub.entity.Category;
-import com.example.datnhathub.entity.Product;
-import com.example.datnhathub.repository.ProductRepository;
+import com.example.datnhathub.dto.ReviewDTO;
+import com.example.datnhathub.entity.*;
+import com.example.datnhathub.repository.*;
 import com.example.datnhathub.service.ProductService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.math.BigDecimal;
@@ -21,8 +24,15 @@ import java.util.List;
 public class ProductController {
     @Autowired
     private ProductService productService;
-    // FIX: đã xóa @Autowired ProductRepository - controller không nên gọi trực tiếp Repository,
-    // luôn đi qua Service để giữ đúng kiến trúc layered (Controller -> Service -> Repository)
+
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @GetMapping("/products")
     public String productList(
@@ -73,10 +83,15 @@ public class ProductController {
 
         Product product = productService.getProductById(id);
 
+        List<ReviewDTO> dsr = reviewRepository.findcomment(product.getProductId());
+
         var details = product.getDetails();
         var selectedDetail = (details != null && !details.isEmpty()) ? details.get(0) : null;
 
-        String imageUrl = productService.getDefaultImageUrl(product);
+        String imageUrl = productService.getDefaultImageUrl(product); // FIX: gọi từ Service, không phải Repository
+
+        session.setAttribute("productid",product.getProductId());
+        session.setAttribute("selectedDetail",selectedDetail.getProductDetailId());
 
         model.addAttribute("product",        product);
         model.addAttribute("details",        details);
@@ -87,6 +102,28 @@ public class ProductController {
         model.addAttribute("loggedIn", loggedIn);
         model.addAttribute("roleName", session.getAttribute("roleName"));
 
+        model.addAttribute("listc",dsr);
+
         return "products/detail";
+    }
+
+    @PostMapping("/comment")
+    public String rep(Reviews review, HttpSession session, HttpServletRequest req){
+        Integer productid = Integer.parseInt(String.valueOf(session.getAttribute("productid")));
+        Integer productDetailId = Integer.parseInt(String.valueOf(session.getAttribute("selectedDetail")));
+
+        String iduser = new String();
+        for (Cookie c : req.getCookies()) {
+            if(c.getName().equals("userId")){
+                iduser = String.valueOf(c.getValue());
+            }
+        }
+        Integer userID = Integer.parseInt(iduser);
+        ProductDetail pd = productDetailRepository.findById(productDetailId).get();
+        Customer customer = customerRepository.findByUserUserID(userID).get();
+        review.setProductDetailID(pd);
+        review.setCustomerID(customer);
+        reviewRepository.save(review);
+        return "redirect:/products/"+productid;
     }
 }

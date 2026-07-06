@@ -18,8 +18,8 @@ public class OrderService {
     @Autowired private CartService cartService;
     @Autowired private CartDetailRepository cartDetailRepository;
     @Autowired private VoucherRepository voucherRepository;
-    @Autowired private ProductDetailRepository productDetailRepository;
     @Autowired private EmployeeRepository employeeRepository;
+    @Autowired private ProductDetailRepository productDetailRepository;
 
     // ════════════════════════════════════════
     // UC20 — Đặt hàng từ giỏ hàng
@@ -145,6 +145,15 @@ public class OrderService {
         }
 
         if ("Đang giao".equals(status) && order.getShipping() != null) {
+            // ← TRỪ KHO Ở ĐÂY
+            if (order.getDetails() != null) {
+                for (OrderDetail od : order.getDetails()) {
+                    ProductDetail pd = od.getProductDetail();
+                    int newStock = pd.getStockQuantity() - od.getQuantity();
+                    pd.setStockQuantity(Math.max(0, newStock)); // không để âm
+                    productDetailRepository.save(pd);
+                }
+            }
             order.getShipping().setShippingStatus("Đang giao");
         }
         if ("Hoàn thành".equals(status)) {

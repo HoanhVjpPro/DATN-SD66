@@ -24,7 +24,7 @@
     <h1 class="page-title">Checkout</h1>
     <div th:if="${error}" class="alert error" th:text="${error}"></div>
     <div class="checkout-layout">
-        <form class="checkout-card form-box" action="/checkout" method="post">
+        <form class="checkout-card form-box" onsubmit="return confirm('Có chắc muốn đặt hàng chứ?')" action="/checkout" method="post">
             <div>
                 <label>Địa chỉ giao hàng</label>
                 <textarea name="shippingAddress" rows="4" required

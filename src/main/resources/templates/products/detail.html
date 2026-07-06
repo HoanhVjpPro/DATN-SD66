@@ -111,11 +111,76 @@
     </div>
   </section>
 
-  <!-- Phần đánh giá: chờ tích hợp ReviewService -->
+<!--  Đánh giá sản phẩm-->
   <section class="reviews">
-    <div class="section-head"><h2>Đánh giá</h2></div>
-    <div class="cart-card">
-      <div class="reviews-placeholder">WIP</div>
+    <div class="section-head">
+      <h2>Đánh giá sản phẩm</h2>
+    </div>
+
+    <!-- Danh sách đánh giá -->
+    <div class="cart-card" style="padding:24px;">
+      <div th:if="${#lists.isEmpty(listc)}" class="reviews-placeholder">
+        Chưa có đánh giá nào cho sản phẩm này.
+      </div>
+
+      <div th:each="c : ${listc}"
+           style="padding:16px 0;border-bottom:1px solid #eee;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong th:text="${c.CustomerName}">Khách hàng</strong>
+
+          <span style="color:#C0633A;font-weight:700;">
+          <span th:text="${c.Rating}">5</span>/5 ★
+        </span>
+        </div>
+
+        <p style="margin:0;color:#555;line-height:1.6;"
+           th:text="${c.Comment}">
+          Nội dung đánh giá
+        </p>
+      </div>
+    </div>
+
+    <!-- Form thêm đánh giá -->
+    <div class="cart-card" style="padding:24px;margin-top:20px;">
+      <h3 style="margin-bottom:16px;">Viết đánh giá của bạn</h3>
+
+      <form action="/comment" method="post"
+            style="display:flex;flex-direction:column;gap:14px;">
+
+        <div>
+          <label style="display:block;margin-bottom:6px;font-weight:600;">
+            Đánh giá
+          </label>
+
+          <select name="Rating"
+                  style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;">
+            <option value="5">★★★★★</option>
+            <option value="4">★★★★☆</option>
+            <option value="3">★★★☆☆</option>
+            <option value="2">★★☆☆☆</option>
+            <option value="1">★☆☆☆☆</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block;margin-bottom:6px;font-weight:600;">
+            Nhận xét
+          </label>
+
+          <textarea
+                  name="Comment"
+                  rows="5"
+                  placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
+                  style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;resize:vertical;"></textarea>
+        </div>
+
+        <div>
+          <button type="submit" class="btn btn-primary">
+            Gửi đánh giá
+          </button>
+        </div>
+
+      </form>
     </div>
   </section>
 </main>

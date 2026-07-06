@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Yêu cầu trả hàng | HatHub Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
+        aside { width:220px; background:#111; color:#fff; padding:1.5rem; }
+        aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
+        aside a.active { color:#C0633A; }
+        aside a:hover { color:#C0633A; }
+        main { flex:1; padding:2rem; background:#F5F0EA; }
+        table { width:100%; background:#fff; border-collapse:collapse; }
+        th, td { padding:0.75rem; border-bottom:1px solid #eee; text-align:left; font-size:0.88rem; vertical-align:middle; }
+        th { background:#111; color:#fff; }
+        .badge { padding:4px 10px; border-radius:20px; font-size:0.75rem; font-weight:700; display:inline-block; }
+        .badge-waiting  { background:#fff3cd; color:#856404; }
+        .badge-accepted { background:#d4edda; color:#155724; }
+        .badge-rejected { background:#f8d7da; color:#721c24; }
+        .alert { padding:1rem; border-radius:4px; margin-bottom:1rem; font-weight:700; }
+        .alert-success { background:#d4edda; color:#155724; }
+        .alert-error   { background:#f8d7da; color:#721c24; }
+        button { border:none; padding:6px 14px; cursor:pointer; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.82rem; }
+        .btn-accept { background:#27ae60; color:#fff; }
+        .btn-accept:hover { background:#1e8449; }
+        .btn-reject { background:#c00; color:#fff; }
+        .btn-reject:hover { background:#a00; }
+
+        /* FILTER TABS */
+        .filter-tabs { display:flex; gap:8px; margin-bottom:1rem; flex-wrap:wrap; }
+        .filter-tabs button { background:#fff; border:1px solid #ddd; color:#333; padding:8px 16px; }
+        .filter-tabs button.active { background:#C0633A; color:#fff; border-color:#C0633A; }
+
+        .reason-text { max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    </style>
+</head>
+<body>
+<aside>
+    <h2 style="color:#C0633A;">HatHub Admin</h2>
+    <a href="/admin/dashboard">Dashboard</a>
+    <a href="/admin/products">Sản phẩm</a>
+    <a href="/admin/categories">Danh mục</a>
+    <a href="/admin/orders">Đơn hàng</a>
+    <a href="/admin/returns" class="active">Trả hàng</a>
+    <a href="/admin/vouchers">Voucher</a>
+    <a href="/admin/users">Người dùng</a>
+    <a href="/logout">Đăng xuất</a>
+</aside>
+
+<main>
+    <h1>Yêu cầu trả hàng</h1>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
+
+    <!-- FILTER TABS -->
+    <div class="filter-tabs">
+        <button onclick="filterReturn('ALL')"           id="tab-ALL"           class="active">Tất cả</button>
+        <button onclick="filterReturn('Chờ xác nhận')"  id="tab-Chờ xác nhận" >Chờ xác nhận</button>
+        <button onclick="filterReturn('Đã chấp nhận')"  id="tab-Đã chấp nhận" >Đã chấp nhận</button>
+        <button onclick="filterReturn('Đã từ chối')"    id="tab-Đã từ chối"   >Đã từ chối</button>
+    </div>
+
+    <p id="countDisplay" style="font-size:0.82rem;color:#666;margin-bottom:0.8rem;">
+        Đang hiển thị tất cả yêu cầu
+    </p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Mã đơn</th>
+            <th>Khách hàng</th>
+            <th>Lý do</th>
+            <th>Ngày gửi</th>
+            <th>Trạng thái</th>
+            <th>Thao tác</th>
+        </tr>
+        </thead>
+        <tbody id="returnTableBody">
+        <tr th:each="r : ${returns}" th:data-status="${r.status}">
+            <td>
+                <a th:href="@{/admin/orders/{id}(id=${r.orderId})}"
+                   style="color:#C0633A;font-weight:700;"
+                   th:text="${r.orderId != null ? '#' + r.orderId : '#' + r.orderId}">
+                    #
+                </a>
+            </td>
+            <td th:text="${r.customer.user.username}">user</td>
+            <td>
+                <span class="reason-text" th:text="${r.returnReason}" th:title="${r.returnReason}">Lý do...</span>
+            </td>
+            <td th:text="${#temporals.format(r.returnDate, 'dd/MM/yyyy HH:mm')}">date</td>
+            <td>
+          <span th:text="${r.returnStatus}"
+                th:class="${r.returnStatus == 'Chờ xác nhận'} ? 'badge badge-waiting' :
+                           (${r.returnStatus == 'Đã chấp nhận'} ? 'badge badge-accepted' : 'badge badge-rejected')">
+            Chờ xác nhận
+          </span>
+            </td>
+            <td>
+                <!-- Chỉ hiện nút khi đang Chờ xác nhận -->
+                <div th:if="${r.returnStatus == 'Chờ xác nhận'}" style="display:flex;gap:6px;">
+                    <form th:action="@{/admin/returns/{id}/accept(id=${r.orderId})}"
+                          method="post"
+                          onsubmit="return confirm('Chấp nhận yêu cầu trả hàng này?')">
+                        <button type="submit" class="btn-accept">✓ Chấp nhận</button>
+                    </form>
+                    <form th:action="@{/admin/returns/{id}/reject(id=${r.orderId})}"
+                          method="post"
+                          onsubmit="return confirm('Từ chối yêu cầu trả hàng này?')">
+                        <button type="submit" class="btn-reject">✗ Từ chối</button>
+                    </form>
+                </div>
+                <span th:if="${r.status == 'Đã chấp nhận'}" style="color:#27ae60;font-weight:700;">✓ Đã xử lý</span>
+                <span th:if="${r.status == 'Đã từ chối'}"   style="color:#c00;font-weight:700;">✗ Đã từ chối</span>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(returns)}">
+            <td colspan="6" style="text-align:center;padding:2rem;color:#888;">Chưa có yêu cầu trả hàng nào</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+
+<script>
+    function filterReturn(status) {
+        const rows    = document.querySelectorAll('#returnTableBody tr[data-status]');
+        const buttons = document.querySelectorAll('.filter-tabs button');
+        let count     = 0;
+
+        buttons.forEach(btn => btn.classList.remove('active'));
+        document.getElementById('tab-' + status)?.classList.add('active');
+
+        rows.forEach(row => {
+            const s = row.getAttribute('data-status');
+            if (status === 'ALL' || s === status) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        const countEl = document.getElementById('countDisplay');
+        countEl.textContent = status === 'ALL'
+            ? 'Đang hiển thị tất cả ' + count + ' yêu cầu'
+            : status + ' — ' + count + ' yêu cầu';
+    }
+
+</script>
+</body>
+</html>
