@@ -40,6 +40,15 @@ public class Orders {
     @Column(name = "Status", length = 50)
     private String status;
 
+    @Column(name = "ReturnStatus", length = 50)
+    private String returnStatus;
+
+    @Column(name = "ReturnReason", length = 500)
+    private String returnReason;
+
+    @Column(name = "ReturnDate")
+    private LocalDateTime returnDate;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderDetail> details;
 

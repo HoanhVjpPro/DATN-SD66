@@ -112,7 +112,6 @@ public class AdminController {
         return "admin/orders";
     }
 
-    // Chi tiết đơn hàng đang bị xung đột với trả hàng. Khi nào xong trả hàng sẽ làm tiếp
     @GetMapping("/orders/{id}")
     public String orderDetail(@PathVariable Integer id,
                               Model model,

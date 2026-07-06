@@ -18,7 +18,7 @@
   <h1 class="page-title">Checkout</h1>
   <div th:if="${error}" class="alert error" th:text="${error}"></div>
   <div class="checkout-layout">
-    <form class="checkout-card form-box" action="/checkout" method="post">
+    <form class="checkout-card form-box"  onsubmit="return confirm('có chắc muốn đặt hàng chứ?')" action="/checkout" method="post">
       <div><label>Địa chỉ giao hàng</label><textarea name="shippingAddress" rows="4" required placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea></div>
       <div><label>Phương thức thanh toán</label><div class="payment-options"><label class="payment-option"><input type="radio" name="paymentMethod" value="COD" checked /> Thanh toán khi nhận hàng (COD)</label><label class="payment-option"><input type="radio" name="paymentMethod" value="Chuyển khoản" /> Chuyển khoản ngân hàng</label></div></div>
       <div><label>Mã voucher</label><input type="text" name="voucherCode" placeholder="VD: HATHUB50" /></div>

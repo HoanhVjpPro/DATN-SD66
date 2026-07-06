@@ -30,13 +30,13 @@ public class PaymentController {
         if (order == null) return "redirect:/orders";
 
         // Thông tin ngân hàng — thay bằng thông tin thật
-        String bankId      = "MB";
-        String accountNo   = "1234567890";
+        String bankId      = "MBBank";
+        String accountNo   = "0984085074";
         String accountName = "HATHUB";
         String amount      = order.getTotalAmount().toPlainString();
         String addInfo     = "HatHub" + orderId;
 
-        String qrUrl = "https://img.vietqr.io/image/" + bankId + "-" + accountNo + "-compact2.png"
+        String qrUrl = "https://img.vietqr.io/image/" + bankId + "-" + accountNo + "-compact.png"
                 + "?amount=" + amount
                 + "&addInfo=" + addInfo
                 + "&accountName=" + accountName;
@@ -45,7 +45,7 @@ public class PaymentController {
         model.addAttribute("qrUrl",   qrUrl);
         model.addAttribute("addInfo", addInfo);
         model.addAttribute("amount",  order.getTotalAmount());
-        return "payment/qr"; // templates/payment/qr.html
+        return "payment/qr";
     }
 
     // ── Xác nhận đã chuyển khoản ──

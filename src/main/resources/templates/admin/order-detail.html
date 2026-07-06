@@ -8,7 +8,7 @@
         body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
         aside { width:220px; background:#111; color:#fff; padding:1.5rem; flex-shrink:0; }
         aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
-        aside a.active { color:#C0633A; }
+        aside a:hover, aside a.active { color:#C0633A; }
         main { flex:1; padding:2rem; background:#F5F0EA; }
         .card { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1rem; }
         .card h3 { margin-bottom:1rem; font-size:1rem; font-weight:900; text-transform:uppercase; letter-spacing:0.05em; border-bottom:2px solid #F5F0EA; padding-bottom:0.5rem; }
@@ -50,6 +50,7 @@
     <a href="/admin/products">Sản phẩm</a>
     <a href="/admin/categories">Danh mục</a>
     <a href="/admin/orders" class="active">Đơn hàng</a>
+    <a href="/admin/returns">Trả hàng</a>
     <a href="/admin/vouchers">Voucher</a>
     <a href="/admin/users">Người dùng</a>
     <a href="/logout">Đăng xuất</a>
@@ -238,10 +239,6 @@
                     <div class="summary-row">
                         <span>Phương thức</span>
                         <strong th:text="${order.payment.paymentMethod}">COD</strong>
-                    </div>
-                    <div class="summary-row">
-                        <span>Trạng thái TT</span>
-                        <strong th:text="${order.payment.paymentStatus}">Chưa TT</strong>
                     </div>
                 </div>
             </div>

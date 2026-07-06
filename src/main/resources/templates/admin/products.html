@@ -9,6 +9,7 @@
     aside { width:220px; background:#111; color:#fff; padding:1.5rem; }
     aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
     aside a.active { color:#C0633A; }
+    aside a:hover { color:#C0633A; }
     main { flex:1; padding:2rem; background:#F5F0EA; }
     table { width:100%; background:#fff; border-collapse:collapse; }
     th, td { padding:0.75rem; border-bottom:1px solid #eee; text-align:left; }
@@ -23,6 +24,7 @@
   <a href="/admin/products" class="active">Sản phẩm</a>
   <a href="/admin/categories">Danh mục</a>
   <a href="/admin/orders">Đơn hàng</a>
+  <a href="/admin/returns">Trả hàng</a>
   <a href="/admin/vouchers">Voucher</a>
   <a href="/admin/users">Người dùng</a>
   <a href="/logout">Đăng xuất</a>
@@ -31,6 +33,7 @@
   <h1>Sản phẩm</h1>
   <a href="/admin/products/new" class="btn">+ Thêm sản phẩm</a>
   <p th:text="${error}" style="color: red"></p>
+  <p th:text="${success}" style="color: #1fff00"></p>
   <table>
     <thead><tr><th>#</th><th>Tên</th><th>Danh mục</th><th>Trạng thái</th><th></th></tr></thead>
     <tbody>
@@ -43,7 +46,7 @@
           <a th:href="@{/admin/products/edit/{id}(id=${p.productId})}"
              style="background:#444;color:#fff;padding:4px 8px;text-decoration:none;margin-right:4px;">Sửa</a>
 
-          <form th:action="@{/admin/products/delete/{id}(id=${p.productId})}" method="post" style="display:inline;">
+          <form th:action="@{/admin/products/delete/{id}(id=${p.productId})}" onsubmit="return confirm('Sản phẩm này có thể còn các biến thể! bạn vẫn muốn xóa chứ?')" method="post" style="display:inline;">
             <button type="submit" style="background:#c00;color:#fff;border:none;padding:4px 8px;cursor:pointer;">Xóa</button>
           </form>
         </td>

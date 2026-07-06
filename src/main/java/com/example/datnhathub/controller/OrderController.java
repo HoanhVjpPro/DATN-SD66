@@ -106,15 +106,15 @@ public class OrderController {
             return "redirect:/orders/" + id;
         }
 
-        // ← TRỪ KHO Ở ĐÂY
-        if (order.getDetails() != null) {
-            for (OrderDetail od : order.getDetails()) {
-                ProductDetail pd = od.getProductDetail();
-                int newStock = pd.getStockQuantity() - od.getQuantity();
-                pd.setStockQuantity(Math.max(0, newStock)); // không để âm
-                productDetailRepository.save(pd);
-            }
-        }
+//        // ← TRỪ KHO Ở ĐÂY
+//        if (order.getDetails() != null) {
+//            for (OrderDetail od : order.getDetails()) {
+//                ProductDetail pd = od.getProductDetail();
+//                int newStock = pd.getStockQuantity() - od.getQuantity();
+//                pd.setStockQuantity(Math.max(0, newStock)); // không để âm
+//                productDetailRepository.save(pd);
+//            }
+//        }
 
         // Đổi status
         order.setStatus("Hoàn thành");

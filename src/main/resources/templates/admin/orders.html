@@ -8,7 +8,7 @@
     body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
     aside { width:220px; background:#111; color:#fff; padding:1.5rem; }
     aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
-    aside a.active { color:#C0633A; }
+    aside a:hover, aside a.active { color:#C0633A; }
     main { flex:1; padding:2rem; background:#F5F0EA; }
     table { width:100%; background:#fff; border-collapse:collapse; }
     th, td { padding:0.75rem; border-bottom:1px solid #eee; text-align:left; font-size:0.9rem; }
@@ -24,6 +24,7 @@
   <a href="/admin/products">Sản phẩm</a>
   <a href="/admin/categories">Danh mục</a>
   <a href="/admin/orders" class="active">Đơn hàng</a>
+  <a href="/admin/returns">Trả hàng</a>
   <a href="/admin/vouchers">Voucher</a>
   <a href="/admin/users">Người dùng</a>
   <a href="/logout">Đăng xuất</a>
@@ -78,11 +79,15 @@
 
   <table>
     <thead>
-    <tr><th>Mã</th><th>Khách hàng</th><th>Ngày</th><th>Tổng</th><th>Trạng thái</th><th>Cập nhật</th><th>Chi tiết</th></tr>
+    <tr><th>Mã</th><th>Khách hàng</th><th>Ngày</th><th>Tổng</th><th>Trạng thái</th><th>Cập nhật</th></tr>
     </thead>
     <tbody id="orderTableBody">
     <tr th:each="o : ${orders}" th:data-status="${o.status}">
-      <td th:text="'#' + ${o.orderId != null ? o.orderId : '#' + o.orderId}">HH001</td>
+      <td >
+        <a th:href="@{/admin/orders/{id}(id=${o.orderId})}"
+           th:text="'#' + ${o.orderId != null ? o.orderId : '#' + o.orderId}"
+           style="color:#C0633A;font-weight:700;">1</a>
+      </td>
       <td th:text="${o.customer.user.username}">user</td>
       <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy')}">date</td>
       <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
@@ -129,7 +134,6 @@
           </form>
         </div>
       </td>
-      <td><a th:href="@{/admin/orders/{id}(id=${o.orderId})}">WIP Xem chi tiết</a></td>
     </tr>
     </tbody>
   </table>
