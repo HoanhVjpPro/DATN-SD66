@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -108,7 +110,7 @@ public class ProductController {
     }
 
     @PostMapping("/comment")
-    public String rep(Reviews review, HttpSession session, HttpServletRequest req){
+    public String rep(Reviews review, HttpSession session, HttpServletRequest req, RedirectAttributes ra){
         Integer productid = Integer.parseInt(String.valueOf(session.getAttribute("productid")));
         Integer productDetailId = Integer.parseInt(String.valueOf(session.getAttribute("selectedDetail")));
 
@@ -123,7 +125,14 @@ public class ProductController {
         Customer customer = customerRepository.findByUserUserID(userID).get();
         review.setProductDetailID(pd);
         review.setCustomerID(customer);
-        reviewRepository.save(review);
+
+        try {
+            reviewRepository.save(review);
+            ra.addFlashAttribute("Csuccess", "Cảm ơn bạn đã đánh giá!");
+        }catch (DataIntegrityViolationException e){
+            ra.addFlashAttribute("Cerror", "Mỗi sản phẩm chỉ được đánh giá 1 lần!");
+        }
+
         return "redirect:/products/"+productid;
     }
 }
