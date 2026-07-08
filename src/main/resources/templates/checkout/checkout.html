@@ -46,7 +46,29 @@
 
         <aside class="summary-card">
             <h2>Order summary</h2>
-            <div class="summary-row"><span>Sản phẩm</span><strong>HatHub cart</strong></div>
+
+            <div class="summary-items" th:each="d : ${cart.details}">
+                <div class="summary-row" style="align-items:flex-start;">
+                    <img th:if="${!d.productDetail.product.images.isEmpty()}"
+                         th:src="@{${d.productDetail.product.images.?[isDefault == true].isEmpty()
+                            ? d.productDetail.product.images[0].imageURL
+                            : d.productDetail.product.images.?[isDefault == true][0].imageURL}}"
+                         alt=""
+                         style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin-right:10px;" />
+                    <span>
+                <strong th:text="${d.productDetail.product.productName}">Tên sản phẩm</strong><br/>
+                <small style="color:rgba(255,255,255,.6);"
+                       th:text="${d.productDetail.size + ' / ' + d.productDetail.color + ' x ' + d.quantity}">
+                    Size / Màu x SL
+                </small>
+            </span>
+                    <strong style="margin-left:auto;"
+                            th:text="${#numbers.formatDecimal(d.productDetail.price * d.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                        0 đ
+                    </strong>
+                </div>
+            </div>
+
             <div class="summary-row">
                 <span>Tổng đơn hàng</span>
                 <strong class="summary-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>

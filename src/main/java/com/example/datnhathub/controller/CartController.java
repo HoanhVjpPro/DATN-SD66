@@ -101,8 +101,9 @@ public class CartController {
             return "redirect:/cart";
         }
 
+        model.addAttribute("cart", cart);
         model.addAttribute("total", cartService.calculateTotal(cart));
-        return "checkout/checkout"; // templates/cart/checkout.html
+        return "checkout/checkout";
     }
 
     // UC20 — Đặt hàng từ giỏ hàng
