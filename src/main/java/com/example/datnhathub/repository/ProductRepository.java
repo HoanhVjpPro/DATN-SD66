@@ -46,5 +46,24 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     // ── UC09: Lọc theo danh mục ──
     Page<Product> findByCategoryCategoryIdAndStatusTrue(Integer categoryId, Pageable pageable);
 
-
+    @Query("""
+    SELECT DISTINCT p FROM Product p
+    JOIN p.category c
+    LEFT JOIN p.brand b
+    LEFT JOIN p.details d
+    WHERE p.status = true
+      AND (:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')))
+      AND (:categoryId IS NULL OR c.categoryId = :categoryId)
+      AND (:brandId IS NULL OR b.brandId = :brandId)
+      AND (:minPrice IS NULL OR d.price >= :minPrice)
+      AND (:maxPrice IS NULL OR d.price <= :maxPrice)
+""")
+    Page<Product> findByFilters(
+            @Param("keyword")    String keyword,
+            @Param("categoryId") Integer categoryId,
+            @Param("brandId")    Integer brandId,
+            @Param("minPrice")   BigDecimal minPrice,
+            @Param("maxPrice")   BigDecimal maxPrice,
+            Pageable pageable
+    );
 }

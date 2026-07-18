@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Shipper | HatHub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family:'Nunito',sans-serif; margin:0; background:#F5F0EA; }
+        nav { background:#111; padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; }
+        nav .brand { color:#C0633A; font-weight:900; font-size:1.2rem; }
+        nav a.logout { color:#ccc; text-decoration:none; font-weight:700; font-size:0.85rem; }
+        .container { max-width:960px; margin:2rem auto; padding:0 1rem; }
+        h1 { font-size:1.4rem; margin-bottom:1rem; }
+        .card { background:#fff; border-radius:8px; padding:1.2rem; margin-bottom:1rem; }
+        .alert { padding:1rem; border-radius:4px; margin-bottom:1rem; font-weight:700; }
+        .alert-success { background:#d4edda; color:#155724; }
+        .alert-error { background:#f8d7da; color:#721c24; }
+        .order-row { display:flex; justify-content:space-between; align-items:center; padding:0.8rem 0; border-bottom:1px solid #eee; flex-wrap:wrap; gap:8px; }
+        .order-row:last-child { border-bottom:none; }
+        .order-code { font-weight:700; color:#C0633A; }
+        .order-addr { font-size:0.85rem; color:#666; margin-top:4px; }
+        button, .btn { border:none; padding:8px 16px; cursor:pointer; font-weight:700; font-size:0.85rem; border-radius:4px; color:#fff; }
+        .btn-claim { background:#2980b9; }
+        .btn-confirm { background:#27ae60; }
+        .btn-incident { background:#c00; }
+        .badge { padding:3px 10px; border-radius:12px; font-size:0.75rem; font-weight:700; }
+        .badge-pending { background:#fff3cd; color:#856404; }
+        .badge-confirmed { background:#d4edda; color:#155724; }
+        .section-title { font-size:1rem; font-weight:900; margin:1.5rem 0 0.5rem; }
+        .empty { color:#999; padding:1rem 0; text-align:center; }
+        .btn-cart {
+            background: var(--rust) !important;
+            border: none !important; border-radius: 4px !important;
+            padding: 8px 18px !important; font-family: var(--font-body);
+            font-size: 0.8rem !important; font-weight: 700 !important;
+            letter-spacing: 0.05em; color: var(--white) !important;
+            cursor: pointer; transition: background 0.2s !important;
+        }
+        .btn-cart:hover { background: var(--rust-dark) !important; }
+        .nav-actions { display: flex; align-items: center; gap: 1rem; }
+        .nav-actions button {
+            background: none; border: none; cursor: pointer; color: var(--white);
+            font-size: 1.1rem; padding: 6px; transition: color 0.2s;
+        }
+        .nav-actions button:hover { color: var(--rust-light); }
+    </style>
+</head>
+<body>
+<nav>
+    <span class="brand">🚚 HatHub Shipper</span>
+    <div>
+        <a href="/profile" class="btn-cart">👤</a>
+        <a href="/logout" class="logout">Đăng xuất</a>
+    </div>
+
+</nav>
+<div class="container">
+    <h1>Bảng điều khiển Shipper</h1>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="section-title">📦 Đơn hàng tôi đang giao</div>
+    <div class="card">
+        <div th:if="${#lists.isEmpty(myOrders)}" class="empty">Bạn chưa nhận đơn nào.</div>
+        <div th:each="o : ${myOrders}" class="order-row">
+            <div>
+                <div class="order-code" th:text="'#' + ${o.orderCode}">#HH...</div>
+                <div class="order-addr" th:text="${o.shipping != null ? o.shipping.shippingAddress : ''}">Địa chỉ</div>
+                <div class="order-addr" th:if="${o.customer != null and o.customer.user != null}"
+                     th:text="'Khách: ' + ${o.customer.user.username} + (${o.customer.user.phone != null} ? ' - ' + ${o.customer.user.phone} : '')">Khách hàng</div>
+                <div class="order-addr" th:text="'Số lượng: ' + ${o.totalQuantity} + ' sản phẩm'">Số lượng</div>
+                <div class="order-addr" style="font-weight:700;color:#C0633A;"
+                     th:text="'Tiền thu hộ: ' + (${o.payment != null and o.payment.paymentMethod == 'Chuyển khoản'} ? '0 đ' : ${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ')">Tiền thu hộ</div>
+                <span class="badge" th:classappend="${o.shipping != null and o.shipping.confirmedByShipper} ? 'badge-confirmed' : 'badge-pending'"
+                      th:text="${o.shipping != null and o.shipping.confirmedByShipper} ? 'Đã xác nhận giao' : 'Đang giao'">status</span>
+            </div>
+            <div style="display:flex;gap:6px;">
+                <form th:if="${o.shipping == null or !o.shipping.confirmedByShipper}"
+                      th:action="@{/shipper/orders/{id}/confirm-delivered(id=${o.orderId})}" method="post"
+                      onsubmit="return confirm('Xác nhận khách đã nhận được hàng?')">
+                    <button type="submit" class="btn-confirm">✓ Khách đã nhận hàng</button>
+                </form>
+                <button type="button" class="btn-incident" th:onclick="|toggleIncidentForm(${o.orderId})|">⚠ Báo sự cố</button>
+            </div>
+            <form th:id="'incident-form-' + ${o.orderId}" style="display:none;width:100%;margin-top:8px;"
+                  th:action="@{/shipper/orders/{id}/report-incident(id=${o.orderId})}" method="post"
+                  onsubmit="return confirm('Xác nhận báo sự cố cho đơn này?')">
+        <textarea name="reason" rows="2" required placeholder="Mô tả sự cố (mất hàng, khách không nghe máy, giao thất bại...)"
+                  style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;"></textarea>
+                <button type="submit" class="btn-incident" style="margin-top:6px;">Gửi báo cáo sự cố</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="section-title">🆕 Đơn hàng chưa ai nhận</div>
+    <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+        <button onclick="filterStatus('ALL')"
+                id="btn-ALL"
+                class="city-filter-btn"
+                style="padding:8px 16px;border:none;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#C0633A;color:#fff;">
+            Tất cả
+        </button>
+        <button onclick="filterStatus('Hà Nội')"
+                id="btn-Hà Nội"
+                class="city-filter-btn"
+                style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+            Hà Nội
+        </button>
+        <button onclick="filterStatus('TP. HCM')"
+                id="btn-TP. HCM"
+                class="city-filter-btn"
+                style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+            TP. HCM
+        </button>
+        <button onclick="filterStatus('Đà Nẵng')"
+                id="btn-Đà Nẵng"
+                class="city-filter-btn"
+                style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+            Đà Nẵng
+        </button>
+        <button onclick="filterStatus('Khác')"
+                id="btn-Khác"
+                class="city-filter-btn"
+                style="padding:8px 16px;border:1px solid #ddd;cursor:pointer;font-family:'Nunito',sans-serif;font-weight:700;font-size:0.85rem;background:#fff;color:#333;">
+            Tỉnh/ thành phố khác
+        </button>
+    </div>
+    <div class="card">
+        <div th:if="${#lists.isEmpty(availableOrders)}" class="empty">Hiện không có đơn nào cần giao.</div>
+        <div id="availableEmptyMsg" class="empty" style="display:none;">Không có đơn nào ở khu vực này.</div>
+        <div id="availableOrdersList">
+            <div th:each="o : ${availableOrders}" class="order-row"
+                 th:attr="data-city=${o.shipping != null and o.shipping.shippingAddress != null ?
+                     (#strings.contains(o.shipping.shippingAddress,'Hà Nội') ? 'Hà Nội' :
+                     ((#strings.contains(o.shipping.shippingAddress,'Hồ Chí Minh') or #strings.contains(o.shipping.shippingAddress,'TP.HCM') or #strings.contains(o.shipping.shippingAddress,'TPHCM') or #strings.contains(o.shipping.shippingAddress,'Sài Gòn')) ? 'TP. HCM' :
+                     (#strings.contains(o.shipping.shippingAddress,'Đà Nẵng') ? 'Đà Nẵng' : 'Khác'))) : 'Khác'}">
+                <div>
+                    <div class="order-code" th:text="'#' + ${o.orderCode}">#HH...</div>
+                    <div class="order-addr" th:text="${o.shipping != null ? o.shipping.shippingAddress : ''}">Địa chỉ</div>
+                    <div class="order-addr" th:if="${o.customer != null and o.customer.user != null}"
+                         th:text="'Khách: ' + ${o.customer.user.username} + (${o.customer.user.phone != null} ? ' - ' + ${o.customer.user.phone} : '')">Khách hàng</div>
+                    <div class="order-addr" th:text="'Số lượng: ' + ${o.totalQuantity} + ' sản phẩm'">Số lượng</div>
+                    <div class="order-addr" style="font-weight:700;color:#C0633A;"
+                         th:text="'Tiền thu hộ: ' + (${o.payment != null and o.payment.paymentMethod == 'Chuyển khoản'} ? '0 đ' : ${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ')">Tiền thu hộ</div>
+                </div>
+                <form th:action="@{/shipper/orders/{id}/claim(id=${o.orderId})}" method="post">
+                    <button type="submit" class="btn-claim">Nhận đơn này</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleIncidentForm(orderId) {
+        const form = document.getElementById('incident-form-' + orderId);
+        if (!form) return;
+        form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+    }
+</script>
+<script>
+    let currentCity = 'ALL';
+
+    function filterStatus(city) {
+        currentCity = city;
+        const buttons = document.querySelectorAll('.city-filter-btn');
+
+        // Reset tất cả nút về màu mặc định
+        buttons.forEach(btn => {
+            btn.style.background = '#fff';
+            btn.style.color      = '#333';
+            btn.style.border     = '1px solid #ddd';
+        });
+
+        // Highlight nút đang chọn
+        const activeBtn = document.getElementById('btn-' + city);
+        if (activeBtn) {
+            activeBtn.style.background = '#C0633A';
+            activeBtn.style.color      = '#fff';
+            activeBtn.style.border     = 'none';
+        }
+
+        applyCityFilter();
+    }
+
+    function applyCityFilter() {
+        const rows = document.querySelectorAll('#availableOrdersList .order-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowCity = row.getAttribute('data-city');
+            const matches = (currentCity === 'ALL' || rowCity === currentCity);
+            row.style.display = matches ? '' : 'none';
+            if (matches) visibleCount++;
+        });
+
+        const emptyMsg = document.getElementById('availableEmptyMsg');
+        if (emptyMsg) {
+            emptyMsg.style.display = (rows.length > 0 && visibleCount === 0) ? 'block' : 'none';
+        }
+    }
+</script>
+</body>
+</html>

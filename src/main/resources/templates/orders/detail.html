@@ -13,25 +13,107 @@
     .success { background:#d4edda; color:#155724; padding:1rem; border-radius:4px; margin-bottom:1rem; }
     table { width:100%; border-collapse:collapse; }
     td, th { padding:0.75rem; border-bottom:1px solid #eee; text-align:left; }
+    .btn-back { background:#444; color:#fff; padding:8px 18px; text-decoration:none; font-weight:700; font-size:0.85rem; border-radius:4px; }
+
+    /* TIMELINE TRẠNG THÁI */
+    .status-timeline { display:flex; align-items:flex-start; margin:0.5rem 0; padding:0 0.5rem; }
+    .status-timeline .t-step { flex:1; position:relative; text-align:center; }
+    .status-timeline .t-step:not(:last-child)::after {
+      content:''; position:absolute; top:17px; left:50%; width:100%; height:3px; background:#e5ded4; z-index:0;
+    }
+    .status-timeline .t-step.line-done:not(:last-child)::after { background:#27ae60; }
+    .status-timeline .t-dot {
+      position:relative; z-index:1; width:36px; height:36px; margin:0 auto; border-radius:50%;
+      background:#e5ded4; color:#999; display:flex; align-items:center; justify-content:center;
+      font-size:1rem; box-shadow:0 0 0 4px #fff;
+    }
+    .status-timeline .t-step.done .t-dot { background:#27ae60; color:#fff; }
+    .status-timeline .t-step.current .t-dot { background:#C0633A; color:#fff; box-shadow:0 0 0 4px rgba(192,99,58,.2); }
+    .status-timeline .t-step.current.incident .t-dot { background:#e67e22; box-shadow:0 0 0 4px rgba(230,126,34,.22); }
+    .status-timeline .t-label { margin-top:8px; font-size:0.78rem; font-weight:700; color:#999; }
+    .status-timeline .t-step.done .t-label { color:#155724; }
+    .status-timeline .t-step.current .t-label { color:#C0633A; }
+    .status-timeline .t-step.current.incident .t-label { color:#e67e22; }
+    .status-timeline .t-sub { font-size:0.7rem; color:#e67e22; font-weight:700; margin-top:2px; }
+    .status-timeline-cancelled { display:flex; align-items:center; gap:0; }
+    .status-timeline-cancelled .t-dot {
+      width:36px; height:36px; border-radius:50%; display:flex; align-items:center;
+      justify-content:center; color:#fff; font-weight:900; flex-shrink:0;
+    }
   </style>
 </head>
 <body>
 <nav><a href="/orders">← Đơn hàng</a></nav>
 <div class="container">
   <div th:if="${success}" class="success" th:text="${success}"></div>
-  <h1 th:text="'Đơn hàng #' + ${order.orderId}">Order</h1>
+  <h1 th:text="'Đơn hàng #' + ${order.orderCode}">Order</h1>
+
+  <!-- TIMELINE TRẠNG THÁI (luồng bình thường) -->
+  <div class="card" th:if="${order.status != 'Đã hủy'}"
+       th:with="hasPaymentStep=${order.payment != null and order.payment.paymentMethod == 'Chuyển khoản'},
+                isIncident=${order.status == 'Xử lý sự cố giao hàng'},
+                isPayment=${order.status == 'Chờ thanh toán'},
+                isConfirm=${order.status == 'Chờ xác nhận'},
+                isProcessing=${order.status == 'Đang xử lý'},
+                isShipping=${order.status == 'Đang giao' or order.status == 'Xử lý sự cố giao hàng'},
+                isDone=${order.status == 'Hoàn thành'},
+                pastPayment=${order.status == 'Chờ xác nhận' or order.status == 'Đang xử lý' or order.status == 'Đang giao' or order.status == 'Xử lý sự cố giao hàng' or order.status == 'Hoàn thành'},
+                pastConfirm=${order.status == 'Đang xử lý' or order.status == 'Đang giao' or order.status == 'Xử lý sự cố giao hàng' or order.status == 'Hoàn thành'},
+                pastProcessing=${order.status == 'Đang giao' or order.status == 'Xử lý sự cố giao hàng' or order.status == 'Hoàn thành'},
+                pastShipping=${order.status == 'Hoàn thành'}">
+    <h3 style="margin-bottom:1.2rem;">Trạng thái đơn hàng</h3>
+    <div class="status-timeline">
+      <div th:if="${hasPaymentStep}"
+           th:class="'t-step ' + (${isPayment} ? 'current' : (${pastPayment} ? 'done line-done' : 'pending'))">
+        <div class="t-dot">💳</div>
+        <div class="t-label">Chờ thanh toán</div>
+      </div>
+      <div th:class="'t-step ' + (${isConfirm} ? 'current' : (${pastConfirm} ? 'done line-done' : 'pending'))">
+        <div class="t-dot">📝</div>
+        <div class="t-label">Chờ xác nhận</div>
+      </div>
+      <div th:class="'t-step ' + (${isProcessing} ? 'current' : (${pastProcessing} ? 'done line-done' : 'pending'))">
+        <div class="t-dot">📦</div>
+        <div class="t-label">Đang xử lý</div>
+      </div>
+      <div th:class="${isShipping} ? (${isIncident} ? 't-step current incident' : 't-step current') : (${pastShipping} ? 't-step done line-done' : 't-step pending')">
+        <div class="t-dot" th:text="${isIncident} ? '⚠' : '🚚'">🚚</div>
+        <div class="t-label">Đang giao</div>
+        <div class="t-sub" th:if="${isIncident}">Đang xử lý sự cố</div>
+      </div>
+      <div th:class="'t-step ' + (${isDone} ? 'done' : 'pending')">
+        <div class="t-dot">✅</div>
+        <div class="t-label">Hoàn thành</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE — ĐƠN ĐÃ HỦY -->
+  <div class="card" th:if="${order.status == 'Đã hủy'}">
+    <h3 style="margin-bottom:1rem;">Trạng thái đơn hàng</h3>
+    <div class="status-timeline-cancelled">
+      <div class="t-dot" style="background:#27ae60;">✓</div>
+      <div style="flex:1;height:3px;background:#e5ded4;"></div>
+      <div class="t-dot" style="background:#c00;">✗</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px;">
+      <span style="font-size:0.78rem;font-weight:700;color:#155724;">Đặt hàng</span>
+      <span style="font-size:0.78rem;font-weight:700;color:#c00;">Đã hủy</span>
+    </div>
+  </div>
+
   <div class="card">
     <p><strong>Trạng thái:</strong> <span th:text="${order.status}">status</span></p>
     <p><strong>Ngày đặt:</strong> <span th:text="${#temporals.format(order.orderDate, 'dd/MM/yyyy HH:mm')}">date</span></p>
     <p><strong>Tổng tiền:</strong> <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</span></p>
     <p th:if="${order.shipping != null}"><strong>Địa chỉ:</strong> <span th:text="${order.shipping.shippingAddress}">addr</span></p>
-    <p th:if="${order.payment != null}"><strong>Thanh toán:</strong> <span th:text="${order.payment.paymentMethod} + ' - ' + ${order.payment.paymentStatus}">pay</span></p>
+    <p th:if="${order.payment != null}"><strong>Thanh toán:</strong> <span th:text="${order.payment.paymentMethod}">pay</span></p>
   </div>
 
   <div th:if="${order.payment != null
                and order.payment.paymentMethod == 'Chuyển khoản'
                and order.status == 'Chờ thanh toán'}"
-         style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
+       style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
     <div class="card">
       <p style="color:#e67e22;font-weight:700;">⚠ Đơn hàng chưa được thanh toán</p>
       <a th:href="@{/payment/qr/{id}(id=${order.orderId})}"
@@ -58,13 +140,28 @@
        style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
     <div class="card">
       <p style="color:#2980b9;font-weight:700;">🚚 Đơn hàng đang trên đường giao đến bạn</p>
-      <form th:action="@{/orders/{id}/received(id=${order.orderId})}" method="post"
-            onsubmit="return confirm('Xác nhận đã nhận được hàng?')">
-        <button type="submit"
-                style="background:#27ae60;color:#fff;border:none;padding:10px 24px;font-weight:700;cursor:pointer;border-radius:4px;margin-top:0.5rem;">
-          ✓ Đã nhận được hàng
-        </button>
-      </form>
+
+      <div th:if="${order.shipping != null and order.shipping.confirmedByShipper}">
+        <form th:action="@{/orders/{id}/received(id=${order.orderId})}" method="post"
+              onsubmit="return confirm('Xác nhận đã nhận được hàng?')">
+          <button type="submit"
+                  style="background:#27ae60;color:#fff;border:none;padding:10px 24px;font-weight:700;cursor:pointer;border-radius:4px;margin-top:0.5rem;">
+            ✓ Đã nhận được hàng
+          </button>
+        </form>
+      </div>
+      <div th:if="${order.shipping == null or !order.shipping.confirmedByShipper}">
+        <p style="color:#888;font-size:0.9rem;">Đang chờ shipper xác nhận giao hàng thành công...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Xử lý sự cố giao hàng -->
+  <div th:if="${order.status == 'Xử lý sự cố giao hàng'}"
+       style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
+    <div class="card">
+      <p style="color:#c00;font-weight:700;">⚠ Đơn hàng gặp sự cố trong quá trình giao</p>
+      <p style="font-size:0.9rem;color:#666;">Đội ngũ HatHub đang xử lý và sẽ liên hệ với bạn sớm nhất. Nếu cần hỗ trợ ngay, vui lòng liên hệ CSKH.</p>
     </div>
   </div>
 
@@ -97,6 +194,7 @@
   </div>
 
   <div class="card">
+    <a th:if="${order.status == 'Đang xử lý' || order.status == 'Đang giao' || order.status == 'Hoàn thành'}" th:href="@{/admin/orders/{id}/invoice/pdf(id=${order.orderId})}" class="btn-back" style="background:#C0633A;">🧾 Xuất hóa đơn PDF</a>
     <h3>Sản phẩm</h3>
     <table>
       <tr th:each="d : ${order.details}">

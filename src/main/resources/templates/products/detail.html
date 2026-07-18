@@ -45,6 +45,7 @@
   <div class="nav-actions">
     <a class="icon-link" th:if="${loggedIn}" href="/profile" aria-label="Tài khoản">👤</a>
     <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" aria-label="Tài khoản">🛒</a>
+    <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/orders" aria-label="Tài khoản">🧾</a>
     <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
     <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
   </div>
@@ -57,11 +58,12 @@
 
   <section class="product-detail">
     <div class="gallery-main">
-      <img th:src="${imageUrl}" th:alt="${product.productName}" />
+      <img id="mainProductImage" th:src="${imageUrl}" th:alt="${product.productName}" />
     </div>
 
     <div class="detail-panel">
       <p class="kicker" th:text="${product.category.categoryName}">Category</p>
+      <p th:if="${product.brand != null}" style="color:#C0633A;font-size:13px;font-weight:700;margin:-4px 0 6px;" th:text="'Thương hiệu: ' + ${product.brand.brandName}">Brand</p>
       <h1 th:text="${product.productName}">Tên sản phẩm</h1>
 
       <div class="detail-price" id="priceDisplay"
@@ -76,10 +78,11 @@
         <div th:if="${details != null and !#lists.isEmpty(details)}">
           <label>Chọn biến thể (Size / Màu)</label>
           <div class="variant-options">
-            <label th:each="d, iter : ${details}">
+            <label th:each="d, iter : ${details}"
+                   th:with="variantImages=${product.images != null ? product.images.?[productDetail != null and productDetail.productDetailId == __${d.productDetailId}__] : {}}">
               <input type="radio" name="productDetailId" th:value="${d.productDetailId}"
                      th:checked="${iter.index == 0}"
-                     th:attr="data-stock=${d.stockQuantity != null ? d.stockQuantity : 0}, data-price=${d.price}"
+                     th:attr="data-stock=${d.stockQuantity != null ? d.stockQuantity : 0}, data-price=${d.price}, data-image=${!#lists.isEmpty(variantImages) ? variantImages[0].imageURL : imageUrl}"
                      th:disabled="${d.stockQuantity == null or d.stockQuantity == 0}"
                      onchange="onVariantChange(this)" required/>
               <span class="variant-chip" th:text="${d.size} + ' / ' + ${d.color} + (${d.stockQuantity != null and d.stockQuantity == 0} ? ' (Hết hàng)' : '')">Size/Color</span>
@@ -111,11 +114,13 @@
     </div>
   </section>
 
-<!--  Đánh giá sản phẩm-->
+  <!--  Đánh giá sản phẩm-->
   <section class="reviews">
     <div class="section-head">
       <h2>Đánh giá sản phẩm</h2>
     </div>
+    <!--    debug-->
+    <p th:text="'ten tk la: ' + ${session.username}" style="color: red"></p>
 
     <!-- Danh sách đánh giá -->
     <div class="cart-card" style="padding:24px;">
@@ -143,8 +148,8 @@
     <!-- Form thêm đánh giá -->
     <div class="cart-card" style="padding:24px;margin-top:20px;">
       <h3 style="margin-bottom:16px;">Viết đánh giá của bạn</h3>
-      <p th:text="${Csuccess}"></p>
-      <p th:text="${Cerror}"></p>
+      <p th:text="${Csuccess}" style="color: green"></p>
+      <p th:text="${Cerror}" style="color: red"></p>
       <form action="/comment" method="post"
             style="display:flex;flex-direction:column;gap:14px;">
 
@@ -172,7 +177,7 @@
                   name="Comment"
                   rows="5"
                   placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
-                  style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;resize:vertical;"></textarea>
+                  style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;resize:vertical;" required></textarea>
         </div>
 
         <div>
@@ -192,13 +197,18 @@
   function onVariantChange(radio) {
     const stock = parseInt(radio.getAttribute('data-stock'), 10) || 0;
     const price = parseFloat(radio.getAttribute('data-price')) || 0;
+    const image = radio.getAttribute('data-image');
 
     const btn = document.getElementById('addToCartBtn');
     const qtyInput = document.getElementById('quantityInput');
     const stockDisplay = document.getElementById('stockDisplay');
     const priceDisplay = document.getElementById('priceDisplay');
+    const mainImage = document.getElementById('mainProductImage');
 
     priceDisplay.textContent = price.toLocaleString('vi-VN') + ' đ';
+    if (image && mainImage) {
+      mainImage.src = image;
+    }
 
     if (stock > 0) {
       stockDisplay.innerHTML = '<span style="color:#666;">Còn ' + stock + ' sản phẩm</span>';

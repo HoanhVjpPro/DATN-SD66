@@ -34,7 +34,7 @@ public class PaymentController {
         String accountNo   = "0984085074";
         String accountName = "HATHUB";
         String amount      = order.getTotalAmount().toPlainString();
-        String addInfo     = "HatHub" + orderId;
+        String addInfo     = order.getOrderCode();
 
         String qrUrl = "https://img.vietqr.io/image/" + bankId + "-" + accountNo + "-compact.png"
                 + "?amount=" + amount

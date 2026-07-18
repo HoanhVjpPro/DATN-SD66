@@ -1,5 +1,6 @@
 package com.example.datnhathub.repository;
 
+import com.example.datnhathub.entity.ProductDetail;
 import com.example.datnhathub.entity.ProductImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,4 +15,6 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Inte
 
     // Lấy tất cả ảnh của sản phẩm (dùng khi reset isDefault)
     List<ProductImage> findAllByProductProductId(Integer productId);
+
+    List<ProductImage> findByProductDetailProductDetailId(Integer productDetailId);
 }

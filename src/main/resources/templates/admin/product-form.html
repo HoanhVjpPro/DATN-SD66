@@ -13,7 +13,6 @@
     .card { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; }
     label { display:block; font-weight:700; margin:0.75rem 0 0.25rem; }
     input, select, textarea { width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; }
-    button { background:#C0633A; color:#fff; border:none; padding:10px 20px; cursor:pointer; margin-top:1rem; }
     table { width:100%; border-collapse:collapse; margin-top:1rem; }
     td, th { padding:0.5rem; border-bottom:1px solid #eee; text-align:left; }
     .success { background:#d4edda; padding:1rem; border-radius:4px; margin-bottom:1rem; }
@@ -21,7 +20,24 @@
     .stock-out { color:#fff; background:#c0392b; padding:2px 8px; border-radius:4px; font-size:0.8rem; }
     .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
     .topbar h1 { font-size:1.4rem; font-weight:900; }
-    .btn-back { background:#444; color:#fff; padding:8px 18px; text-decoration:none; font-weight:700; font-size:0.85rem; border-radius:4px; }
+
+    /* ===== Nút bấm — đồng bộ toàn hệ thống ===== */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:4px; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.85rem; padding:9px 18px; cursor:pointer; text-decoration:none; line-height:1.2; white-space:nowrap; }
+    .btn-sm { padding:6px 12px; font-size:0.8rem; }
+    .btn-primary { background:#C0633A; color:#fff; }
+    .btn-primary:hover { background:#9B4A27; }
+    .btn-secondary { background:#444; color:#fff; }
+    .btn-secondary:hover { background:#2c2c2c; }
+    .btn-success { background:#27ae60; color:#fff; }
+    .btn-success:hover { background:#1e8449; }
+    .btn-danger { background:#c00; color:#fff; }
+    .btn-danger:hover { background:#a00; }
+    .btn-warning { background:#e67e22; color:#fff; }
+    .btn-warning:hover { background:#c8611c; }
+    .btn-info { background:#2980b9; color:#fff; }
+    .btn-info:hover { background:#20648f; }
+    .btn-neutral { background:#666; color:#fff; }
+    .btn-neutral:hover { background:#4d4d4d; }
   </style>
 </head>
 <body>
@@ -30,6 +46,7 @@
   <a href="/admin/dashboard">Dashboard</a>
   <a href="/admin/products" class="active">Sản phẩm</a>
   <a href="/admin/categories">Danh mục</a>
+  <a href="/admin/brands">Thương hiệu</a>
   <a href="/admin/orders">Đơn hàng</a>
   <a href="/admin/returns">Trả hàng</a>
   <a href="/admin/vouchers">Voucher</a>
@@ -39,7 +56,7 @@
 <main>
   <div class="topbar">
     <h1 th:text="${product.productId != null ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}">Form</h1>
-    <a href="/admin/products" class="btn-back">← Quay lại</a>
+    <a href="/admin/products" class="btn btn-neutral">← Quay lại</a>
   </div>
   <div th:if="${success}" class="success" th:text="${success}"></div>
   <div class="card">
@@ -52,10 +69,16 @@
         <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.categoryName}"
                 th:selected="${product.category != null and product.category.categoryId == c.categoryId}"></option>
       </select>
+      <label>Thương hiệu</label>
+      <select name="brandId">
+        <option value="">-- Không chọn --</option>
+        <option th:each="b : ${brands}" th:value="${b.brandId}" th:text="${b.brandName}"
+                th:selected="${product.brand != null and product.brand.brandId == b.brandId}"></option>
+      </select>
       <label>Mô tả</label>
       <textarea name="description" rows="4" th:text="${product.description}"></textarea>
       <label><input type="checkbox" name="status" value="true" th:checked="${product.status == null or product.status}" style="width:auto;"/> Đang bán</label>
-      <button type="submit">Lưu sản phẩm</button>
+      <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Lưu sản phẩm</button>
     </form>
   </div>
 
@@ -70,16 +93,22 @@
         <div><label>Giá</label><input name="price" min="0" type="number" step="1000" required/></div>
         <div><label>SKU</label><input name="sku"/></div>
         <div><label>Tồn kho</label><input name="stockQuantity" type="number" value="0" min="0" required/></div>
-        <button type="submit" style="margin-top:1.5rem;">Thêm</button>
+        <button type="submit" class="btn btn-primary" style="margin-top:1.5rem;">Thêm</button>
       </div>
     </form>
 
     <!-- BẢNG BIẾN THỂ -->
     <table th:if="${details != null}">
       <tr>
-        <th>Size</th><th>Màu</th><th>Giá</th><th>SKU</th><th>Tồn kho</th><th>Thao tác</th>
+        <th>Ảnh</th><th>Size</th><th>Màu</th><th>Giá</th><th>SKU</th><th>Tồn kho</th><th>Thao tác</th>
       </tr>
-      <tr th:each="d : ${details}">
+      <tr th:each="d : ${details}"
+          th:with="variantImages=${product.images != null ? product.images.?[productDetail != null and productDetail.productDetailId == __${d.productDetailId}__] : {}}">
+        <td style="width:64px;">
+          <img th:if="${!#lists.isEmpty(variantImages)}" th:src="${variantImages[0].imageURL}"
+               style="width:56px;height:56px;object-fit:cover;border-radius:6px;"/>
+          <span th:if="${#lists.isEmpty(variantImages)}" style="font-size:0.7rem;color:#999;">Chưa có ảnh</span>
+        </td>
         <form th:action="@{/admin/products/detail/update/{id}(id=${d.productDetailId})}" method="post">
           <input type="hidden" name="productId" th:value="${product.productId}"/>
           <td><input name="size"          type="text"   th:value="${d.size}"          required style="padding:4px;border:1px solid #ddd;width:100%;"/></td>
@@ -93,12 +122,12 @@
           </td>
           <td style="display:flex;gap:6px;align-items:center;padding:8px 4px;">
             <!-- NÚT LƯU -->
-            <button type="submit" style="background:#444;color:#fff;border:none;padding:4px 10px;cursor:pointer;">Lưu</button>
+            <button type="submit" class="btn btn-success btn-sm">Lưu</button>
         </form>
         <!-- NÚT XÓA — form riêng ngoài form sửa -->
         <form th:action="@{/admin/products/detail/delete/{id}(id=${d.productDetailId})}" method="post" style="display:inline;">
           <input type="hidden" name="productId" th:value="${product.productId}"/>
-          <button type="submit" style="background:#c00;color:#fff;border:none;padding:4px 10px;cursor:pointer;"
+          <button type="submit" class="btn btn-danger btn-sm"
                   onclick="return confirm('Xóa biến thể này?')">Xóa</button>
         </form>
         </td>
@@ -109,8 +138,14 @@
     <h3 style="margin-top:1.5rem;">Upload ảnh</h3>
     <form th:action="@{/admin/products/{id}/image(id=${product.productId})}" method="post" enctype="multipart/form-data">
       <input type="file" name="file" accept="image/*" required/>
+      <label>Gắn cho biến thể (để trống = ảnh chung của sản phẩm)</label>
+      <select name="productDetailId">
+        <option value="">-- Ảnh chung sản phẩm --</option>
+        <option th:each="d : ${details}" th:value="${d.productDetailId}"
+                th:text="${d.size} + ' / ' + ${d.color}"></option>
+      </select>
       <label><input type="checkbox" name="isDefault" value="true" checked style="width:auto;"/> Ảnh mặc định</label>
-      <button type="submit">Upload</button>
+      <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Upload</button>
     </form>
   </div>
 </main>

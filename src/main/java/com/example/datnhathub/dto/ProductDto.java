@@ -18,4 +18,5 @@ public class ProductDto {
     private String  defaultImage;   // URL ảnh mặc định (IsDefault = 1)
     private BigDecimal minPrice;    // Giá thấp nhất trong các biến thể
     private Boolean status;
+    private String brandName;
 }

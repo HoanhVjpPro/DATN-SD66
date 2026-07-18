@@ -49,7 +49,8 @@
     <a href="/admin/dashboard">Dashboard</a>
     <a href="/admin/products">Sản phẩm</a>
     <a href="/admin/categories">Danh mục</a>
-    <a href="/admin/orders" class="active">Đơn hàng</a>
+    <a href="/admin/brands">Thương hiệu</a>
+    <a href="/admin/orders">Đơn hàng</a>
     <a href="/admin/returns">Trả hàng</a>
     <a href="/admin/vouchers">Voucher</a>
     <a href="/admin/users">Người dùng</a>
@@ -59,7 +60,10 @@
 <main>
     <div class="topbar">
         <h1 th:text="'Đơn hàng #' + (${order.orderId != null ? order.orderId : '#' + order.orderId})"></h1>
-        <a href="/admin/orders" class="btn-back">← Quay lại</a>
+        <div style="display:flex;gap:8px;">
+            <a th:href="@{/admin/orders/{id}/invoice/pdf(id=${order.orderId})}" class="btn-back" style="background:#C0633A;">🧾 Xuất hóa đơn PDF</a>
+            <a href="/admin/orders" class="btn-back">← Quay lại</a>
+        </div>
     </div>
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
@@ -151,12 +155,12 @@
             <div class="card" th:if="${order.shipping != null}">
                 <h3>Địa chỉ giao hàng</h3>
                 <div class="info-block">
-<!--                    <div class="info-label">Địa chỉ</div>-->
+                    <!--                    <div class="info-label">Địa chỉ</div>-->
                     <div class="info-value" th:text="${order.shipping.shippingAddress}">addr</div>
                 </div>
                 <div class="info-block" style="margin-top:0.8rem;">
-<!--                    <div class="info-label">Trạng thái vận chuyển</div>-->
-<!--                    <div class="info-value" th:text="${order.shipping.shippingStatus}">status</div>-->
+                    <!--                    <div class="info-label">Trạng thái vận chuyển</div>-->
+                    <!--                    <div class="info-value" th:text="${order.shipping.shippingStatus}">status</div>-->
                 </div>
             </div>
 
@@ -179,56 +183,79 @@
                 </table>
             </div>
 
-            <!-- YÊU CẦU TRẢ HÀNG (nếu có) -->
-<!--            <div class="card" th:if="${order.returnRequest != null}">-->
-<!--                <h3>Yêu cầu trả hàng</h3>-->
-<!--                <div class="info-grid">-->
-<!--                    <div class="info-block">-->
-<!--                        <div class="info-label">Trạng thái</div>-->
-<!--                        <div class="info-value">-->
-<!--              <span th:text="${order.returnRequest.status}"-->
-<!--                    th:class="${order.returnRequest.status == 'Chờ xác nhận'} ? 'badge badge-pending' :-->
-<!--                               (${order.returnRequest.status == 'Đã chấp nhận'} ? 'badge badge-done' : 'badge badge-cancelled')">-->
-<!--                status-->
-<!--              </span>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                    <div class="info-block">-->
-<!--                        <div class="info-label">Ngày gửi</div>-->
-<!--                        <div class="info-value" th:text="${#temporals.format(order.returnRequest.createdDate, 'dd/MM/yyyy HH:mm')}">date</div>-->
-<!--                    </div>-->
-<!--                    <div class="info-block" style="grid-column:1/-1;">-->
-<!--                        <div class="info-label">Lý do</div>-->
-<!--                        <div class="info-value" th:text="${order.returnRequest.reason}">lý do</div>-->
-<!--                    </div>-->
-<!--                </div>-->
+            <!-- XỬ LÝ SỰ CỐ GIAO HÀNG -->
+            <div class="card" th:if="${order.status == 'Xử lý sự cố giao hàng'}">
+                <h3>⚠ Sự cố giao hàng</h3>
+                <p th:if="${order.shipping != null}" style="color:#c00;font-weight:700;"
+                   th:text="'Lý do: ' + ${order.shipping.incidentReason}">Lý do sự cố</p>
+                <p th:if="${order.shipping != null and order.shipping.shipper != null}"
+                   style="font-size:0.9rem;color:#666;"
+                   th:text="'Báo cáo bởi shipper: ' + ${order.shipping.shipper.user.username}">Shipper</p>
 
-<!--                &lt;!&ndash; Nút xử lý nếu đang chờ &ndash;&gt;-->
-<!--                <div th:if="${order.returnRequest.status == 'Chờ xác nhận'}"-->
-<!--                     style="display:flex;gap:8px;margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">-->
-<!--                    <form th:action="@{/admin/returns/{id}/accept(id=${order.returnRequest.returnRequestId})}"-->
-<!--                          method="post" onsubmit="return confirm('Chấp nhận yêu cầu trả hàng?')">-->
-<!--                        <button type="submit" class="btn-accept" style="background:#27ae60;color:#fff;border:none;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;">✓ Chấp nhận trả hàng</button>-->
-<!--                    </form>-->
-<!--                    <form th:action="@{/admin/returns/{id}/reject(id=${order.returnRequest.returnRequestId})}"-->
-<!--                          method="post" onsubmit="return confirm('Từ chối yêu cầu trả hàng?')">-->
-<!--                        <button type="submit" style="background:#c00;color:#fff;border:none;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;">✗ Từ chối</button>-->
-<!--                    </form>-->
-<!--                </div>-->
-<!--            </div>-->
+                <div style="display:flex;gap:8px;margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
+                    <form th:action="@{/admin/orders/{id}/incident/refund(id=${order.orderId})}"
+                          method="post" onsubmit="return confirm('Chuyển đơn sang CSKH xử lý hoàn tiền? Đơn sẽ bị hủy.')">
+                        <button type="submit" style="background:#c00;color:#fff;border:none;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;">📞 Liên hệ CSKH hoàn tiền</button>
+                    </form>
+                    <form th:action="@{/admin/orders/{id}/incident/reship(id=${order.orderId})}"
+                          method="post" onsubmit="return confirm('Chuyển đơn về trạng thái giao lại?')">
+                        <button type="submit" style="background:#2980b9;color:#fff;border:none;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;">🔄 Giao lại đơn hàng</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- YÊU CẦU TRẢ HÀNG (nếu có) -->
+            <div class="card" th:if="${order.returnStatus != null}">
+                <h3>Yêu cầu trả hàng</h3>
+                <div class="info-grid">
+                    <div class="info-block">
+                        <div class="info-label">Trạng thái</div>
+                        <div class="info-value">
+              <span th:text="${order.returnStatus}"
+                    th:class="${order.returnStatus == 'Chờ xác nhận'} ? 'badge badge-pending' :
+                               (${order.returnStatus == 'Đã chấp nhận'} ? 'badge badge-done' : 'badge badge-cancelled')">
+                status
+              </span>
+                        </div>
+                    </div>
+                    <div class="info-block">
+                        <div class="info-label">Ngày gửi</div>
+                        <div class="info-value" th:text="${#temporals.format(order.returnDate, 'dd/MM/yyyy HH:mm')}">date</div>
+                    </div>
+                    <div class="info-block" style="grid-column:1/-1;">
+                        <div class="info-label">Lý do</div>
+                        <div class="info-value" th:text="${order.returnReason}">lý do</div>
+                    </div>
+                </div>
+
+                <!-- Nút xử lý nếu đang chờ -->
+                <div th:if="${order.returnStatus == 'Chờ xác nhận'}"
+                     style="display:flex;gap:8px;margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
+                    <form th:action="@{/admin/returns/{id}/accept(id=${order.orderId})}"
+                          method="post" onsubmit="return confirm('Chấp nhận yêu cầu trả hàng?')">
+                        <button type="submit" class="btn-accept" style="background:#27ae60;color:#fff;border:none;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;">✓ Chấp nhận trả hàng</button>
+                    </form>
+                    <form th:action="@{/admin/returns/{id}/reject(id=${order.orderId})}"
+                          method="post" onsubmit="return confirm('Từ chối yêu cầu trả hàng?')">
+                        <button type="submit" style="background:#c00;color:#fff;border:none;padding:8px 18px;font-family:'Nunito',sans-serif;font-weight:700;cursor:pointer;border-radius:4px;">✗ Từ chối</button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <!-- CỘT PHẢI — TÓM TẮT -->
         <div>
-            <div class="card" style="position:sticky;top:20px;">
+            <div class="card" style="position:sticky;top:20px;"
+                 th:with="shippingFee=${order.shipping != null ? order.shipping.shippingFee : 0},
+                          subtotal=${order.totalAmount - shippingFee}">
                 <h3>Tóm tắt thanh toán</h3>
                 <div class="summary-row">
                     <span>Tạm tính</span>
-                    <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                    <span th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
                 </div>
                 <div class="summary-row">
                     <span>Phí vận chuyển</span>
-                    <span style="color:#27ae60;">Miễn phí</span>
+                    <strong th:text="${shippingFee == 0 ? 'Miễn phí' : #numbers.formatDecimal(shippingFee, 0, 'COMMA', 0, 'POINT') + ' đ'}">-- đ</strong>
                 </div>
                 <div class="summary-row total">
                     <span>Tổng cộng</span>

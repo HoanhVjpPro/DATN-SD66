@@ -27,6 +27,7 @@
   <a href="/admin/dashboard">Dashboard</a>
   <a href="/admin/products">Sản phẩm</a>
   <a href="/admin/categories">Danh mục</a>
+  <a href="/admin/brands">Thương hiệu</a>
   <a href="/admin/orders">Đơn hàng</a>
   <a href="/admin/returns">Trả hàng</a>
   <a href="/admin/vouchers">Voucher</a>
@@ -38,31 +39,40 @@
   <div th:if="${success}" class="success" th:text="${success}"></div>
   <div th:if="${error}" class="error" th:text="${error}"></div>
 
-  <form action="/admin/users/employee" method="post">
-    <h3>Tạo nhân viên mới</h3>
+<!--  <form action="/admin/users/employee" method="post">-->
+<!--    <h3>Tạo nhân viên mới</h3>-->
+<!--    <input type="text" name="username" placeholder="Username" required/>-->
+<!--    <input type="password" name="password" placeholder="Password" required/>-->
+<!--    <input type="email" name="email" placeholder="Email"/>-->
+<!--    <input type="text" name="phone" placeholder="Phone"/>-->
+<!--    <button type="submit">Tạo nhân viên</button>-->
+<!--  </form>-->
+
+  <form action="/admin/users/shipper" method="post">
+    <h3>Tạo shipper mới</h3>
     <input type="text" name="username" placeholder="Username" required/>
     <input type="password" name="password" placeholder="Password" required/>
     <input type="email" name="email" placeholder="Email"/>
     <input type="text" name="phone" placeholder="Phone"/>
-    <button type="submit">Tạo nhân viên</button>
+    <button type="submit">Tạo shipper</button>
   </form>
 
   <table>
     <thead><tr><th>#</th><th>Username</th><th>Email</th><th>Role</th><th>Trạng thái</th><th></th></tr></thead>
     <tbody>
-      <tr th:each="u, index : ${users}">
-        <td th:text="${index.count}">1</td>
-        <td th:text="${u.username}">user</td>
-        <td th:text="${u.email}">email</td>
-        <td th:text="${u.role.roleName}">ROLE</td>
-        <td th:text="${u.status ? 'Hoạt động' : 'Khóa'}">status</td>
-        <td>
-<!--          <span th:if="${session.user.userID == u.userID}">Tài khoản đang sử dụng</span>-->
-          <form th:action="@{/admin/users/toggle/{id}(id=${u.userID})}" method="post">
-            <button type="submit" th:text="${u.status ? 'Khóa' : 'Mở khóa'}">Toggle</button>
-          </form>
-        </td>
-      </tr>
+    <tr th:each="u, index : ${users}">
+      <td th:text="${index.count}">1</td>
+      <td th:text="${u.username}">user</td>
+      <td th:text="${u.email}">email</td>
+      <td th:text="${u.role.roleName}">ROLE</td>
+      <td th:text="${u.status ? 'Hoạt động' : 'Khóa'}">status</td>
+      <td>
+        <span style="color: red" th:if="${session.user.userID == u.userID}">Tài khoản đang được sử dụng</span>
+        <form th:if="${session.user.userID != u.userID}" th:action="@{/admin/users/toggle/{id}(id=${u.userID})}" method="post">
+          <button type="submit" th:text="${u.status ? 'Khóa' : 'Mở khóa'}">Toggle</button>
+        </form>
+      </td>
+    </tr>
     </tbody>
   </table>
 </main>

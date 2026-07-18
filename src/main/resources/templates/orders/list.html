@@ -20,15 +20,17 @@
 <div class="container">
   <h1>Đơn hàng của tôi</h1>
   <table th:if="${!#lists.isEmpty(orders)}">
-    <thead><tr><th>Mã đơn</th><th>Ngày</th><th>Tổng tiền</th><th>Trạng thái</th><th></th></tr></thead>
+    <thead><tr><th>Mã đơn</th><th>Ngày</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead>
     <tbody>
-      <tr th:each="o : ${orders}">
-        <td th:text="'#' + ${o.orderId}">#1</td>
-        <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy HH:mm')}">date</td>
-        <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
-        <td><span class="status" th:text="${o.status}">status</span></td>
-        <td><a th:href="@{/orders/{id}(id=${o.orderId})}">Chi tiết</a></td>
-      </tr>
+    <tr th:each="o : ${orders}">
+      <td>
+        <a style="color: #C0633A; font-weight:700" th:href="@{/orders/{id}(id=${o.orderId})}" th:text="'#' + ${o.orderCode}"></a>
+      </td>
+      <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy HH:mm')}">date</td>
+      <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
+      <td><span class="status" th:text="${o.status}"
+                th:style="${o.status == 'Xử lý sự cố giao hàng'} ? 'background:#c00;' : ''">status</span></td>
+    </tr>
     </tbody>
   </table>
   <p th:if="${#lists.isEmpty(orders)}">Bạn chưa có đơn hàng nào. <a href="/">Mua sắm ngay</a></p>

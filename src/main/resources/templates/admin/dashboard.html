@@ -21,6 +21,7 @@
   <a href="/admin/dashboard" class="active">Dashboard</a>
   <a href="/admin/products">Sản phẩm</a>
   <a href="/admin/categories">Danh mục</a>
+  <a href="/admin/brands">Thương hiệu</a>
   <a href="/admin/orders">Đơn hàng</a>
   <a href="/admin/returns">Trả hàng</a>
   <a href="/admin/vouchers">Voucher</a>
@@ -37,10 +38,69 @@
     <div class="stat"><div class="stat-num" th:text="${totalUsers}">0</div><div>Người dùng</div></div>
   </div>
   <br>
-  <h1>Doanh thu</h1>
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <h1>Doanh thu 6 tháng gần nhất</h1>
+    <a href="/admin/dashboard/export/excel" style="background:#27ae60;color:#fff;padding:8px 18px;border-radius:4px;font-weight:700;text-decoration:none;font-size:0.85rem;">📊 Xuất Excel doanh thu</a>
+  </div>
+  <div class="stat" style="max-width:100%;">
+    <canvas id="revenueChart" height="90"></canvas>
+  </div>
+  <br>
+  <div style="display:flex;align-items:center;justify-content:space-between;">
+    <h1>Top 5 sản phẩm bán chạy nhất</h1>
+    <a href="/admin/products/sales" style="background:#333;color:#fff;padding:8px 18px;border-radius:4px;font-weight:700;text-decoration:none;font-size:0.85rem;">📋 Xem toàn bộ doanh số</a>
+  </div>
   <div class="stat">
-      WIP
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+      <tr style="background:#111; color:#fff;">
+        <th style="padding:0.75rem; text-align:left; font-size:0.8rem; text-transform:uppercase;">Sản phẩm</th>
+        <th style="padding:0.75rem; text-align:right; font-size:0.8rem; text-transform:uppercase;">Số lượng bán</th>
+        <th style="padding:0.75rem; text-align:right; font-size:0.8rem; text-transform:uppercase;">Doanh thu</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="p : ${topProducts}">
+        <td style="padding:0.75rem; border-bottom:1px solid #eee;" th:text="${p.productName}">Tên sản phẩm</td>
+        <td style="padding:0.75rem; border-bottom:1px solid #eee; text-align:right;" th:text="${p.totalQty}">0</td>
+        <td style="padding:0.75rem; border-bottom:1px solid #eee; text-align:right;"
+            th:text="${#numbers.formatDecimal(p.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+      </tr>
+      <tr th:if="${topProducts == null or #lists.isEmpty(topProducts)}">
+        <td colspan="3" style="padding:1rem; text-align:center; color:#999;">Chưa có dữ liệu bán hàng</td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </main>
 </body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+  const revenueLabels = /*[[${revenueLabels}]]*/ [];
+  const revenueData = /*[[${revenueData}]]*/ [];
+
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'bar',
+    data: {
+      labels: revenueLabels,
+      datasets: [{
+        label: 'Doanh thu (đ)',
+        data: revenueData,
+        backgroundColor: '#C0633A'
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) { return value.toLocaleString('vi-VN') + ' đ'; }
+          }
+        }
+      }
+    }
+  });
+</script>
 </html>

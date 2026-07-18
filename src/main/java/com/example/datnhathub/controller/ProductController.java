@@ -40,6 +40,7 @@ public class ProductController {
     public String productList(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) Integer brandId,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "newest") String sort,
@@ -48,14 +49,22 @@ public class ProductController {
             Model model) {
 
         Page<ProductDto> productPage = productService.getProducts(
-                keyword, categoryId, minPrice, maxPrice, sort, page
+                keyword, categoryId, brandId, minPrice, maxPrice, sort, page
         );
 
         List<Category> categories = productService.getAllCategories();
+        List<Brand> brands = productService.getAllBrands();
 
         Category selectedCategory = (categoryId != null)
                 ? categories.stream()
                 .filter(c -> c.getCategoryId().equals(categoryId))
+                .findFirst()
+                .orElse(null)
+                : null;
+
+        Brand selectedBrand = (brandId != null)
+                ? brands.stream()
+                .filter(b -> b.getBrandId().equals(brandId))
                 .findFirst()
                 .orElse(null)
                 : null;
@@ -66,6 +75,8 @@ public class ProductController {
         model.addAttribute("totalProducts",     productPage.getTotalElements());
         model.addAttribute("categories",        categories);
         model.addAttribute("selectedCategory",  selectedCategory);
+        model.addAttribute("brands",            brands);
+        model.addAttribute("selectedBrand",     selectedBrand);
 
         model.addAttribute("keyword",   keyword);
         model.addAttribute("minPrice",  minPrice);

@@ -23,7 +23,7 @@ public class OrderController {
     private OrderRepository ordersRepository;
 
     @Autowired
-    private ProductDetailRepository productDetailRepository;
+    private OrderService orderService;
 
     // ── Danh sách đơn hàng của Customer ──
     @GetMapping("/orders")
@@ -80,8 +80,7 @@ public class OrderController {
             return "redirect:/orders/" + id;
         }
 
-        order.setStatus("Đã hủy");
-        ordersRepository.save(order);
+        orderService.updateOrderStatus(id, "Đã hủy", null); // dùng chung logic hoàn kho + hoàn voucher
         ra.addFlashAttribute("success", "Đã hủy đơn hàng thành công!");
         return "redirect:/orders";
     }
@@ -106,17 +105,11 @@ public class OrderController {
             return "redirect:/orders/" + id;
         }
 
-//        // ← TRỪ KHO Ở ĐÂY
-//        if (order.getDetails() != null) {
-//            for (OrderDetail od : order.getDetails()) {
-//                ProductDetail pd = od.getProductDetail();
-//                int newStock = pd.getStockQuantity() - od.getQuantity();
-//                pd.setStockQuantity(Math.max(0, newStock)); // không để âm
-//                productDetailRepository.save(pd);
-//            }
-//        }
+        if (order.getShipping() == null || !Boolean.TRUE.equals(order.getShipping().getConfirmedByShipper())) {
+            ra.addFlashAttribute("error", "Shipper chưa xác nhận giao hàng thành công. Vui lòng chờ thêm!");
+            return "redirect:/orders/" + id;
+        }
 
-        // Đổi status
         order.setStatus("Hoàn thành");
         ordersRepository.save(order);
 

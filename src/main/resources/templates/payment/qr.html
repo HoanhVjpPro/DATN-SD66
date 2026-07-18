@@ -19,13 +19,28 @@
     .note { font-size:0.82rem; color:#888; margin-top:0.8rem; line-height:1.6; }
     .step { display:flex; align-items:flex-start; gap:12px; text-align:left; margin-bottom:0.8rem; }
     .step-num { background:#C0633A; color:#fff; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; flex-shrink:0; }
+
+    /* ===== Đếm ngược thời gian thanh toán ===== */
+    .countdown-box { background:#fff8f5; border:1px solid #f0d8cc; border-radius:8px; padding:0.9rem 1rem; margin-bottom:1rem; display:flex; align-items:center; justify-content:center; gap:10px; }
+    .countdown-box.warning { background:#fff4e5; border-color:#e67e22; }
+    .countdown-box.expired { background:#fdecea; border-color:#c00; }
+    .countdown-label { font-size:0.88rem; color:#666; }
+    .countdown-time { font-size:1.3rem; font-weight:900; color:#C0633A; letter-spacing:1px; font-variant-numeric:tabular-nums; }
+    .countdown-box.warning .countdown-time { color:#e67e22; }
+    .countdown-box.expired .countdown-time, .countdown-box.expired .countdown-label { color:#c00; }
   </style>
 </head>
 <body>
-<nav><a href="/">← HatHub</a></nav>
+<nav><a onclick="goBack()">← HatHub</a></nav>
 <div class="container">
   <h1>Thanh toán chuyển khoản</h1>
 
+  <!-- ĐẾM NGƯỢC — đơn tự hủy sau 15 phút nếu chưa thanh toán -->
+  <div class="countdown-box" id="countdownBox"
+       th:attr="data-order-time=${#temporals.format(order.orderDate, 'yyyy-MM-dd''T''HH:mm:ss')}">
+    <span class="countdown-label">Đơn hàng tự hủy sau:</span>
+    <span class="countdown-time" id="countdownTime">15:00</span>
+  </div>
 
   <div class="card">
     <!-- QR CODE -->
@@ -47,7 +62,7 @@
     </div>
     <div class="info-row">
       <span>Chủ tài khoản</span>
-      <strong>HATHUB</strong>
+      <strong>Tran Hoang Anh</strong>
     </div>
     <div class="info-row">
       <span>Số tiền</span>
@@ -92,5 +107,68 @@
 
   <a href="/orders" class="btn-back">← Xem tất cả đơn hàng</a>
 </div>
+<script>
+  const PAYMENT_TIMEOUT_MS = 15 * 60 * 1000;
+
+  const box = document.getElementById('countdownBox');
+  const timeEl = document.getElementById('countdownTime');
+  const confirmBtn = document.querySelector('.btn-confirm');
+
+  const orderTimeStr = box.getAttribute('data-order-time');
+  const orderTime = new Date(orderTimeStr).getTime();
+  const expireTime = orderTime + PAYMENT_TIMEOUT_MS;
+
+  function renderExpired() {
+    box.classList.remove('warning');
+    box.classList.add('expired');
+    timeEl.textContent = 'Đã hết hạn';
+    box.querySelector('.countdown-label').textContent = 'Đơn hàng đã bị hủy do quá hạn thanh toán:';
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.style.opacity = '0.5';
+      confirmBtn.style.cursor = 'not-allowed';
+      confirmBtn.textContent = '✗ Đơn hàng đã hết hạn';
+    }
+  }
+
+  function tick() {
+    const remainingMs = expireTime - Date.now();
+
+    if (remainingMs <= 0) {
+      renderExpired();
+      clearInterval(timerId);
+      return;
+    }
+
+    const totalSeconds = Math.floor(remainingMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    timeEl.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+
+    // Cảnh báo khi còn dưới 3 phút
+    if (remainingMs <= 3 * 60 * 1000) {
+      box.classList.add('warning');
+    }
+  }
+
+  if (expireTime - Date.now() <= 0) {
+    renderExpired();
+  } else {
+    tick();
+    var timerId = setInterval(tick, 1000);
+  }
+
+  function goBack() {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.location.href = '/';
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') goBack();
+  });
+</script>
 </body>
 </html>

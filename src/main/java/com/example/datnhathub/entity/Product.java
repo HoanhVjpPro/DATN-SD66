@@ -39,4 +39,8 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductImage> images;
+
+    @ManyToOne
+    @JoinColumn(name = "BrandID")
+    private Brand brand;
 }

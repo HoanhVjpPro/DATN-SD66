@@ -17,18 +17,44 @@
         <span>HatHub</span>
     </a>
     <ul class="nav-menu"><li><a href="/cart">Quay lại giỏ</a></li><li><a th:href="@{/products}">Tiếp tục mua</a></li></ul>
-    <div class="nav-actions">
-    </div>
+    <div class="nav-actions"></div>
 </nav>
 <main class="page-wrap">
     <h1 class="page-title">Checkout</h1>
     <div th:if="${error}" class="alert error" th:text="${error}"></div>
+    <div th:if="${outOfStockMessages != null and !outOfStockMessages.isEmpty()}" class="alert error" style="line-height:1.6;">
+        <strong>⚠ Một số sản phẩm trong giỏ không đủ số lượng tồn kho:</strong>
+        <ul style="margin:8px 0 0 18px;padding:0;">
+            <li th:each="msg : ${outOfStockMessages}" th:text="${msg}"></li>
+        </ul>
+        <div style="margin-top:8px;">
+            Vui lòng <a href="/cart" style="color:inherit;text-decoration:underline;font-weight:700;">liên hệ với CSKH</a> để cập nhật số lượng trước khi đặt hàng.
+        </div>
+    </div>
     <div class="checkout-layout">
-        <form class="checkout-card form-box" onsubmit="return confirm('Có chắc muốn đặt hàng chứ?')" action="/checkout" method="post">
+        <form class="checkout-card form-box" id="checkoutForm"
+              onsubmit="return confirm('Có chắc muốn đặt hàng chứ?')" action="/checkout" method="post">
             <div>
-                <label>Địa chỉ giao hàng</label>
-                <textarea name="shippingAddress" rows="4" required
-                          placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea>
+                <label>Tỉnh/Thành phố</label>
+                <select name="city" id="citySelect" required onchange="updateGrandTotal()">
+                    <option value="" disabled selected>-- Chọn tỉnh/thành phố --</option>
+                    <option value="Hà Nội">Hà Nội (20.000VNĐ)</option>
+                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh (30.000VNĐ)</option>
+                    <option value="Đà Nẵng">Đà Nẵng (25.000VNĐ)</option>
+                    <option value="Khác">Tỉnh/thành khác (35.000VNĐ)</option>
+                </select>
+            </div>
+            <div>
+                <label>Số nhà, tên đường</label>
+                <input type="text" name="houseAddress" required placeholder="VD: 123 Đường Láng" />
+            </div>
+            <div>
+                <label>Phường/Xã</label>
+                <input type="text" name="ward" required placeholder="VD: Phường Láng Thượng" />
+            </div>
+            <div>
+                <label>Quận/Huyện</label>
+                <input type="text" name="district" required placeholder="VD: Quận Đống Đa" />
             </div>
             <div>
                 <label>Phương thức thanh toán</label>
@@ -38,30 +64,42 @@
                 </div>
             </div>
             <div>
-                <label>Mã voucher</label>
-                <input type="text" name="voucherCode" placeholder="VD: HATHUB50" />
+                <label>Ghi chú</label>
+                <textarea rows="4" placeholder="VD: Để hàng trước cửa, không bấm chuông, ..."></textarea>
             </div>
-            <button class="btn btn-primary" type="submit">Đặt hàng</button>
+            <div>
+                <label>Mã voucher</label>
+                <div style="display:flex;gap:8px;">
+                    <input type="text" name="voucherCode" id="voucherCodeInput" placeholder="VD: HATHUB30" style="flex:1;" />
+                    <button type="button" onclick="applyVoucher()"
+                            style="background:#333;color:#fff;border:none;padding:0 16px;border-radius:4px;cursor:pointer;font-weight:700;">
+                        Áp dụng
+                    </button>
+                </div>
+                <p id="voucherMessage" style="font-size:13px;margin-top:6px;"></p>
+            </div>
+            <button class="btn btn-primary" type="submit"
+                    th:disabled="${outOfStockMessages != null and !outOfStockMessages.isEmpty()}"
+                    th:text="${outOfStockMessages != null and !outOfStockMessages.isEmpty()} ? 'Vui lòng cập nhật giỏ hàng' : 'Đặt hàng'">Đặt hàng</button>
         </form>
 
         <aside class="summary-card">
-            <h2>Order summary</h2>
-
-            <div class="summary-items" th:each="d : ${cart.details}">
+            <h2>Tóm tắt đơn hàng</h2>
+            <div th:each="d : ${cart.details}">
                 <div class="summary-row" style="align-items:flex-start;">
                     <img th:if="${!d.productDetail.product.images.isEmpty()}"
                          th:src="@{${d.productDetail.product.images.?[isDefault == true].isEmpty()
-                            ? d.productDetail.product.images[0].imageURL
-                            : d.productDetail.product.images.?[isDefault == true][0].imageURL}}"
+                                    ? d.productDetail.product.images[0].imageURL
+                                    : d.productDetail.product.images.?[isDefault == true][0].imageURL}}"
                          alt=""
                          style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin-right:10px;" />
                     <span>
-                <strong th:text="${d.productDetail.product.productName}">Tên sản phẩm</strong><br/>
-                <small style="color:rgba(255,255,255,.6);"
-                       th:text="${d.productDetail.size + ' / ' + d.productDetail.color + ' x ' + d.quantity}">
-                    Size / Màu x SL
-                </small>
-            </span>
+                        <strong th:text="${d.productDetail.product.productName + ' x' + d.quantity}">Tên sản phẩm x1</strong><br/>
+                        <small style="color:rgba(255,255,255,.6);"
+                               th:text="${d.productDetail.size + ' / ' + d.productDetail.color}">
+                            Size / Màu
+                        </small>
+                    </span>
                     <strong style="margin-left:auto;"
                             th:text="${#numbers.formatDecimal(d.productDetail.price * d.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">
                         0 đ
@@ -70,14 +108,97 @@
             </div>
 
             <div class="summary-row">
-                <span>Tổng đơn hàng</span>
-                <strong class="summary-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+                <span>Tiền sản phẩm</span>
+                <strong th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+            </div>
+            <div class="summary-row">
+                <span>Phí vận chuyển</span>
+                <strong id="shippingFeeDisplay">-- đ</strong>
+            </div>
+            <div class="summary-row" id="voucherRow" style="display:none;">
+                <span>Giảm giá voucher</span>
+                <strong id="voucherDiscountDisplay" style="color:#4caf50;">-0 đ</strong>
+            </div>
+            <div class="summary-row">
+                <span>Tổng thanh toán</span>
+                <strong class="summary-total" id="grandTotalDisplay" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
             </div>
             <p style="color:rgba(255,255,255,.68);font-size:14px;">
-                Sau khi đặt hàng, HatHub sẽ xác nhận đơn và chuẩn bị giao theo thông tin bạn cung cấp.
+                Đơn hàng từ 500.000đ được miễn phí vận chuyển.
             </p>
         </aside>
     </div>
 </main>
+
+<script th:inline="javascript">
+    const subtotal = /*[[${total}]]*/ 0;
+    const FREESHIP_THRESHOLD = 500000;
+    const FEES = { "Hà Nội": 20000, "TP. Hồ Chí Minh": 30000, "Đà Nẵng": 25000, "Khác": 35000 };
+
+    let voucherDiscount = 0;
+    let voucherFreeShip = false;
+
+    function formatVND(n) {
+        return Math.round(n).toLocaleString('vi-VN') + ' đ';
+    }
+
+    function getShippingFee() {
+        if (voucherFreeShip) return 0;
+        const city = document.getElementById('citySelect').value;
+        if (subtotal >= FREESHIP_THRESHOLD) return 0;
+        return FEES[city] !== undefined ? FEES[city] : FEES["Khác"];
+    }
+
+    function updateGrandTotal() {
+        const fee = getShippingFee();
+        document.getElementById('shippingFeeDisplay').textContent =
+            fee === 0 ? 'Miễn phí' : formatVND(fee);
+
+        const grandTotal = Math.max(0, subtotal - voucherDiscount + fee);
+        document.getElementById('grandTotalDisplay').textContent = formatVND(grandTotal);
+    }
+
+    function applyVoucher() {
+        const code = document.getElementById('voucherCodeInput').value.trim();
+        const messageEl = document.getElementById('voucherMessage');
+        const voucherRow = document.getElementById('voucherRow');
+
+        if (!code) {
+            voucherDiscount = 0;
+            voucherFreeShip = false;
+            voucherRow.style.display = 'none';
+            messageEl.textContent = '';
+            updateGrandTotal();
+            return;
+        }
+
+        fetch('/api/vouchers/check?code=' + encodeURIComponent(code) + '&subtotal=' + subtotal)
+            .then(res => res.json())
+            .then(data => {
+                if (data.valid) {
+                    voucherDiscount = data.discount;
+                    voucherFreeShip = data.freeShip === true;
+                    voucherRow.style.display = 'flex';
+                    document.getElementById('voucherDiscountDisplay').textContent =
+                        voucherFreeShip ? 'Miễn phí vận chuyển' : ('-' + formatVND(voucherDiscount));
+                    messageEl.style.color = '#4caf50';
+                    messageEl.textContent = 'Áp dụng voucher thành công!';
+                } else {
+                    voucherDiscount = 0;
+                    voucherFreeShip = false;
+                    voucherRow.style.display = 'none';
+                    messageEl.style.color = '#e57373';
+                    messageEl.textContent = data.message || 'Mã voucher không hợp lệ';
+                }
+                updateGrandTotal();
+            })
+            .catch(() => {
+                messageEl.style.color = '#e57373';
+                messageEl.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', updateGrandTotal);
+</script>
 </body>
 </html>
