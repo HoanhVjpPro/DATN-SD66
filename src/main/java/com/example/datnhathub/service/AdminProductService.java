@@ -1,13 +1,7 @@
 package com.example.datnhathub.service;
 
-import com.example.datnhathub.entity.Category;
-import com.example.datnhathub.entity.Product;
-import com.example.datnhathub.entity.ProductDetail;
-import com.example.datnhathub.entity.ProductImage;
-import com.example.datnhathub.repository.CategoryRepository;
-import com.example.datnhathub.repository.ProductDetailRepository;
-import com.example.datnhathub.repository.ProductImageRepository;
-import com.example.datnhathub.repository.ProductRepository;
+import com.example.datnhathub.entity.*;
+import com.example.datnhathub.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +29,13 @@ public class AdminProductService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Autowired
+    private BrandRepository brandRepository;
+
+    public List<Brand> getAllBrands() {
+        return brandRepository.findAll();
+    }
+
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
@@ -57,25 +58,25 @@ public class AdminProductService {
     // ════════════════════════════════════════
     // UC10, UC11 — Lưu sản phẩm (thêm mới + sửa)
     // ════════════════════════════════════════
-    public Product saveProduct(Integer productId,
-                               String productName,
-                               Integer categoryId,
-                               String description,
-                               boolean status) {
-
-        // Thêm mới hoặc lấy product đang sửa
-        Product product = productId != null
-                ? getProductById(productId)
+    public Product saveProduct(Integer productId, String productName, Integer categoryId,
+                               Integer brandId, String description, boolean isActive) {
+        Product product = (productId != null)
+                ? productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + productId))
                 : new Product();
 
         product.setProductName(productName);
         product.setDescription(description);
-        product.setStatus(status);
+        product.setStatus(isActive);
 
-        // Set category
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục ID: " + categoryId));
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Không tìm thấy danh mục ID: " + categoryId));
         product.setCategory(category);
+
+        if (brandId != null) {
+            Brand brand = brandRepository.findById(brandId).orElseThrow(() -> new RuntimeException("Không tìm thấy thương hiệu ID: " + brandId));
+            product.setBrand(brand);
+        } else {
+            product.setBrand(null);
+        }
 
         return productRepository.save(product);
     }
@@ -125,11 +126,12 @@ public class AdminProductService {
     }
 
     // ════════════════════════════════════════
-    // UC14 — Upload ảnh sản phẩm
+    // UC14 — Upload ảnh sản phẩm (có thể gắn cho 1 biến thể cụ thể)
     // ════════════════════════════════════════
     public void uploadImage(Integer productId,
                             MultipartFile file,
-                            boolean isDefault) throws IOException {
+                            boolean isDefault,
+                            Integer productDetailId) throws IOException {
 
         // Lưu ra ngoài project — dễ truy cập hơn
         String uploadDir = System.getProperty("user.dir") + "/uploads/products/";
@@ -155,6 +157,13 @@ public class AdminProductService {
         image.setProduct(product);
         image.setImageURL("/uploads/products/" + fileName); // URL truy cập
         image.setIsDefault(isDefault);
+
+        if (productDetailId != null) {
+            ProductDetail detail = productDetailRepository.findById(productDetailId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy biến thể ID: " + productDetailId));
+            image.setProductDetail(detail);
+        }
+
         productImageRepository.save(image);
     }
 

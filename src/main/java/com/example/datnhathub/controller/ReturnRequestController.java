@@ -3,10 +3,13 @@ package com.example.datnhathub.controller;
 import com.example.datnhathub.entity.OrderDetail;
 import com.example.datnhathub.entity.Orders;
 import com.example.datnhathub.entity.ProductDetail;
+import com.example.datnhathub.entity.Voucher;
 import com.example.datnhathub.repository.OrderRepository;
 import com.example.datnhathub.repository.ProductDetailRepository;
+import com.example.datnhathub.repository.VoucherRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +26,12 @@ public class ReturnRequestController {
 
     @Autowired
     private OrderRepository ordersRepository;
-    @Autowired private ProductDetailRepository productDetailRepository;
+
+    @Autowired
+    private ProductDetailRepository productDetailRepository;
+
+    @Autowired
+    private VoucherRepository voucherRepository;
 
     // ── Customer xem trang trả hàng ──
     @GetMapping("/orders/{id}/return")
@@ -106,6 +114,13 @@ public class ReturnRequestController {
                 pd.setStockQuantity(pd.getStockQuantity() + od.getQuantity());
                 productDetailRepository.save(pd);
             }
+        }
+
+        // Hoàn lại lượt sử dụng voucher nếu đơn có dùng
+        if (order.getVoucher() != null) {
+            Voucher v = order.getVoucher();
+            v.setQuantity((v.getQuantity() == null ? 0 : v.getQuantity()) + 1);
+            voucherRepository.save(v);
         }
 
         order.setReturnStatus("Đã chấp nhận");

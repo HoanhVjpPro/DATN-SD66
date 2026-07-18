@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -31,7 +32,7 @@ public class VoucherService {
     }
 
     @Transactional
-    public BigDecimal applyVoucher(String code) {
+    public BigDecimal applyVoucher(String code, BigDecimal subtotal) {
         Voucher voucher = voucherRepository.findByCode(code)
                 .orElseThrow(() -> new IllegalArgumentException("Mã voucher không hợp lệ"));
 
@@ -41,6 +42,29 @@ public class VoucherService {
 
         voucher.setQuantity(voucher.getQuantity() - 1);
         voucherRepository.save(voucher);
-        return voucher.getDiscountAmount() != null ? voucher.getDiscountAmount() : BigDecimal.ZERO;
+        return voucher.calculateDiscount(subtotal);
+    }
+
+    // Kiểm tra voucher hợp lệ mà KHÔNG trừ số lượng (dùng để preview trước khi đặt hàng)
+    public Voucher validateVoucher(String code) {
+        Voucher voucher = voucherRepository.findByCode(code.trim())
+                .orElseThrow(() -> new IllegalArgumentException("Mã voucher không tồn tại"));
+
+        if (voucher.getQuantity() == null || voucher.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Voucher đã hết lượt sử dụng");
+        }
+        if (voucher.isExpired()) {
+            throw new IllegalArgumentException("Voucher đã hết hạn sử dụng");
+        }
+        return voucher;
+    }
+
+    @Transactional
+    public void updateQuantityAndExpiry(Integer id, Integer quantity, LocalDate expiryDate) {
+        Voucher voucher = voucherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy voucher"));
+        voucher.setQuantity(quantity);
+        voucher.setExpiryDate(expiryDate);
+        voucherRepository.save(voucher);
     }
 }

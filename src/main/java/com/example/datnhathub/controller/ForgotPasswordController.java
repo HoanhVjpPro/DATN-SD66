@@ -22,7 +22,7 @@ public class ForgotPasswordController {
 
     @GetMapping("/forgot-password")
     public String showForgotPassword() {
-        return "forgot-password"; // templates/forgot-password.html
+        return "forgot-password";
     }
 
     @PostMapping("/forgot-password")
@@ -97,7 +97,7 @@ public class ForgotPasswordController {
             return "redirect:/forgot-password";
         }
 
-        user.setPassword(newPassword); // plain text theo yêu cầu
+        user.setPassword(newPassword);
         userRepository.save(user);
 
         // Xóa session OTP sau khi dùng

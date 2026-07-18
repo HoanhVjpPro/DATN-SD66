@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @AllArgsConstructor
@@ -57,4 +58,23 @@ public class Orders {
 
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Payment payment;
+
+    @ManyToOne
+    @JoinColumn(name = "VoucherID")
+    private Voucher voucher;
+
+    public String getOrderCode() {
+        String datePart = orderDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        return "HH" + datePart + orderId;
+    }
+
+    @Column(name = "StockDeducted", nullable = false)
+    private Boolean stockDeducted = false;
+
+    public Integer getTotalQuantity() {
+        if (details == null) return 0;
+        return details.stream()
+                .mapToInt(OrderDetail::getQuantity)
+                .sum();
+    }
 }

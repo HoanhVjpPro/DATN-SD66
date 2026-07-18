@@ -49,6 +49,7 @@ public class AdminProductController {
     public String newProductForm(Model model) {
         model.addAttribute("product",    new Product());
         model.addAttribute("categories", adminProductService.getAllCategories());
+        model.addAttribute("brands",     adminProductService.getAllBrands());
         return "admin/product-form";
     }
 
@@ -61,6 +62,7 @@ public class AdminProductController {
         model.addAttribute("product",    product);
         model.addAttribute("details",    details);
         model.addAttribute("categories", adminProductService.getAllCategories());
+        model.addAttribute("brands",     adminProductService.getAllBrands());
         return "admin/product-form";
     }
 
@@ -69,6 +71,7 @@ public class AdminProductController {
     public String saveProduct(@RequestParam(required = false) Integer productId,
                               @RequestParam String productName,
                               @RequestParam Integer categoryId,
+                              @RequestParam(required = false) Integer brandId,
                               @RequestParam(required = false, defaultValue = "") String description,
                               @RequestParam(required = false) String status,
                               RedirectAttributes ra) {
@@ -76,7 +79,7 @@ public class AdminProductController {
         boolean isActive = "true".equals(status);
 
         Product saved = adminProductService.saveProduct(
-                productId, productName, categoryId, description, isActive
+                productId, productName, categoryId, brandId, description, isActive
         );
 
         ra.addFlashAttribute("success",
@@ -118,11 +121,12 @@ public class AdminProductController {
     public String uploadImage(@PathVariable Integer id,
                               @RequestParam MultipartFile file,
                               @RequestParam(required = false) String isDefault,
+                              @RequestParam(required = false) Integer productDetailId,
                               RedirectAttributes ra) {
 
         try {
             boolean setDefault = "true".equals(isDefault);
-            adminProductService.uploadImage(id, file, setDefault);
+            adminProductService.uploadImage(id, file, setDefault, productDetailId);
             ra.addFlashAttribute("success", "Upload ảnh thành công!");
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Upload thất bại: " + e.getMessage());
@@ -131,7 +135,7 @@ public class AdminProductController {
         return "redirect:/admin/products/edit/" + id;
     }
 
-// UC12 — Ẩn / Hiện sản phẩm (an toàn, không xóa dữ liệu)
+    // UC12 — Ẩn / Hiện sản phẩm (an toàn, không xóa dữ liệu)
     @PostMapping("/toggle/{id}")
     public String toggleProductStatus(@PathVariable Integer id, RedirectAttributes ra) {
         adminProductService.toggleProductStatus(id);
@@ -139,8 +143,7 @@ public class AdminProductController {
         return "redirect:/admin/products";
     }
 
-// UC14 — Xóa ảnh sản phẩm
-// POST /admin/products/image/delete/{imageId}
+    // UC14 — Xóa ảnh sản phẩm
     @PostMapping("/image/delete/{imageId}")
     public String deleteImage(@PathVariable Integer imageId,
                               @RequestParam Integer productId,

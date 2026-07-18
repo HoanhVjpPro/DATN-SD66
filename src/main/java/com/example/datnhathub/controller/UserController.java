@@ -33,13 +33,13 @@ public class UserController {
     @GetMapping("/")
     public String home(HttpSession session, Model model) {
 
-        // 4 sản phẩm mới nhất hiển thị ở trang chủ
-        model.addAttribute("featuredProducts", productService.getFeaturedProducts(4));
+        // 4 sản phẩm bán chạy nhất hiển thị ở trang chủ
+        model.addAttribute("featuredProducts", productService.getBestSellingProducts(4));
 
         model.addAttribute("loggedIn", session.getAttribute("userId") != null);
         model.addAttribute("roleName", session.getAttribute("roleName"));
 
-        return "main-menu"; // templates/main-menu.html
+        return "main-menu";
     }
 
     @GetMapping("/login")
@@ -127,6 +127,7 @@ public class UserController {
         return switch (role) {
             case "ADMIN"    -> "redirect:/admin/dashboard";
             case "EMPLOYEE" -> "redirect:/employee/dashboard";
+            case "SHIPPER"  -> "redirect:/shipper/dashboard";
             default         -> "redirect:/";
         };
     }

@@ -372,10 +372,11 @@
   </ul>
 
   <div class="nav-actions">
-<!--    <button title="Tìm kiếm">🔍</button>-->
-<!--    <button title="Yêu thích">♡</button>-->
+    <!--    <button title="Tìm kiếm">🔍</button>-->
+    <!--    <button title="Yêu thích">♡</button>-->
     <a href="/profile" class="btn-cart">👤</a>
     <a href="/cart" th:if="${loggedIn and roleName == 'CUSTOMER'}" class="btn-cart">🛒</a>
+    <a href="/orders" th:if="${loggedIn and roleName == 'CUSTOMER'}" class="btn-cart">🧾</a>
     <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
     <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
   </div>
@@ -441,7 +442,7 @@
     <a href="/products?categoryId=0" class="cat-card cat-1">
       <div class="cat-card-bg">🧢</div>
       <div class="cat-card-inner">
-        <div class="cat-name">Mũ lưới trai</div>
+        <div class="cat-name">Mũ lưỡi trai</div>
       </div>
     </a>
     <a href="/products?categoryId=1" class="cat-card cat-2">
@@ -451,15 +452,15 @@
       </div>
     </a>
     <a href="/products?categoryId=2" class="cat-card cat-3">
-      <div class="cat-card-bg">🎩</div>
-      <div class="cat-card-inner">
-        <div class="cat-name">Mũ tai mèo</div>
-      </div>
-    </a>
-    <a href="/products?categoryId=3" class="cat-card cat-4">
       <div class="cat-card-bg">👒</div>
       <div class="cat-card-inner">
         <div class="cat-name">Mũ rơm</div>
+      </div>
+    </a>
+    <a href="/products?categoryId=3" class="cat-card cat-4">
+      <div class="cat-card-bg">🎩</div>
+      <div class="cat-card-inner">
+        <div class="cat-name">Mũ chuyên dụng</div>
       </div>
     </a>
   </div>
@@ -467,7 +468,7 @@
 <!-- PRODUCTS -->
 <section class="section section-alt" id="products">
   <div class="section-header">
-    <h2 class="section-title">Sản phẩm</h2>
+    <h2 class="section-title">sản phẩm<br>bán chạy nhất</h2>
     <a href="/products" class="section-link">Xem tất cả →</a>
   </div>
   <div class="product-grid">
@@ -525,12 +526,12 @@
     <div class="feature-item">
       <div class="feature-icon">🚚</div>
       <div class="feature-title">Miễn phí vận chuyển</div>
-      <div class="feature-desc">Đơn hàng từ 299.000 đ trên toàn quốc</div>
+      <div class="feature-desc">Đơn hàng từ 500.000 đ trên toàn quốc</div>
     </div>
     <div class="feature-item">
       <div class="feature-icon">🔄</div>
       <div class="feature-title">Đổi trả dễ dàng</div>
-      <div class="feature-desc">30 ngày đổi trả miễn phí, không cần giải thích</div>
+      <div class="feature-desc">30 ngày đổi trả miễn phí</div>
     </div>
     <div class="feature-item">
       <div class="feature-icon">✅</div>

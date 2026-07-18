@@ -81,6 +81,7 @@
     <div class="nav-actions">
         <a class="icon-link" th:if="${loggedIn}" href="/profile" aria-label="Tài khoản">👤</a>
         <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" aria-label="Tài khoản">🛒</a>
+        <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/orders" aria-label="Tài khoản">🧾</a>
         <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
         <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
     </div>
@@ -99,6 +100,7 @@
             <h3>Tìm kiếm</h3>
             <form class="search-box" th:action="@{/products}" method="get">
                 <input type="hidden" name="categoryId" th:value="${selectedCategory != null ? selectedCategory.categoryId : ''}"/>
+                <input type="hidden" name="brandId" th:value="${selectedBrand != null ? selectedBrand.brandId : ''}"/>
                 <input type="text" name="keyword" placeholder="Tên mũ, kiểu dáng..." th:value="${keyword}"/>
                 <button type="submit">⌕</button>
             </form>
@@ -106,6 +108,7 @@
             <h3>Khoảng giá</h3>
             <form class="price-range" th:action="@{/products}" method="get">
                 <input type="hidden" name="categoryId" th:value="${selectedCategory != null ? selectedCategory.categoryId : ''}"/>
+                <input type="hidden" name="brandId" th:value="${selectedBrand != null ? selectedBrand.brandId : ''}"/>
                 <input type="hidden" name="keyword" th:value="${keyword}"/>
                 <input type="number" min="0" step="1000" name="minPrice" placeholder="Từ (đ)" th:value="${minPrice}"/>
                 <input type="number" min="0" step="1000" name="maxPrice" placeholder="Đến (đ)" th:value="${maxPrice}"/>
@@ -115,12 +118,24 @@
             <h3>Danh mục</h3>
             <ul class="filter-list">
                 <li>
-                    <a th:href="@{/products}" th:classappend="${selectedCategory == null ? 'active' : ''}">Tất cả</a>
+                    <a th:href="@{/products(brandId=${selectedBrand != null ? selectedBrand.brandId : null})}" th:classappend="${selectedCategory == null ? 'active' : ''}">Tất cả</a>
                 </li>
                 <li th:each="c : ${categories}">
-                    <a th:href="@{/products(categoryId=${c.categoryId})}"
+                    <a th:href="@{/products(categoryId=${c.categoryId}, brandId=${selectedBrand != null ? selectedBrand.brandId : null})}"
                        th:classappend="${selectedCategory != null and selectedCategory.categoryId == c.categoryId ? 'active' : ''}"
                        th:text="${c.categoryName}">Category</a>
+                </li>
+            </ul>
+
+            <h3>Thương hiệu</h3>
+            <ul class="filter-list">
+                <li>
+                    <a th:href="@{/products(categoryId=${selectedCategory != null ? selectedCategory.categoryId : null})}" th:classappend="${selectedBrand == null ? 'active' : ''}">Tất cả</a>
+                </li>
+                <li th:each="b : ${brands}">
+                    <a th:href="@{/products(categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${b.brandId})}"
+                       th:classappend="${selectedBrand != null and selectedBrand.brandId == b.brandId ? 'active' : ''}"
+                       th:text="${b.brandName}">Brand</a>
                 </li>
             </ul>
         </aside>
@@ -131,6 +146,7 @@
                 <span style="color: black"><strong th:text="${totalProducts}">0</strong> sản phẩm</span>
                 <form th:action="@{/products}" method="get" style="display:flex;align-items:center;gap:8px;">
                     <input type="hidden" name="categoryId" th:value="${selectedCategory != null ? selectedCategory.categoryId : ''}"/>
+                    <input type="hidden" name="brandId" th:value="${selectedBrand != null ? selectedBrand.brandId : ''}"/>
                     <input type="hidden" name="keyword" th:value="${keyword}"/>
                     <input type="hidden" name="minPrice" th:value="${minPrice}"/>
                     <input type="hidden" name="maxPrice" th:value="${maxPrice}"/>
@@ -157,6 +173,7 @@
                     </a>
                     <div class="info">
                         <span class="cat" th:text="${p.categoryName}">Category</span>
+                        <span th:if="${p.brandName != null}" style="font-size:11px;color:rgba(255,255,255,.5);" th:text="${p.brandName}">Brand</span>
                         <a class="name" th:href="@{/products/{id}(id=${p.productId})}" th:text="${p.productName}">Tên sản phẩm</a>
                         <div class="price-row">
                             <span class="price" th:text="${p.minPrice != null ? #numbers.formatDecimal(p.minPrice, 0, 'COMMA', 0, 'POINT') + ' đ' : 'Liên hệ'}">0 đ</span>
@@ -169,15 +186,15 @@
             <!-- Phân trang -->
             <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
                 <a th:if="${currentPage > 0}"
-                   th:href="@{/products(page=${currentPage - 1}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}">‹</a>
+                   th:href="@{/products(page=${currentPage - 1}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${selectedBrand != null ? selectedBrand.brandId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}">‹</a>
                 <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
           <span th:if="${i == currentPage}" class="current" th:text="${i + 1}">1</span>
           <a th:unless="${i == currentPage}"
-             th:href="@{/products(page=${i}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}"
+             th:href="@{/products(page=${i}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${selectedBrand != null ? selectedBrand.brandId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}"
              th:text="${i + 1}">1</a>
         </span>
                 <a th:if="${currentPage < totalPages - 1}"
-                   th:href="@{/products(page=${currentPage + 1}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}">›</a>
+                   th:href="@{/products(page=${currentPage + 1}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${selectedBrand != null ? selectedBrand.brandId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}">›</a>
             </div>
         </section>
     </div>

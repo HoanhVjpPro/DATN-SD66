@@ -28,4 +28,8 @@ public class ProductImage {
 
     @Column(name = "IsDefault")
     private Boolean isDefault = false;
+
+    @ManyToOne
+    @JoinColumn(name = "ProductDetailID")
+    private ProductDetail productDetail;
 }

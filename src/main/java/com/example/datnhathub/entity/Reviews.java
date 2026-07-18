@@ -11,7 +11,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Review")
+@Table(name = "Review", uniqueConstraints = @UniqueConstraint(
+        name = "UQ_Review_ProductDetail_Customer",
+        columnNames = {"ProductDetailID", "CustomerID"}
+))
 public class Reviews {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -28,8 +28,8 @@ button, input, select, textarea { font: inherit; }
 .nav-actions { display: flex; align-items: center; gap: 10px; }
 .search-form { display: flex; align-items: center; width: 230px; background: #fff; border-radius: 3px; overflow: hidden; }
 .search-form input { min-width: 0; width: 100%; border: 0; padding: 10px 12px; color: var(--ink); outline: 0; }
-.search-form button, .icon-link { border: 0; min-width: 40px; height: 40px; display: grid; place-items: center; background: var(--ink-2); color: #fff; text-decoration: none; cursor: pointer; }
-.cart-link { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; background: #fff; color: var(--ink); text-decoration: none; border-radius: 3px; font-size: 13px; font-weight: 900; text-transform: uppercase; }
+.search-form button, .icon-link { border: 0; min-width: 42px; min-height: 42px; border-radius: 3px; display: grid; place-items: center; background: var(--ink-2); color: #fff; text-decoration: none; cursor: pointer; }
+.cart-link { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 14px; background: #fff; color: var(--ink); text-decoration: none; border-radius: 3px; font-size: 13px; font-weight: 900; text-transform: uppercase; }
 .logout-link { color: rgba(255,255,255,.75); text-decoration: none; font-size: 13px; font-weight: 700; }
 .hero-shop { min-height: calc(100vh - 103px); display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, .78fr); background: var(--ink); color: #fff; }
 .hero-copy { align-self: center; padding: 64px 7vw; }
@@ -80,8 +80,8 @@ button, input, select, textarea { font: inherit; }
 .product-name { min-height: 44px; margin: 4px 0 8px; font-size: 15px; font-weight: 900; line-height: 1.35; }
 .product-name a { text-decoration: none; }
 .product-price { font-size: 18px; font-weight: 900; color: var(--accent); }
-.product-actions { display: grid; grid-template-columns: 1fr 44px; gap: 8px; margin-top: 12px; }
-.small-icon { width: 44px; min-height: 42px; border: 1px solid var(--line); background: #fff; border-radius: 3px; display: grid; place-items: center; text-decoration: none; font-weight: 900; }
+.product-actions { display: grid; grid-template-columns: 1fr 42px; gap: 8px; margin-top: 12px; }
+.small-icon { width: 42px; min-height: 42px; border: 1px solid var(--line); background: #fff; border-radius: 3px; display: grid; place-items: center; text-decoration: none; font-weight: 900; }
 .empty-state { padding: 42px; background: #fff; border: 1px solid var(--line); text-align: center; }
 .story-band { display: grid; grid-template-columns: .9fr 1.1fr; background: var(--ink); color: #fff; }
 .story-visual { min-height: 380px; background: linear-gradient(135deg, #f0b429 0%, #d9412e 42%, #111 42%); display: grid; place-items: center; }
@@ -120,13 +120,13 @@ button, input, select, textarea { font: inherit; }
 .review { padding: 16px 0; border-top: 1px solid var(--line); }
 .review strong { color: var(--accent); }
 .cart-layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 22px; align-items: start; }
-.cart-item { display: grid; grid-template-columns: 1fr 110px 160px 120px 44px; gap: 12px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.cart-item { display: grid; grid-template-columns: 1fr 110px 160px 120px 42px; gap: 12px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); }
 .cart-item:last-child { border-bottom: 0; }
 .cart-product strong { display: block; }
 .cart-product small { color: var(--muted); }
 .qty-form { display: flex; gap: 6px; }
 .qty-form input { width: 72px; border: 1px solid var(--line); padding: 9px; }
-.qty-form button, .remove-btn { border: 1px solid var(--line); background: #fff; width: 40px; min-height: 40px; cursor: pointer; }
+.qty-form button, .remove-btn { border: 1px solid var(--line); background: #fff; width: 42px; min-height: 42px; border-radius: 3px; cursor: pointer; }
 .remove-btn { color: var(--accent); font-weight: 900; }
 .summary-card { position: sticky; top: 92px; background: var(--ink); color: #fff; padding: 22px; }
 .summary-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.14); }

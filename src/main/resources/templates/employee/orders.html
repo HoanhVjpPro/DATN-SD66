@@ -2,16 +2,16 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8"/>
-  <title>Quản lý đơn hàng | HatHub Staff</title>
+  <title>Quản lý đơn hàng | HatHub</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
   <style>
     body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
     aside { width:220px; background:#111; color:#fff; padding:1.5rem; }
     aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
-    aside a.active { color:#C0633A; }
+    aside a:hover, aside a.active { color:#C0633A; }
     main { flex:1; padding:2rem; background:#F5F0EA; }
     table { width:100%; background:#fff; border-collapse:collapse; }
-    th, td { padding:0.75rem; border-bottom:1px solid #eee; font-size:0.9rem; }
+    th, td { padding:0.75rem; border-bottom:1px solid #eee; text-align:left; font-size:0.9rem; }
     th { background:#111; color:#fff; }
     select, button { padding:6px; }
     button { background:#C0633A; color:#fff; border:none; cursor:pointer; }
@@ -19,13 +19,18 @@
 </head>
 <body>
 <aside>
-  <h2 style="color:#C0633A;">HatHub Staff</h2>
+  <h2 style="color:#C0633A;">HatHub Admin</h2>
   <a href="/employee/dashboard">Dashboard</a>
   <a href="/employee/orders" class="active">Đơn hàng</a>
+  <a href="/employee/returns">Trả hàng</a>
   <a href="/logout">Đăng xuất</a>
 </aside>
 <main>
   <h1>Đơn hàng</h1>
+
+  <input type="text" id="searchInput" placeholder="Tìm theo mã đơn, tên khách hoặc ngày (dd/MM/yyyy)..."
+         onkeyup="applyFilters()"
+         style="padding:10px 14px;border:1px solid #ddd;border-radius:4px;width:340px;margin-bottom:1rem;font-family:'Nunito',sans-serif;"/>
 
   <!-- BỘ LỌC TRẠNG THÁI -->
   <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
@@ -74,34 +79,44 @@
 
   <table>
     <thead>
-    <tr><th>Mã</th><th>Khách hàng</th><th>Ngày</th><th>Tổng</th><th>Trạng thái</th><th>Cập nhật</th><th>Chi tiết</th></tr>
+    <tr><th>Mã</th><th>Khách hàng</th><th>Ngày</th><th>Tổng</th><th>Trạng thái</th><th>Cập nhật</th></tr>
     </thead>
     <tbody id="orderTableBody">
     <tr th:each="o : ${orders}" th:data-status="${o.status}">
-      <td th:text="'#' + ${o.orderId != null ? o.orderId : '#' + o.orderId}">HH001</td>
-      <td th:text="${o.customer.user.username}">user</td>
-      <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy')}">date</td>
+      <td >
+        <a th:href="@{/employee/orders/{id}(id=${o.orderId})}"
+           th:text="${'#' + o.orderCode}"
+           class="order-code"
+           style="color:#C0633A;font-weight:700;">HH00000000</a>
+      </td>
+      <td th:text="${o.customer.user.username}" class="order-user">user</td>
+      <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy')}" class="order-date">date</td>
       <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
       <td th:text="${o.status}">status</td>
       <td>
         <!-- nút theo trạng thái — giữ nguyên như cũ -->
         <div th:if="${o.status == 'Chờ xác nhận'}" style="display:flex;gap:4px;">
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post">
+          <form th:action="@{/employee/orders/{id}/status(id=${o.orderId})}" method="post" onsubmit="return confirm('Xác nhận đơn hàng?')">
             <input type="hidden" name="status" value="Đang xử lý"/>
             <button type="submit" style="background:#2980b9;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Xác nhận</button>
           </form>
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
+          <form th:action="@{/employee/orders/{id}/status(id=${o.orderId})}" method="post"
                 onsubmit="return confirm('Hủy đơn hàng này?')">
             <input type="hidden" name="status" value="Đã hủy"/>
             <button type="submit" style="background:#c00;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Hủy</button>
           </form>
         </div>
-        <div th:if="${o.status == 'Đang xử lý'}">
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post">
+        <div th:if="${o.status == 'Đang xử lý'}" style="display:flex;gap:4px;">
+          <form th:action="@{/employee/orders/{id}/status(id=${o.orderId})}" method="post" onsubmit="return confirm('Giao đơn hàng này?')">
             <input type="hidden" name="status" value="Đang giao"/>
             <button type="submit" style="background:#e67e22;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Giao hàng</button>
           </form>
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
+          <form th:action="@{/employee/orders/{id}/status(id=${o.orderId})}" method="post"
+                onsubmit="return confirm('Chuyển đơn về trạng thái Chờ xác nhận?')">
+            <input type="hidden" name="status" value="Chờ xác nhận"/>
+            <button type="submit" style="background:#888;color:#fff;border:none;padding:6px 10px;cursor:pointer;">↩ Quay lại</button>
+          </form>
+          <form th:action="@{/employee/orders/{id}/status(id=${o.orderId})}" method="post"
                 onsubmit="return confirm('Hủy đơn hàng này?')">
             <input type="hidden" name="status" value="Đã hủy"/>
             <button type="submit" style="background:#c00;color:#fff;border:none;padding:6px 10px;cursor:pointer;">Hủy</button>
@@ -125,17 +140,17 @@
           </form>
         </div>
       </td>
-      <td><a th:href="@{/orders/{id}(id=${o.orderId})}">WIP Xem chi tiết</a></td>
     </tr>
     </tbody>
   </table>
 </main>
 </body>
 <script>
+  let currentStatus = 'ALL';
+
   function filterStatus(status) {
-    const rows    = document.querySelectorAll('#orderTableBody tr');
+    currentStatus = status;
     const buttons = document.querySelectorAll('[id^="btn-"]');
-    let count     = 0;
 
     // Reset tất cả nút về màu mặc định
     buttons.forEach(btn => {
@@ -152,10 +167,27 @@
       activeBtn.style.border     = 'none';
     }
 
-    // Lọc rows
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+    const rows = document.querySelectorAll('#orderTableBody tr[data-status]');
+    let count = 0;
+
     rows.forEach(row => {
       const rowStatus = row.getAttribute('data-status');
-      if (status === 'ALL' || rowStatus === status) {
+      const matchesStatus = (currentStatus === 'ALL' || rowStatus === currentStatus);
+
+      let matchesKeyword = true;
+      if (keyword) {
+        const code = row.querySelector('.order-code')?.textContent.toLowerCase() || '';
+        const user = row.querySelector('.order-user')?.textContent.toLowerCase() || '';
+        const date = row.querySelector('.order-date')?.textContent.toLowerCase() || '';
+        matchesKeyword = code.includes(keyword) || user.includes(keyword) || date.includes(keyword);
+      }
+
+      if (matchesStatus && matchesKeyword) {
         row.style.display = '';
         count++;
       } else {
@@ -163,14 +195,11 @@
       }
     });
 
-    // Cập nhật số lượng
     const countEl = document.getElementById('countDisplay');
-    if (status === 'ALL') {
-      countEl.textContent = 'Đang hiển thị tất cả ' + count + ' đơn hàng';
-    } else {
-      countEl.textContent = 'Trạng thái: ' + status + ' — ' + count + ' đơn hàng';
-    }
+    const statusLabel = currentStatus === 'ALL' ? 'tất cả' : 'trạng thái "' + currentStatus + '"';
+    countEl.textContent = keyword
+            ? 'Tìm "' + keyword + '" trong ' + statusLabel + ' — ' + count + ' đơn hàng'
+            : 'Đang hiển thị ' + statusLabel + ' — ' + count + ' đơn hàng';
   }
 </script>
 </html>
-

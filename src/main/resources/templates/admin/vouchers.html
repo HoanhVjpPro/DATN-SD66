@@ -13,9 +13,32 @@
     table { width:100%; background:#fff; border-collapse:collapse; }
     th, td { padding:0.75rem; border-bottom:1px solid #eee; }
     th { background:#111; color:#fff; }
-    form { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; }
-    input { padding:8px; border:1px solid #ddd; margin-right:0.5rem; }
-    button { background:#C0633A; color:#fff; border:none; padding:8px 16px; cursor:pointer; }
+    form#voucherForm { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; }
+    input, select { padding:8px; border:1px solid #ddd; border-radius:4px; }
+    #voucherSearchInput { width:280px; }
+
+    /* ===== Nút bấm — đồng bộ toàn hệ thống ===== */
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:4px; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.85rem; padding:9px 18px; cursor:pointer; text-decoration:none; line-height:1.2; white-space:nowrap; }
+    .btn-sm { padding:6px 12px; font-size:0.8rem; }
+    .btn-primary { background:#C0633A; color:#fff; }
+    .btn-primary:hover { background:#9B4A27; }
+    .btn-secondary { background:#444; color:#fff; }
+    .btn-secondary:hover { background:#2c2c2c; }
+    .btn-success { background:#27ae60; color:#fff; }
+    .btn-success:hover { background:#1e8449; }
+    .btn-danger { background:#c00; color:#fff; }
+    .btn-danger:hover { background:#a00; }
+    .btn-warning { background:#e67e22; color:#fff; }
+    .btn-warning:hover { background:#c8611c; }
+    .btn-info { background:#2980b9; color:#fff; }
+    .btn-info:hover { background:#20648f; }
+    .btn-neutral { background:#666; color:#fff; }
+    .btn-neutral:hover { background:#4d4d4d; }
+
+    /* FILTER TABS */
+    .filter-tabs { display:flex; gap:8px; margin-bottom:1rem; flex-wrap:wrap; align-items:center; }
+    .filter-tabs button { background:#fff; border:1px solid #ddd; color:#333; }
+    .filter-tabs button.active { background:#C0633A; color:#fff; border-color:#C0633A; }
   </style>
 </head>
 <body>
@@ -24,6 +47,7 @@
   <a href="/admin/dashboard">Dashboard</a>
   <a href="/admin/products">Sản phẩm</a>
   <a href="/admin/categories">Danh mục</a>
+  <a href="/admin/brands">Thương hiệu</a>
   <a href="/admin/orders">Đơn hàng</a>
   <a href="/admin/returns">Trả hàng</a>
   <a href="/admin/vouchers" class="active">Voucher</a>
@@ -32,27 +56,142 @@
 </aside>
 <main>
   <h1>Voucher</h1>
-  <form action="/admin/vouchers" method="post">
+
+  <div th:if="${success}" style="background:#d4edda;color:#155724;padding:12px;border-radius:4px;margin-bottom:1rem;" th:text="${success}"></div>
+  <div th:if="${error}" style="background:#f8d7da;color:#721c24;padding:12px;border-radius:4px;margin-bottom:1rem;" th:text="${error}"></div>
+
+  <form action="/admin/vouchers" method="post" id="voucherForm">
     <input type="text" name="code" placeholder="Mã voucher" required/>
-    <input type="number" min="0" step="1000" name="discountAmount" placeholder="Giảm (VNĐ)" required/>
+
+    <select name="discountType" id="discountType" onchange="toggleDiscountFields()" required>
+      <option value="FIXED">Giảm số tiền cố định</option>
+      <option value="PERCENT">Giảm theo phần trăm (%)</option>
+      <option value="FREESHIP">Miễn phí vận chuyển</option>
+    </select>
+
+    <input type="number" min="0" step="1000" name="discountAmount" id="discountAmountInput"
+           placeholder="Giảm (VNĐ)"/>
+
+    <input type="number" min="0" max="100" step="1" name="discountPercent" id="discountPercentInput"
+           placeholder="Giảm (%)" style="display:none;"/>
+
+    <input type="number" min="0" step="1000" name="maxDiscountAmount" id="maxDiscountInput"
+           placeholder="Giảm tối đa (VNĐ, để trống = không giới hạn)" style="display:none;"/>
+
+    <input type="date" name="expiryDate" placeholder="Hạn sử dụng"/>
+
     <input type="number" name="quantity" placeholder="Số lượng" required/>
-    <button type="submit">Thêm</button>
+    <button type="submit" class="btn btn-primary">Thêm</button>
   </form>
+
+  <div class="filter-tabs">
+    <input type="text" id="voucherSearchInput" placeholder="Tìm theo mã hoặc hạn dùng (dd/MM/yyyy)..."
+           onkeyup="applyVoucherFilters()"/>
+
+    <button type="button" class="btn btn-sm active" onclick="filterVoucherType('ALL')" id="vtype-ALL">Tất cả</button>
+    <button type="button" class="btn btn-sm" onclick="filterVoucherType('FIXED')" id="vtype-FIXED">Cố định</button>
+    <button type="button" class="btn btn-sm" onclick="filterVoucherType('PERCENT')" id="vtype-PERCENT">Theo %</button>
+    <button type="button" class="btn btn-sm" onclick="filterVoucherType('FREESHIP')" id="vtype-FREESHIP">Free ship</button>
+  </div>
+
   <table>
-    <thead><tr><th>Mã</th><th>Giảm</th><th>Còn lại</th><th></th></tr></thead>
+    <thead><tr><th>Mã</th><th>Loại</th><th>Giảm</th><th>Hạn dùng</th><th>Còn lại</th><th></th></tr></thead>
     <tbody>
-      <tr th:each="v : ${vouchers}">
-        <td th:text="${v.code}">CODE</td>
-        <td th:text="${#numbers.formatDecimal(v.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
-        <td  th:text="${v.quantity}"></td>
-        <td>
-          <form th:action="@{/admin/vouchers/delete/{id}(id=${v.voucherId})}" method="post">
-            <button type="submit" style="background:#c00;">Xóa</button>
-          </form>
-        </td>
-      </tr>
+    <tr th:each="v : ${vouchers}" th:data-type="${v.discountType}">
+      <td th:text="${v.code}" class="voucher-code">CODE</td>
+      <td th:text="${v.discountType == 'PERCENT' ? 'Theo %' : (v.discountType == 'FREESHIP' ? 'Free ship' : 'Cố định')}">Cố định</td>
+      <td>
+          <span th:if="${v.discountType == 'PERCENT'}"
+                th:text="${v.discountPercent} + '%' + (${v.maxDiscountAmount != null} ? (' (tối đa ' + ${#numbers.formatDecimal(v.maxDiscountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ)') : '')">10%</span>
+        <span th:if="${v.discountType == 'FREESHIP'}">Miễn phí vận chuyển</span>
+        <span th:if="${v.discountType == 'FIXED'}"
+              th:text="${#numbers.formatDecimal(v.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+      </td>
+      <td class="voucher-expiry"
+          th:text="${v.expiryDate == null ? 'Vĩnh viễn' : (#temporals.format(v.expiryDate, 'dd/MM/yyyy') + (v.expired ? ' (Hết hạn)' : ''))}"
+          th:style="${v.expired} ? 'color:red;' : ''">--</td>
+      <td th:text="${v.quantity}"></td>
+      <td>
+        <button type="button" class="btn btn-secondary btn-sm" th:onclick="|toggleEditRow(this, 'edit-${v.voucherId}')|"
+                style="margin-right:6px;">Sửa</button>
+        <a th:href="@{/admin/vouchers/{id}/send(id=${v.voucherId})}"
+           class="btn btn-primary btn-sm" style="margin-right:6px;">Gửi</a>
+        <form th:action="@{/admin/vouchers/delete/{id}(id=${v.voucherId})}" method="post" style="display:inline-block;padding:0;margin:0;">
+          <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+        </form>
+      </td>
+    </tr>
+    <tr th:id="'edit-' + ${v.voucherId}" th:each="v : ${vouchers}" style="display:none;background:#fafafa;">
+      <td colspan="6">
+        <form th:action="@{/admin/vouchers/{id}/edit-quantity-expiry(id=${v.voucherId})}" method="post"
+              style="display:flex;gap:10px;align-items:center;padding:6px 0;">
+          <label style="font-weight:700;font-size:0.85rem;">Số lượng còn lại:</label>
+          <input type="number" name="quantity" min="0" th:value="${v.quantity}" required style="width:100px;"/>
+          <label style="font-weight:700;font-size:0.85rem;">Hạn dùng:</label>
+          <input type="date" name="expiryDate" th:value="${v.expiryDate}"/>
+          <button type="submit" class="btn btn-success btn-sm">Lưu</button>
+          <button type="button" class="btn btn-neutral btn-sm" th:onclick="|toggleEditRow(this, 'edit-${v.voucherId}')|">Hủy</button>
+        </form>
+      </td>
+    </tr>
     </tbody>
   </table>
+
+  <script>
+    function toggleEditRow(btn, rowId) {
+      const row = document.getElementById(rowId);
+      if (!row) return;
+      row.style.display = (row.style.display === 'none' || row.style.display === '') ? 'table-row' : 'none';
+    }
+
+    function toggleDiscountFields() {
+      const type = document.getElementById('discountType').value;
+      const amountInput = document.getElementById('discountAmountInput');
+      const percentInput = document.getElementById('discountPercentInput');
+      const maxInput = document.getElementById('maxDiscountInput');
+
+      amountInput.style.display = 'none';
+      amountInput.removeAttribute('required');
+      percentInput.style.display = 'none';
+      percentInput.removeAttribute('required');
+      maxInput.style.display = 'none';
+
+      if (type === 'FIXED') {
+        amountInput.style.display = 'inline-block';
+        amountInput.setAttribute('required', 'required');
+      } else if (type === 'PERCENT') {
+        percentInput.style.display = 'inline-block';
+        percentInput.setAttribute('required', 'required');
+        maxInput.style.display = 'inline-block';
+      }
+    }
+
+    let currentVoucherType = 'ALL';
+
+    function filterVoucherType(type) {
+      currentVoucherType = type;
+      document.querySelectorAll('[id^="vtype-"]').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('vtype-' + type)?.classList.add('active');
+      applyVoucherFilters();
+    }
+
+    function applyVoucherFilters() {
+      const keyword = document.getElementById('voucherSearchInput').value.trim().toLowerCase();
+      document.querySelectorAll('tr[data-type]').forEach(row => {
+        const rowType = row.getAttribute('data-type');
+        const matchesType = (currentVoucherType === 'ALL' || rowType === currentVoucherType);
+
+        let matchesKeyword = true;
+        if (keyword) {
+          const code = row.querySelector('.voucher-code')?.textContent.toLowerCase() || '';
+          const expiry = row.querySelector('.voucher-expiry')?.textContent.toLowerCase() || '';
+          matchesKeyword = code.includes(keyword) || expiry.includes(keyword);
+        }
+
+        row.style.display = (matchesType && matchesKeyword) ? '' : 'none';
+      });
+    }
+  </script>
 </main>
 </body>
 </html>

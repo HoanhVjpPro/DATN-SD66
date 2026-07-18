@@ -2,9 +2,11 @@ package com.example.datnhathub.service;
 
 import com.example.datnhathub.entity.Employee;
 import com.example.datnhathub.entity.Role;
+import com.example.datnhathub.entity.Shipper;
 import com.example.datnhathub.entity.Users;
 import com.example.datnhathub.repository.EmployeeRepository;
 import com.example.datnhathub.repository.RoleRepository;
+import com.example.datnhathub.repository.ShipperRepository;
 import com.example.datnhathub.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,8 @@ public class AdminService {
     private RoleRepository roleRepository;
     @Autowired
     private EmployeeRepository employeeRepository;
+    @Autowired
+    private ShipperRepository shipperRepository;
     @Autowired
     private UserRepository userRepository;
 
@@ -56,6 +60,30 @@ public class AdminService {
         employee.setUser(saved);
         employee.setEmployeeCode("NV" + saved.getUserID());
         employeeRepository.save(employee);
+        return saved;
+    }
+
+    @Transactional
+    public Users createShipper(String username, String password, String email, String phone) {
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Tên đăng nhập đã tồn tại");
+        }
+        Role role = roleRepository.findByRoleName("SHIPPER")
+                .orElseThrow(() -> new IllegalStateException("Role SHIPPER chưa được cấu hình"));
+
+        Users user = new Users();
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setEmail(email);
+        user.setPhone(phone);
+        user.setStatus(true);
+        user.setRole(role);
+        Users saved = userRepository.save(user);
+
+        Shipper shipper = new Shipper();
+        shipper.setUser(saved);
+        shipper.setShipperCode("SH" + saved.getUserID());
+        shipperRepository.save(shipper);
         return saved;
     }
 }

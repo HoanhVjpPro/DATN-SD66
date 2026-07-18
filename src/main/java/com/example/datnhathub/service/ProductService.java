@@ -1,12 +1,11 @@
 package com.example.datnhathub.service;
 
 import com.example.datnhathub.dto.ProductDto;
+import com.example.datnhathub.entity.Brand;
 import com.example.datnhathub.entity.Category;
 import com.example.datnhathub.entity.Product;
 import com.example.datnhathub.entity.ProductDetail;
-import com.example.datnhathub.repository.CategoryRepository;
-import com.example.datnhathub.repository.ProductImageRepository;
-import com.example.datnhathub.repository.ProductRepository;
+import com.example.datnhathub.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -24,16 +23,23 @@ public class ProductService {
     private CategoryRepository categoryRepository;
 
     @Autowired
-    private ProductImageRepository productImageRepository;
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private BrandRepository brandRepository;
+
+    public List<Brand> getAllBrands() {
+        return brandRepository.findAll();
+    }
 
     public Page<ProductDto> getProducts(String keyword,
                                         Integer categoryId,
+                                        Integer brandId,
                                         BigDecimal minPrice,
                                         BigDecimal maxPrice,
                                         String sort,
                                         int page) {
 
-        // Xác định sắp xếp
         Sort sorting = switch (sort == null ? "default" : sort) {
             case "price-asc"  -> Sort.by("details.price").ascending();
             case "price-desc" -> Sort.by("details.price").descending();
@@ -41,15 +47,12 @@ public class ProductService {
             default           -> Sort.by("productId").ascending();
         };
 
-        // Phân trang: 12 sản phẩm / trang
         Pageable pageable = PageRequest.of(page, 12, sorting);
 
-        // Query DB
         Page<Product> productPage = productRepository.findByFilters(
-                keyword, categoryId, minPrice, maxPrice, pageable
+                keyword, categoryId, brandId, minPrice, maxPrice, pageable
         );
 
-        // Chuyển Entity → DTO
         List<ProductDto> dtos = productPage.getContent()
                 .stream()
                 .map(this::toDTO)
@@ -143,4 +146,27 @@ public class ProductService {
         return productRepository.findAll();
     }
 
+    // Top N sản phẩm bán chạy nhất (theo tổng số lượng đã bán), dùng cho trang chủ
+    public List<ProductDto> getBestSellingProducts(int limit) {
+        List<OrderRepository.BestSellingProjection> topSelling =
+                orderRepository.findBestSellingProductIds(limit);
+
+        List<ProductDto> result = new java.util.ArrayList<>();
+        for (var item : topSelling) {
+            productRepository.findById(item.getProductId())
+                    .filter(p -> Boolean.TRUE.equals(p.getStatus())) // chỉ lấy sản phẩm còn đang bán
+                    .ifPresent(p -> result.add(toDTO(p)));
+        }
+
+        // Nếu chưa đủ số lượng (chưa có đơn hàng / sản phẩm bị ẩn) → bù bằng sản phẩm mới nhất
+        if (result.size() < limit) {
+            List<Integer> existingIds = result.stream().map(ProductDto::getProductId).toList();
+            getFeaturedProducts(limit * 2).stream()
+                    .filter(p -> !existingIds.contains(p.getProductId()))
+                    .limit(limit - result.size())
+                    .forEach(result::add);
+        }
+
+        return result;
+    }
 }
