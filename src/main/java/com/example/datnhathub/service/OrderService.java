@@ -135,10 +135,7 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    // ════════════════════════════════════════
-    // UC20 — Đặt hàng từ giỏ hàng
-    // FIX: validate tồn kho lại lần cuối + trừ kho sau khi đặt thành công
-    // ════════════════════════════════════════
+    // Đặt hàng từ giỏ hàng
     @Transactional
     public Orders placeOrder(Integer userId, String shippingAddress, String city, String paymentMethod, String voucherCode) {
 
@@ -149,19 +146,13 @@ public class OrderService {
             throw new RuntimeException("Giỏ hàng đang trống, không thể đặt hàng.");
         }
 
-        // FIX: trừ kho NGAY tại đây (lúc đặt hàng) bằng UPDATE có điều kiện ở tầng DB
-        // (WHERE StockQuantity >= qty), thay vì chỉ kiểm tra rồi trừ trễ lúc giao hàng.
-        // Nhờ vậy nếu 2 khách đặt cùng lúc khi chỉ còn 1 sản phẩm, chỉ 1 người trừ kho
-        // thành công (atomic ở DB), người còn lại nhận lỗi ngay và đơn không được tạo,
-        // thay vì cả 2 đơn đều tạo được rồi admin mới phát hiện thiếu hàng lúc giao.
         for (CartDetail cd : cart.getDetails()) {
             ProductDetail pd = cd.getProductDetail();
-            int updatedRows = productDetailRepository.decreaseStock(pd.getProductDetailId(), cd.getQuantity());
-            if (updatedRows == 0) {
+            int stock = pd.getStockQuantity() == null ? 0 : pd.getStockQuantity();
+            if (cd.getQuantity() > stock) {
                 throw new RuntimeException(
                         "Sản phẩm \"" + pd.getProduct().getProductName() + "\" (" + pd.getSize() + "/" + pd.getColor()
-                                + ") không đủ số lượng trong kho (có thể vừa được người khác mua). "
-                                + "Vui lòng cập nhật lại giỏ hàng."
+                                + ") không đủ số lượng trong kho. Vui lòng cập nhật lại giỏ hàng."
                 );
             }
         }
@@ -206,7 +197,7 @@ public class OrderService {
                 && total.compareTo(BigDecimal.ZERO) > 0;
         order.setStatus(needPayment ? "Chờ thanh toán" : "Chờ xác nhận");
         order.setTotalAmount(total);
-        order.setStockDeducted(true); // kho đã bị trừ ngay ở trên, không trừ lại lúc giao hàng nữa
+        order.setStockDeducted(false);
 
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (CartDetail cd : cart.getDetails()) {
@@ -288,11 +279,25 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại"));
 
         String previousStatus = order.getStatus();
-        order.setStatus(status);
 
         if (employeeUserId != null) {
             employeeRepository.findByUserUserID(employeeUserId).ifPresent(order::setEmployee);
         }
+
+        // Admin/nhân viên xác nhận đơn -> TRỪ KHO tại đây (lần đầu tiên đơn vào "Đang xử lý")
+        if ("Đang xử lý".equals(status) && !Boolean.TRUE.equals(order.getStockDeducted())) {
+            deductStockForOrder(order); // ném lỗi nếu không đủ hàng -> rollback toàn bộ transaction
+            order.setStockDeducted(true);
+        }
+
+        // Nếu admin bấm "Quay lại" từ "Đang xử lý" về "Chờ xác nhận" -> hoàn lại kho đã trừ
+        if ("Chờ xác nhận".equals(status) && "Đang xử lý".equals(previousStatus)
+                && Boolean.TRUE.equals(order.getStockDeducted())) {
+            restoreStockForOrder(order);
+            order.setStockDeducted(false);
+        }
+
+        order.setStatus(status);
 
         if ("Đang giao".equals(status) && order.getShipping() != null) {
             order.getShipping().setShippingStatus("Đang giao");
@@ -307,12 +312,8 @@ public class OrderService {
             if (order.getShipping() != null) order.getShipping().setShippingStatus("Đã hủy");
 
             // Hoàn kho nếu trước đó ĐÃ từng trừ (dùng cờ, không phụ thuộc chuỗi trạng thái)
-            if (Boolean.TRUE.equals(order.getStockDeducted()) && order.getDetails() != null) {
-                for (OrderDetail od : order.getDetails()) {
-                    ProductDetail pd = od.getProductDetail();
-                    pd.setStockQuantity(pd.getStockQuantity() + od.getQuantity());
-                    productDetailRepository.save(pd);
-                }
+            if (Boolean.TRUE.equals(order.getStockDeducted())) {
+                restoreStockForOrder(order);
                 order.setStockDeducted(false);
             }
 
@@ -324,6 +325,31 @@ public class OrderService {
         }
 
         orderRepository.save(order);
+    }
+
+    // Trừ kho atomic cho từng dòng đơn hàng; ném lỗi (và rollback transaction) nếu bất kỳ sản phẩm nào không đủ hàng
+    private void deductStockForOrder(Orders order) {
+        if (order.getDetails() == null) return;
+        for (OrderDetail od : order.getDetails()) {
+            ProductDetail pd = od.getProductDetail();
+            int updatedRows = productDetailRepository.decreaseStock(pd.getProductDetailId(), od.getQuantity());
+            if (updatedRows == 0) {
+                throw new IllegalStateException(
+                        "Không thể xác nhận đơn: sản phẩm \"" + pd.getProduct().getProductName()
+                                + "\" (" + pd.getSize() + "/" + pd.getColor() + ") không đủ tồn kho."
+                );
+            }
+        }
+    }
+
+    // Hoàn lại kho cho toàn bộ đơn hàng (dùng khi hủy đơn hoặc revert về "Chờ xác nhận")
+    private void restoreStockForOrder(Orders order) {
+        if (order.getDetails() == null) return;
+        for (OrderDetail od : order.getDetails()) {
+            ProductDetail pd = od.getProductDetail();
+            pd.setStockQuantity(pd.getStockQuantity() + od.getQuantity());
+            productDetailRepository.save(pd);
+        }
     }
 
     // Tự động hủy đơn "Chờ thanh toán" quá 15 phút chưa thanh toán
@@ -354,5 +380,13 @@ public class OrderService {
 
     public List<OrderRepository.TopProductProjection> getAllProductSales() {
         return orderRepository.getAllProductSales();
+    }
+
+    public List<OrderRepository.DailyRevenueProjection> getDailyRevenue() {
+        return orderRepository.getDailyRevenue();
+    }
+
+    public List<OrderRepository.WeeklyRevenueProjection> getWeeklyRevenue() {
+        return orderRepository.getWeeklyRevenue();
     }
 }

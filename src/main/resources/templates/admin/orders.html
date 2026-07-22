@@ -90,7 +90,7 @@
       </td>
       <td th:text="${o.customer.user.username}" class="order-user">user</td>
       <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy')}" class="order-date">date</td>
-      <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
+      <td style="text-align: right" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
       <td th:text="${o.status}">status</td>
       <td>
         <!-- nút theo trạng thái -->

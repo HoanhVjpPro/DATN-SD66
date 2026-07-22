@@ -15,7 +15,7 @@ public class OrderCleanupScheduler {
     @Autowired
     private OrderService orderService;
 
-    // (fixedRate tính bằng millisecond: 60_000 = 1 phút)
+    // fixedRate tính bằng millisecond: 60_000 = 1 phút
     @Scheduled(fixedRate = 60_000)
     public void cancelExpiredUnpaidOrders() {
         int count = orderService.cancelExpiredUnpaidOrders();

@@ -96,4 +96,37 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
             "GROUP BY p.ProductName " +
             "ORDER BY totalQty DESC", nativeQuery = true)
     List<TopProductProjection> getAllProductSales();
+
+    // Doanh thu theo ngày (14 ngày gần nhất), cùng điều kiện lọc như doanh thu tháng
+    @Query(value = "SELECT FORMAT(o.OrderDate, 'dd/MM') AS day, SUM(o.TotalAmount) AS revenue " +
+            "FROM Orders o " +
+            "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
+            "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
+            "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
+            "AND o.OrderDate >= DATEADD(DAY, -13, CAST(GETDATE() AS DATE)) " +
+            "GROUP BY FORMAT(o.OrderDate, 'dd/MM'), CAST(o.OrderDate AS DATE) " +
+            "ORDER BY CAST(o.OrderDate AS DATE)", nativeQuery = true)
+    List<DailyRevenueProjection> getDailyRevenue();
+
+    // Doanh thu theo tuần (8 tuần gần nhất, theo ISO week)
+    @Query(value = "SELECT CONCAT(N'Tuần ', DATEPART(ISO_WEEK, o.OrderDate), '/', DATEPART(YEAR, o.OrderDate)) AS week, " +
+            "SUM(o.TotalAmount) AS revenue " +
+            "FROM Orders o " +
+            "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
+            "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
+            "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
+            "AND o.OrderDate >= DATEADD(WEEK, -7, GETDATE()) " +
+            "GROUP BY DATEPART(YEAR, o.OrderDate), DATEPART(ISO_WEEK, o.OrderDate) " +
+            "ORDER BY DATEPART(YEAR, o.OrderDate), DATEPART(ISO_WEEK, o.OrderDate)", nativeQuery = true)
+    List<WeeklyRevenueProjection> getWeeklyRevenue();
+
+    interface DailyRevenueProjection {
+        String getDay();
+        java.math.BigDecimal getRevenue();
+    }
+
+    interface WeeklyRevenueProjection {
+        String getWeek();
+        java.math.BigDecimal getRevenue();
+    }
 }

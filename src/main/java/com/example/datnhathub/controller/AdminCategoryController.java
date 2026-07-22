@@ -1,7 +1,9 @@
 package com.example.datnhathub.controller;
 
 import com.example.datnhathub.entity.Category;
+import com.example.datnhathub.entity.Users;
 import com.example.datnhathub.repository.CategoryRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
@@ -21,7 +23,14 @@ public class AdminCategoryController {
     // GET /admin/categories — Danh sách + form thêm/sửa
     // → templates/admin/categories.html
     @GetMapping
-    public String listCategories(@RequestParam(required = false) Integer editId, Model model) {
+    public String listCategories(@RequestParam(required = false) Integer editId, Model model, HttpSession session) {
+        Users user  = (Users) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        if (!user.getRole().getRoleId().equals(1)) {
+            return "access-denied";
+        }
         List<Category> categories = categoryRepository.findAll();
         model.addAttribute("categories", categories);
 

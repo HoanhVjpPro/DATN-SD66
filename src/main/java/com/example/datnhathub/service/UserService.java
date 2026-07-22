@@ -18,9 +18,6 @@ public class UserService {
     @Autowired
     private CustomerRepository customerRepository;
 
-    // ════════════════════════════════════════
-    // REGISTER
-    // ════════════════════════════════════════
     @Transactional
     public String register(RegisterDto dto) {
 
@@ -67,9 +64,6 @@ public class UserService {
         return null; // null = thành công, không có lỗi
     }
 
-    // ════════════════════════════════════════
-    // LOGIN
-    // ════════════════════════════════════════
     public Users login(String username, String password) {
 
         // Tìm user theo username

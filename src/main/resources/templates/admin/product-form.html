@@ -38,6 +38,36 @@
     .btn-info:hover { background:#20648f; }
     .btn-neutral { background:#666; color:#fff; }
     .btn-neutral:hover { background:#4d4d4d; }
+    .rte-toolbar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+      padding: 8px;
+      background: #f0f0f0;
+      border: 1px solid #ccc;
+      border-radius: 6px 6px 0 0;
+    }
+    .rte-toolbar button, .rte-toolbar input[type=color] {
+      width: 36px;
+      height: 32px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background: #fff;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+    }
+    .rte-toolbar button:hover { background: #eee; }
+    .rte-editor {
+      min-height: 180px;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      background: #fff;
+      outline: none;
+      line-height: 1.6;
+    }
+    .rte-editor:focus { border-color: #C0633A; }
   </style>
 </head>
 <body>
@@ -66,17 +96,36 @@
       <input type="text" name="productName" th:value="${product.productName}" required/>
       <label>Danh mục</label>
       <select name="categoryId" required>
+        <option value="" disabled>-- chưa có --</option>
         <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.categoryName}"
                 th:selected="${product.category != null and product.category.categoryId == c.categoryId}"></option>
       </select>
       <label>Thương hiệu</label>
       <select name="brandId">
-        <option value="">-- Không chọn --</option>
+        <option value="" disabled>-- chưa có --</option>
         <option th:each="b : ${brands}" th:value="${b.brandId}" th:text="${b.brandName}"
                 th:selected="${product.brand != null and product.brand.brandId == b.brandId}"></option>
       </select>
       <label>Mô tả</label>
-      <textarea name="description" rows="4" th:text="${product.description}"></textarea>
+      <!-- Toolbar -->
+      <div class="rte-toolbar">
+        <button type="button" onclick="document.execCommand('bold')" title="Đậm"><b>B</b></button>
+        <button type="button" onclick="document.execCommand('italic')" title="Nghiêng"><i>I</i></button>
+        <button type="button" onclick="document.execCommand('underline')" title="Gạch chân"><u>U</u></button>
+        <button type="button" onclick="toggleUppercase()" title="In hoa">AA</button>
+        <input type="color" onchange="document.execCommand('foreColor', false, this.value)" title="Màu chữ" value="#000000"/>
+        <button type="button" onclick="document.execCommand('removeFormat')" title="Xóa định dạng">✕</button>
+      </div>
+
+      <!-- Vùng soạn thảo hiển thị cho admin -->
+      <div id="descriptionEditor"
+           class="rte-editor"
+           contenteditable="true"
+           th:utext="${product.description}">
+      </div>
+
+      <!-- Ô ẩn thực sự gửi lên server -->
+      <textarea name="description" id="descriptionHidden" style="display:none;"></textarea>
       <label><input type="checkbox" name="status" value="true" th:checked="${product.status == null or product.status}" style="width:auto;"/> Đang bán</label>
       <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Lưu sản phẩm</button>
     </form>
@@ -137,8 +186,9 @@
     <!-- UPLOAD ẢNH -->
     <h3 style="margin-top:1.5rem;">Upload ảnh</h3>
     <form th:action="@{/admin/products/{id}/image(id=${product.productId})}" method="post" enctype="multipart/form-data">
+      <label>Hình ảnh</label>
       <input type="file" name="file" accept="image/*" required/>
-      <label>Gắn cho biến thể (để trống = ảnh chung của sản phẩm)</label>
+      <label>Gắn cho biến thể</label>
       <select name="productDetailId">
         <option value="">-- Ảnh chung sản phẩm --</option>
         <option th:each="d : ${details}" th:value="${d.productDetailId}"
@@ -150,4 +200,26 @@
   </div>
 </main>
 </body>
+<script>
+  // In hoa phần văn bản đang bôi đen (execCommand không có sẵn lệnh này)
+  function toggleUppercase() {
+    const selection = window.getSelection();
+    if (!selection.rangeCount || selection.isCollapsed) {
+      alert('Vui lòng bôi đen đoạn chữ cần in hoa trước!');
+      return;
+    }
+    const range = selection.getRangeAt(0);
+    const selectedText = range.toString();
+    const span = document.createElement('span');
+    span.textContent = selectedText.toUpperCase();
+    range.deleteContents();
+    range.insertNode(span);
+  }
+
+  // Đồng bộ nội dung HTML vào textarea ẩn trước khi submit form
+  document.querySelector('form').addEventListener('submit', function () {
+    const editor = document.getElementById('descriptionEditor');
+    document.getElementById('descriptionHidden').value = editor.innerHTML;
+  });
+</script>
 </html>

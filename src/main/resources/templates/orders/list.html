@@ -27,7 +27,7 @@
         <a style="color: #C0633A; font-weight:700" th:href="@{/orders/{id}(id=${o.orderId})}" th:text="'#' + ${o.orderCode}"></a>
       </td>
       <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy HH:mm')}">date</td>
-      <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
+      <td style="text-align: right" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
       <td><span class="status" th:text="${o.status}"
                 th:style="${o.status == 'Xử lý sự cố giao hàng'} ? 'background:#c00;' : ''">status</span></td>
     </tr>

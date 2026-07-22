@@ -61,24 +61,15 @@ public class ProductService {
         return new PageImpl<>(dtos, pageable, productPage.getTotalElements());
     }
 
-    // ════════════════════════════════════════
-    // Lấy tất cả danh mục (cho filter sidebar)
-    // ════════════════════════════════════════
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
 
-    // ════════════════════════════════════════
-    // Lấy chi tiết 1 sản phẩm (UC07)
-    // ════════════════════════════════════════
     public Product getProductById(Integer productId) {
         return productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + productId));
     }
 
-    // ════════════════════════════════════════
-    // Helper: Chuyển Product → ProductDTO
-    // ════════════════════════════════════════
     private ProductDto toDTO(Product product) {
         ProductDto dto = new ProductDto();
         dto.setProductId(product.getProductId());

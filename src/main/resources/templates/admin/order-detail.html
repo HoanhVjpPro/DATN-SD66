@@ -26,6 +26,7 @@
         .badge-done       { background:#d4edda; color:#155724; }
         .badge-cancelled  { background:#f8d7da; color:#721c24; }
         .badge-waiting    { background:#fff3cd; color:#856404; }
+        .badge-troble     { background: #ffdd98; color: #a85400;}
         .alert { padding:1rem; border-radius:4px; margin-bottom:1rem; font-weight:700; }
         .alert-success { background:#d4edda; color:#155724; }
         .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
@@ -61,7 +62,8 @@
     <div class="topbar">
         <h1 th:text="'Đơn hàng #' + (${order.orderId != null ? order.orderId : '#' + order.orderId})"></h1>
         <div style="display:flex;gap:8px;">
-            <a th:href="@{/admin/orders/{id}/invoice/pdf(id=${order.orderId})}" class="btn-back" style="background:#C0633A;">🧾 Xuất hóa đơn PDF</a>
+            <a th:if="${order.status != 'Chờ thanh toán' && order.status != 'Chờ xác nhận' && order.status != 'Đã hủy'}"
+               th:href="@{/admin/orders/{id}/invoice/pdf(id=${order.orderId})}" class="btn-back" style="background:#C0633A;">🧾 Xuất hóa đơn PDF</a>
             <a href="/admin/orders" class="btn-back">← Quay lại</a>
         </div>
     </div>
@@ -92,7 +94,8 @@
                                (${order.status == 'Đang xử lý'} ? 'badge badge-processing' :
                                (${order.status == 'Đã hủy'}    ? 'badge badge-cancelled' :
                                (${order.status == 'Chờ thanh toán'} ? 'badge badge-waiting' :
-                                'badge badge-pending'))))">status</span>
+                               (${order.status == 'Xử lý sự cố giao hàng'} ? 'badge badge-troble' :
+                                'badge badge-pending')))))">status</span>
                         </div>
                     </div>
                     <div class="info-block">
@@ -243,15 +246,23 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI — TÓM TẮT -->
         <div>
             <div class="card" style="position:sticky;top:20px;"
                  th:with="shippingFee=${order.shipping != null ? order.shipping.shippingFee : 0},
-                          subtotal=${order.totalAmount - shippingFee}">
+              subtotal=${order.subtotal},
+              discountAmount=${subtotal + shippingFee - order.totalAmount}">
                 <h3>Tóm tắt thanh toán</h3>
                 <div class="summary-row">
                     <span>Tạm tính</span>
                     <span th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                </div>
+                <div th:if="${order.voucher != null}" class="summary-row">
+                    <span>Voucher</span>
+                    <strong style="color:#27ae60;"
+                            th:text="${order.voucher.freeShip}
+                          ? 'Miễn phí vận chuyển'
+                          : '-' + ${#numbers.formatDecimal(discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                    </strong>
                 </div>
                 <div class="summary-row">
                     <span>Phí vận chuyển</span>

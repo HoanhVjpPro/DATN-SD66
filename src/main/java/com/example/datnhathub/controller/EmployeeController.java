@@ -1,9 +1,6 @@
 package com.example.datnhathub.controller;
 
-import com.example.datnhathub.entity.OrderDetail;
-import com.example.datnhathub.entity.Orders;
-import com.example.datnhathub.entity.ProductDetail;
-import com.example.datnhathub.entity.Voucher;
+import com.example.datnhathub.entity.*;
 import com.example.datnhathub.repository.OrderRepository;
 import com.example.datnhathub.repository.ProductDetailRepository;
 import com.example.datnhathub.repository.VoucherRepository;

@@ -69,8 +69,6 @@
       <div class="detail-price" id="priceDisplay"
            th:text="${selectedDetail != null ? #numbers.formatDecimal(selectedDetail.price, 0, 'COMMA', 0, 'POINT') + ' đ' : 'Liên hệ'}">0 đ</div>
 
-      <p class="detail-desc" th:text="${product.description}">Mô tả sản phẩm</p>
-
       <div th:if="${success}" class="alert success" th:text="${success}"></div>
       <div th:if="${error}" class="alert error" th:text="${error}"></div>
 
@@ -111,6 +109,16 @@
         </button>
         <a class="btn btn-outline" th:href="@{/products}">Tiếp tục xem sản phẩm</a>
       </form>
+    </div>
+  </section>
+
+  <!--description-->
+  <section class="reviews">
+    <div class="section-head">
+      <h2>Mô tả</h2>
+    </div>
+    <div class="cart-card">
+      <div style="color: black; white-space: pre-wrap;" class="detail-desc" th:utext="${product.description}">Mô tả sản phẩm</div>
     </div>
   </section>
 

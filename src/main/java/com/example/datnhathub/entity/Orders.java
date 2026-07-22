@@ -77,4 +77,11 @@ public class Orders {
                 .mapToInt(OrderDetail::getQuantity)
                 .sum();
     }
+
+    public BigDecimal getSubtotal() {
+        if (details == null) return BigDecimal.ZERO;
+        return details.stream()
+                .map(d -> d.getUnitPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }

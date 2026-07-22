@@ -81,7 +81,7 @@
                       onsubmit="return confirm('Xác nhận khách đã nhận được hàng?')">
                     <button type="submit" class="btn-confirm">✓ Khách đã nhận hàng</button>
                 </form>
-                <button type="button" class="btn-incident" th:onclick="|toggleIncidentForm(${o.orderId})|">⚠ Báo sự cố</button>
+                <button th:if="${o.shipping.getConfirmedByShipper() == false}" type="button" class="btn-incident" th:onclick="|toggleIncidentForm(${o.orderId})|">⚠ Báo sự cố</button>
             </div>
             <form th:id="'incident-form-' + ${o.orderId}" style="display:none;width:100%;margin-top:8px;"
                   th:action="@{/shipper/orders/{id}/report-incident(id=${o.orderId})}" method="post"
