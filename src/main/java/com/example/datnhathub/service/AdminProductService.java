@@ -40,24 +40,18 @@ public class AdminProductService {
         return categoryRepository.findAll();
     }
 
-    // ════════════════════════════════════════
-    // UC10, UC11 — Lấy tất cả sản phẩm (admin)
-    // ════════════════════════════════════════
+    // Lấy tất cả sản phẩm (admin)
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
-    // ════════════════════════════════════════
-    // UC10 — Lấy sản phẩm theo ID (dùng cho form edit)
-    // ════════════════════════════════════════
+    // Lấy sản phẩm theo ID (dùng cho form edit)
     public Product getProductById(Integer id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + id));
     }
 
-    // ════════════════════════════════════════
-    // UC10, UC11 — Lưu sản phẩm (thêm mới + sửa)
-    // ════════════════════════════════════════
+    // Lưu sản phẩm (thêm mới + sửa)
     public Product saveProduct(Integer productId, String productName, Integer categoryId,
                                Integer brandId, String description, boolean isActive) {
         Product product = (productId != null)
@@ -81,17 +75,12 @@ public class AdminProductService {
         return productRepository.save(product);
     }
 
-    // ════════════════════════════════════════
-    // UC12 — Xóa sản phẩm
-    // ════════════════════════════════════════
+    // Xóa sản phẩm
     public void deleteProduct(Integer productId) {
         productRepository.deleteById(productId);
     }
 
-    // ════════════════════════════════════════
-    // UC13 — Thêm biến thể
-    // ════════════════════════════════════════
-    // Sửa lại addDetail — thêm tham số stockQuantity
+    // Thêm biến thể
     public void addDetail(Integer productId,
                           String size,
                           String color,
@@ -111,23 +100,17 @@ public class AdminProductService {
         productDetailRepository.save(detail);
     }
 
-    // ════════════════════════════════════════
-    // UC13 — Xóa biến thể
-    // ════════════════════════════════════════
+    // Xóa biến thể
     public void deleteDetail(Integer detailId) {
         productDetailRepository.deleteById(detailId);
     }
 
-    // ════════════════════════════════════════
-    // UC13 — Lấy biến thể theo productId
-    // ════════════════════════════════════════
+    // Lấy biến thể theo productId
     public List<ProductDetail> getDetailsByProductId(Integer productId) {
         return productDetailRepository.findByProductProductId(productId);
     }
 
-    // ════════════════════════════════════════
-    // UC14 — Upload ảnh sản phẩm (có thể gắn cho 1 biến thể cụ thể)
-    // ════════════════════════════════════════
+    // Upload ảnh sản phẩm (có thể gắn cho 1 biến thể cụ thể)
     public void uploadImage(Integer productId,
                             MultipartFile file,
                             boolean isDefault,
@@ -167,18 +150,15 @@ public class AdminProductService {
         productImageRepository.save(image);
     }
 
-    // ════════════════════════════════════════
-// UC12 — Ẩn / Hiện sản phẩm
-// ════════════════════════════════════════
+// Ẩn / Hiện sản phẩm
     public void toggleProductStatus(Integer productId) {
         Product product = getProductById(productId);
         product.setStatus(!Boolean.TRUE.equals(product.getStatus()));
         productRepository.save(product);
     }
 
-    // ════════════════════════════════════════
-// UC14 — Xóa ảnh sản phẩm
-// ════════════════════════════════════════
+
+// Xóa ảnh sản phẩm
     public void deleteImage(Integer imageId) {
         productImageRepository.deleteById(imageId);
     }

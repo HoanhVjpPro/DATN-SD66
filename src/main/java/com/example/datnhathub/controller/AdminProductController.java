@@ -2,11 +2,13 @@ package com.example.datnhathub.controller;
 
 import com.example.datnhathub.entity.Product;
 import com.example.datnhathub.entity.ProductDetail;
+import com.example.datnhathub.entity.Users;
 import com.example.datnhathub.repository.CategoryRepository;
 import com.example.datnhathub.repository.ProductDetailRepository;
 import com.example.datnhathub.repository.ProductImageRepository;
 import com.example.datnhathub.repository.ProductRepository;
 import com.example.datnhathub.service.AdminProductService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -38,7 +40,14 @@ public class AdminProductController {
 
     // GET /admin/products — Danh sách sản phẩm
     @GetMapping
-    public String listProducts(Model model) {
+    public String listProducts(Model model, HttpSession session) {
+        Users user = (Users) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        if (!user.getRole().getRoleId().equals(1)) {
+            return "access-denied";
+        }
         List<Product> products = adminProductService.getAllProducts();
         model.addAttribute("products", products);
         return "admin/products"; // templates/admin/products.html

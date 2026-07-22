@@ -57,13 +57,13 @@ public class AdminController {
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
-//        Users user = (Users) session.getAttribute("user");
-//        if (user == null) {
-//            return "redirect:/login";
-//        }
-//        if (!"ADMIN".equals(user.getRole())) {
-//            return "access-denied";
-//        }
+        Users user = (Users) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        if (!user.getRole().getRoleId().equals(1)) {
+            return "access-denied";
+        }
         model.addAttribute("totalProducts", productService.getAllProducts().size());
         model.addAttribute("totalCategories", categoryService.getAll().size());
         model.addAttribute("totalOrders", orderService.countAll());
@@ -76,6 +76,18 @@ public class AdminController {
         model.addAttribute("revenueData",
                 monthlyRevenue.stream().map(OrderRepository.MonthlyRevenueProjection::getRevenue).toList());
 
+        var dailyRevenue = orderService.getDailyRevenue();
+        model.addAttribute("dailyLabels",
+                dailyRevenue.stream().map(OrderRepository.DailyRevenueProjection::getDay).toList());
+        model.addAttribute("dailyData",
+                dailyRevenue.stream().map(OrderRepository.DailyRevenueProjection::getRevenue).toList());
+
+        var weeklyRevenue = orderService.getWeeklyRevenue();
+        model.addAttribute("weeklyLabels",
+                weeklyRevenue.stream().map(OrderRepository.WeeklyRevenueProjection::getWeek).toList());
+        model.addAttribute("weeklyData",
+                weeklyRevenue.stream().map(OrderRepository.WeeklyRevenueProjection::getRevenue).toList());
+
         model.addAttribute("topProducts", orderService.getTopSellingProducts());
 
         return "admin/dashboard";
@@ -83,7 +95,14 @@ public class AdminController {
 
     // ── VOUCHERS ──
     @GetMapping("/vouchers")
-    public String vouchers(Model model) {
+    public String vouchers(Model model, HttpSession session) {
+        Users user = (Users) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        if (!user.getRole().getRoleId().equals(1)) {
+            return "access-denied";
+        }
         model.addAttribute("vouchers", voucherService.getAll());
         model.addAttribute("voucher", new Voucher());
         return "admin/vouchers";
@@ -231,7 +250,7 @@ public class AdminController {
         if (user == null) {
             return "redirect:/login";
         }
-        if ("Admin".equals(user.getUsername())) {
+        if (!user.getRole().getRoleId().equals(1)) {
             return "access-denied";
         }
 
@@ -262,7 +281,14 @@ public class AdminController {
 
     // ── orders ──
     @GetMapping("/orders")
-    public String orders(Model model) {
+    public String orders(Model model, HttpSession session) {
+        Users user = (Users) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        if (!user.getRole().getRoleId().equals(1)) {
+            return "access-denied";
+        }
         model.addAttribute("orders", orderService.getAllOrders());
         return "admin/orders";
     }
@@ -284,13 +310,25 @@ public class AdminController {
     }
 
     @PostMapping("/orders/{id}/status")
-    public String updateOrderStatus(@PathVariable Integer id, @RequestParam String status) {
-        orderService.updateOrderStatus(id, status, null);
-        return "redirect:/admin/orders";
+    public String updateOrderStatus(@PathVariable Integer id, @RequestParam String status, RedirectAttributes ra) {
+        try {
+            orderService.updateOrderStatus(id, status, null);
+            ra.addFlashAttribute("success", "Đã cập nhật trạng thái đơn hàng!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/admin/orders/" + id;
     }
 
     @GetMapping("/products/sales")
-    public String allProductSales(Model model) {
+    public String allProductSales(Model model, HttpSession session) {
+        Users user = (Users) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        if (!user.getRole().getRoleId().equals(1)) {
+            return "access-denied";
+        }
         model.addAttribute("productSales", orderService.getAllProductSales());
         return "admin/all-doanh-so";
     }

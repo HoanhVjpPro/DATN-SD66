@@ -40,7 +40,7 @@
     .nav-logo svg { width: 32px; height: 32px; }
     .nav-logo-text {
       font-family: var(--font-display); font-size: 1.7rem; font-weight: 900;
-      color: var(--white); letter-spacing: 1px; text-transform: lowercase;
+      color: var(--white); letter-spacing: 1px;
     }
     .nav-logo-text span { color: var(--rust); }
     .nav-links { display: flex; gap: 2rem; list-style: none; }
@@ -360,7 +360,7 @@
 <nav>
   <a href="#" class="nav-logo">
     <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
-    <span class="nav-logo-text">hat<span>hub</span></span>
+    <strong class="nav-logo-text">HATHUB</strong>
   </a>
 
   <ul class="nav-links">
@@ -451,13 +451,13 @@
         <div class="cat-name">Mũ bảo hiểm</div>
       </div>
     </a>
-    <a href="/products?categoryId=2" class="cat-card cat-3">
+    <a href="/products?categoryId=3" class="cat-card cat-3">
       <div class="cat-card-bg">👒</div>
       <div class="cat-card-inner">
         <div class="cat-name">Mũ rơm</div>
       </div>
     </a>
-    <a href="/products?categoryId=3" class="cat-card cat-4">
+    <a href="/products?categoryId=9" class="cat-card cat-4">
       <div class="cat-card-bg">🎩</div>
       <div class="cat-card-inner">
         <div class="cat-name">Mũ chuyên dụng</div>

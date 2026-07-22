@@ -13,6 +13,11 @@
     .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; }
     .stat { background:#fff; padding:1.5rem; border-radius:8px; }
     .stat-num { font-size:2rem; font-weight:900; color:#C0633A; }
+    .rev-tab {
+      padding:0.5rem 1.2rem; border:none; border-radius:6px; cursor:pointer;
+      background:#eee; font-weight:700; font-family:'Nunito',sans-serif; font-size:0.85rem;
+    }
+    .rev-tab.active { background:#C0633A; color:#fff; }
   </style>
 </head>
 <body>
@@ -39,10 +44,17 @@
   </div>
   <br>
   <div style="display:flex;align-items:center;justify-content:space-between;">
-    <h1>Doanh thu 6 tháng gần nhất</h1>
+    </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+    <h1>Doanh thu</h1>
     <a href="/admin/dashboard/export/excel" style="background:#27ae60;color:#fff;padding:8px 18px;border-radius:4px;font-weight:700;text-decoration:none;font-size:0.85rem;">📊 Xuất Excel doanh thu</a>
-  </div>
+      </div>
   <div class="stat" style="max-width:100%;">
+    <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+      <button type="button" class="rev-tab active" data-period="daily">Theo ngày</button>
+      <button type="button" class="rev-tab" data-period="weekly">Theo tuần</button>
+      <button type="button" class="rev-tab" data-period="monthly">Theo tháng</button>
+    </div>
     <canvas id="revenueChart" height="90"></canvas>
   </div>
   <br>
@@ -75,17 +87,24 @@
 </main>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <script th:inline="javascript">
-  const revenueLabels = /*[[${revenueLabels}]]*/ [];
-  const revenueData = /*[[${revenueData}]]*/ [];
+  const revenueByPeriod = {
+    daily:   { labels: /*[[${dailyLabels}]]*/ [],   data: /*[[${dailyData}]]*/ [] },
+    weekly:  { labels: /*[[${weeklyLabels}]]*/ [],  data: /*[[${weeklyData}]]*/ [] },
+    monthly: { labels: /*[[${revenueLabels}]]*/ [], data: /*[[${revenueData}]]*/ [] }
+  };
 
-  new Chart(document.getElementById('revenueChart'), {
+  const ctx = document.getElementById('revenueChart');
+  let currentPeriod = 'daily';
+
+  const revenueChart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: revenueLabels,
+      labels: revenueByPeriod[currentPeriod].labels,
       datasets: [{
         label: 'Doanh thu (đ)',
-        data: revenueData,
+        data: revenueByPeriod[currentPeriod].data,
         backgroundColor: '#C0633A'
       }]
     },
@@ -101,6 +120,18 @@
         }
       }
     }
+  });
+
+  document.querySelectorAll('.rev-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.rev-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const period = btn.dataset.period;
+      revenueChart.data.labels = revenueByPeriod[period].labels;
+      revenueChart.data.datasets[0].data = revenueByPeriod[period].data;
+      revenueChart.update();
+    });
   });
 </script>
 </html>

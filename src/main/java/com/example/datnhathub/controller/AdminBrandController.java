@@ -1,7 +1,9 @@
 package com.example.datnhathub.controller;
 
 import com.example.datnhathub.entity.Brand;
+import com.example.datnhathub.entity.Users;
 import com.example.datnhathub.repository.BrandRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Controller;
@@ -20,7 +22,14 @@ public class AdminBrandController {
 
     // GET /admin/brands — Danh sách + form thêm/sửa
     @GetMapping
-    public String listBrands(@RequestParam(required = false) Integer editId, Model model) {
+    public String listBrands(@RequestParam(required = false) Integer editId, Model model, HttpSession session) {
+        Users user =  (Users) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        if (!user.getRole().getRoleId().equals(1)) {
+            return "access-denied";
+        }
         List<Brand> brands = brandRepository.findAll();
         model.addAttribute("brands", brands);
 
