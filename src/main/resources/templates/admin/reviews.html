@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Quản lý đánh giá | HatHub Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family:'Nunito',sans-serif; background:#F5F0EA; margin:0; }
+        .admin-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: #111; color: #fff; padding: 2rem 1rem; }
+        .sidebar h2 { font-size: 1.2rem; margin-bottom: 2rem; color: #C0633A; text-align: center; }
+        .sidebar ul { list-style: none; padding: 0; }
+        .sidebar ul li { margin-bottom: 1rem; }
+        .sidebar ul li a { color: #ccc; text-decoration: none; font-weight: 700; display: block; padding: 8px 12px; border-radius: 4px; transition: 0.2s; }
+        .sidebar ul li a:hover, .sidebar ul li a.active { background: #C0633A; color: #fff; }
+        .main-content { flex: 1; padding: 2rem; background: #F5F0EA; }
+        .card { background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .success { background:#d4edda; color:#155724; padding:1rem; border-radius:4px; margin-bottom:1rem; }
+        .error { background:#f8d7da; color:#721c24; padding:1rem; border-radius:4px; margin-bottom:1rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 0.9rem; }
+        th { background: #111; color: #fff; }
+        textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; resize: vertical; }
+        .btn-reply { background: #C0633A; color: #fff; border: none; padding: 6px 14px; font-weight: 700; border-radius: 4px; cursor: pointer; }
+        .btn-reply:hover { background: #a5522e; }
+    </style>
+</head>
+<body>
+<div class="admin-layout">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>HatHub Admin</h2>
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/admin/products">Sản phẩm</a>
+        <a href="/admin/categories">Danh mục</a>
+        <a href="/admin/brands">Thương hiệu</a>
+        <a href="/admin/materials">Chất liệu</a>
+        <a href="/admin/hat-types">Kiểu mũ</a>
+        <a href="/admin/sizes">Size</a>
+        <a href="/admin/colors">Màu sắc</a>
+        <a href="/admin/orders">Đơn hàng</a>
+        <a href="/admin/returns">Trả hàng</a>
+        <a href="/admin/vouchers">Voucher</a>
+        <a href="/admin/reviews" class="active">Đánh giá sản phẩm</a>
+        <a href="/admin/users">Người dùng</a>
+        <a href="/logout">Đăng xuất</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1>Quản lý đánh giá sản phẩm</h1>
+        <div th:if="${success}" class="success" th:text="${success}"></div>
+        <div th:if="${error}" class="error" th:text="${error}"></div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+            <h3>Tất cả đánh giá từ khách hàng</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Sản phẩm & Biến thể</th>
+                    <th>Khách hàng</th>
+                    <th>Đánh giá</th>
+                    <th>Nhận xét</th>
+                    <th>Phản hồi của Admin</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${reviews == null or reviews.isEmpty()}">
+                    <td colspan="6" style="text-align: center; color: #888;">Chưa có đánh giá nào trên hệ thống.</td>
+                </tr>
+                <tr th:each="r : ${reviews}">
+                    <td th:text="${r.reviewID}">1</td>
+                    <td>
+                        <span th:text="${r.productDetailID != null and r.productDetailID.product != null ? r.productDetailID.product.productName : 'N/A'}">Tên sản phẩm</span>
+                        <br/>
+                        <small style="color: #666;" th:text="${r.productDetailID != null ? 'Size: ' + r.productDetailID.size + ' / Màu: ' + r.productDetailID.color : ''}"></small>
+                    </td>
+                    <td th:text="${r.customerID != null and r.customerID.user != null ? r.customerID.user.username : 'Ẩn danh'}">Khách</td>
+                    <td><span style="color: #C0633A; font-weight: 700;" th:text="${r.rating} + ' ★'">5 ★</span></td>
+                    <td th:text="${r.comment}">Nội dung...</td>
+                    <td>
+                        <form th:action="@{/admin/reviews/{id}/reply(id=${r.reviewID})}" method="post">
+                            <textarea name="adminReply" rows="2" placeholder="Nhập phản hồi..." th:text="${r.adminReply}"></textarea>
+                            <button type="submit" class="btn-reply" style="margin-top: 6px;">Gửi phản hồi</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>

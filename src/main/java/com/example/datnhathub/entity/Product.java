@@ -43,4 +43,14 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "BrandID")
     private Brand brand;
+
+    // Chất liệu (vd: Cotton, Len, Da...)
+    @ManyToOne
+    @JoinColumn(name = "MaterialID")
+    private Material material;
+
+    // Kiểu mũ (vd: Lưỡi trai, Bucket, Beret...)
+    @ManyToOne
+    @JoinColumn(name = "HatTypeID")
+    private HatType hatType;
 }

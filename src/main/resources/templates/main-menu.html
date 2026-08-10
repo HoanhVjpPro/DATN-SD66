@@ -26,129 +26,78 @@
 
     html { scroll-behavior: smooth; }
     body { font-family: var(--font-body); background: var(--white); color: var(--black); line-height: 1.6; }
+    a { text-decoration: none; }
 
-    /* ── NAV ── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: var(--black);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 2.5rem; height: 64px;
+    /* ── TOP BAR & HEADER ── */
+    .top-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 2.5rem;
+      background: #BC6341; /* Đã đổi sang màu nâu bạn chọn */
+      border-bottom: 1px solid var(--gray-700);
+      font-size: 0.85rem; font-weight: 600; color: var(--white);
     }
-    .nav-logo {
-      display: flex; align-items: center; gap: 10px; text-decoration: none;
-    }
-    .nav-logo svg { width: 32px; height: 32px; }
-    .nav-logo-text {
-      font-family: var(--font-display); font-size: 1.7rem; font-weight: 900;
-      color: var(--white); letter-spacing: 1px;
-    }
-    .nav-logo-text span { color: var(--rust); }
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
-    .nav-links a {
-      color: var(--gray-200); text-decoration: none; font-size: 0.85rem;
-      font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: var(--rust-light); }
-    .nav-actions { display: flex; align-items: center; gap: 1rem; }
-    .nav-actions button {
-      background: none; border: none; cursor: pointer; color: var(--white);
-      font-size: 1.1rem; padding: 6px; transition: color 0.2s;
-    }
-    .nav-actions button:hover { color: var(--rust-light); }
-    .btn-cart {
-      background: var(--rust) !important;
-      border: none !important; border-radius: 4px !important;
-      padding: 8px 18px !important; font-family: var(--font-body);
-      font-size: 0.8rem !important; font-weight: 700 !important;
-      letter-spacing: 0.05em; color: var(--white) !important;
-      cursor: pointer; transition: background 0.2s !important;
-    }
-    .btn-cart:hover { background: var(--rust-dark) !important; }
-    a{
-      text-decoration: none;
-    }
-    /* ── HERO ── */
-    .hero {
-      background: var(--black);
-      min-height: 90vh;
-      display: grid; grid-template-columns: 1fr 1fr;
-      overflow: hidden;
-    }
-    .hero-left {
-      display: flex; flex-direction: column; justify-content: center;
-      padding: 5rem 4rem 5rem 5rem;
-    }
-    .hero-eyebrow {
-      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--rust);
-      margin-bottom: 1.2rem;
-    }
-    .hero-title {
-      font-family: var(--font-display); font-weight: 900;
-      font-size: clamp(3.5rem, 6vw, 5.5rem); line-height: 1.1;
-      color: var(--white); text-transform: uppercase; margin-bottom: 1.5rem;
-      letter-spacing: 0.08em;
-    }
-    .hero-title em { color: var(--rust); font-style: normal; }
-    .hero-sub {
-      color: var(--gray-400); font-size: 1rem; max-width: 380px;
-      margin-bottom: 2.5rem; line-height: 1.7;
-    }
-    .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
-    .btn-primary {
-      background: var(--rust); color: var(--white); border: none;
-      padding: 14px 32px; font-family: var(--font-body); font-weight: 700;
-      font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase;
-      cursor: pointer; transition: background 0.2s; text-decoration: none;
-      display: inline-block;
-    }
-    .btn-primary:hover { background: var(--rust-dark); }
-    .btn-outline {
-      background: transparent; color: var(--white);
-      border: 1.5px solid var(--gray-700); padding: 14px 32px;
-      font-family: var(--font-body); font-weight: 700; font-size: 0.9rem;
-      letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer;
-      transition: border-color 0.2s, color 0.2s; text-decoration: none;
-      display: inline-block;
-    }
-    .btn-outline:hover { border-color: var(--rust); color: var(--rust); }
-    .hero-right {
-      position: relative; display: flex; align-items: flex-end;
-      background: var(--off-black);
-      overflow: hidden;
-    }
-    .hero-img-wrapper {
-      width: 100%; height: 100%;
-      display: flex; align-items: center; justify-content: center;
-      padding: 3rem;
-    }
-    .hero-cap-img { width: 100%; max-width: 420px; height: auto; max-height: 70vh; object-fit: cover; border-radius: 8px; }
-    .hero-badge {
-      position: absolute; bottom: 2.5rem; right: 2.5rem;
-      background: var(--rust); color: var(--white);
-      width: 90px; height: 90px; border-radius: 50%;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-family: var(--font-display); font-weight: 900; text-align: center;
-    }
-    .hero-badge-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
-    .hero-badge-num { font-size: 1.8rem; line-height: 1; }
+    .top-bar-left, .top-bar-right { display: flex; gap: 1.5rem; align-items: center; }
+    .top-bar a { color: var(--white); text-decoration: none; transition: color 0.2s; }
+    .top-bar a:hover { color: var(--off-black); /* Đổi màu khi di chuột để dễ nhìn hơn trên nền nâu */ }
 
-    /* ── TICKER ── */
-    .ticker {
-      background: var(--rust); padding: 12px 0; overflow: hidden;
-      display: flex; white-space: nowrap;
+    .main-header {
+      background: var(--black); display: flex; flex-direction: column; align-items: center;
+      padding: 15px 2.5rem 0; position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
-    .ticker-track {
-      display: inline-flex; gap: 0; animation: ticker-scroll 30s linear infinite;
+    .main-header .nav-logo {
+      display: flex; flex-direction: column; align-items: center;
+      text-decoration: none; margin-bottom: 15px;
     }
-    .ticker-item {
-      font-family: var(--font-display); font-size: 1rem; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.08em; color: var(--white);
-      padding: 0 2.5rem;
+    .main-header .nav-logo img {
+      height: 55px; width: auto; object-fit: contain;
+      border-radius: 50%;
     }
-    .ticker-dot { color: rgba(255,255,255,0.4); }
-    @keyframes ticker-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+    .main-header .nav-logo-text {
+      font-family: var(--font-display); font-size: 1.8rem; font-weight: 900;
+      color: var(--white); letter-spacing: 1px; text-transform: uppercase; margin-top: 5px;
+    }
+    .main-header .nav-logo-text span {
+      color: var(--rust);
+    }
+    .main-header .nav-links {
+      display: flex; gap: 2rem; list-style: none; flex-wrap: wrap;
+      justify-content: center; padding-bottom: 15px; margin: 0;
+    }
+    .main-header .nav-links a {
+      color: var(--gray-200); font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 0.05em; text-transform: uppercase; text-decoration: none; transition: color 0.2s;
+    }
+    .main-header .nav-links a:hover { color: var(--rust-light); }
+
+    /* ── HERO SLIDER ── */
+    .hero-slider {
+      position: relative; width: 100%; height: 75vh; min-height: 500px;
+      display: flex; align-items: center; overflow: hidden; background: var(--black);
+    }
+    .hero-slider .hero-bg {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover; z-index: 1;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+    .hero-slider .hero-bg.active {
+      opacity: 0.85;
+      z-index: 2;
+    }    .hero-slider .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 65%); z-index: 2; }
+    .hero-slider .hero-content { position: relative; z-index: 3; padding-left: 8%; max-width: 650px; color: var(--white); }
+    .hero-slider .hero-title { font-family: var(--font-display); font-weight: 900; font-size: clamp(4rem, 8vw, 7rem); line-height: 1; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.05em; }
+    .hero-slider .hero-divider { width: 100%; max-width: 450px; height: 2px; background: rgba(255,255,255,0.4); margin-bottom: 20px; }
+    .hero-slider .hero-desc { font-size: 1.1rem; line-height: 1.6; max-width: 500px; text-shadow: 1px 1px 4px rgba(0,0,0,0.6); font-family: var(--font-body); }
+
+    /* Slider Controls */
+    .hero-slider .slider-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 4; background: rgba(255,255,255,0.8); border: none; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--black); transition: background 0.3s, color 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .hero-slider .slider-arrow:hover { background: var(--rust); color: var(--white); }
+    .hero-slider .slider-arrow.prev { left: 2%; }
+    .hero-slider .slider-arrow.next { right: 2%; }
+    .hero-slider .slider-dots { position: absolute; bottom: 30px; right: 5%; z-index: 4; display: flex; gap: 10px; }
+    .hero-slider .slider-dots .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--white); cursor: pointer; background: transparent; transition: background 0.3s; }
+    .hero-slider .slider-dots .dot.active, .hero-slider .slider-dots .dot:hover { background: var(--rust); border-color: var(--rust); }
 
     /* ── SECTIONS ── */
     .section { padding: 5rem 5rem; }
@@ -194,7 +143,6 @@
       font-family: var(--font-display); font-weight: 900; font-size: 1.3rem;
       text-transform: uppercase; color: var(--white); line-height: 1.1;
     }
-    .cat-count { font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 2px; }
     /* cat colors */
     .cat-1 { background: #1e1b16; }
     .cat-2 { background: #162024; }
@@ -263,6 +211,14 @@
     }
     .sale-title .big { font-size: clamp(5rem, 9vw, 9rem); color: var(--rust); display: block; }
     .sale-desc { color: var(--gray-400); font-size: 0.9rem; max-width: 320px; margin-bottom: 2rem; }
+    .btn-primary {
+      background: var(--rust); color: var(--white); border: none;
+      padding: 14px 32px; font-family: var(--font-body); font-weight: 700;
+      font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s; text-decoration: none;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--rust-dark); }
     .sale-right {
       background: #1a1208;
       display: flex; align-items: center; justify-content: center; padding: 3rem;
@@ -276,16 +232,8 @@
       padding: 3rem 5rem; border-bottom: 1px solid var(--gray-200);
       display: flex; align-items: center; gap: 3rem; justify-content: space-between;
     }
-
     .brand-strip-label { font-size: 0.7rem; color: black; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
     .brand-logos { display: flex; gap: 3rem; align-items: center; flex-wrap: wrap; }
-
-    .brand-logo-item {
-      font-family: var(--font-display); font-weight: 900; font-size: 1.2rem;
-      text-transform: uppercase; color: var(--gray-200); letter-spacing: 2px;
-      opacity: 0.5; transition: opacity 0.2s;
-    }
-
     .new-brand-logo{
       font-family: var(--font-display); font-weight: 900; font-size: 1.2rem;
       text-transform: uppercase; color: #000000; letter-spacing: 2px;
@@ -307,7 +255,6 @@
       background: var(--rust); padding: 4rem 5rem;
       display: flex; align-items: center; justify-content: space-between; gap: 2rem;
     }
-    .nl-text {}
     .nl-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 0.5rem; }
     .nl-title { font-family: var(--font-display); font-weight: 900; font-size: 2.2rem; text-transform: uppercase; color: var(--white); line-height: 1.05; }
     .nl-form { display: flex; gap: 0; min-width: 400px; }
@@ -349,75 +296,60 @@
       transition: border-color 0.2s, color 0.2s; text-decoration: none;
     }
     .social-btn:hover { border-color: var(--rust); color: var(--rust); }
-
-    /* ── CAP SVG (reusable) ── */
-    .cap-illustration { display: block; }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
+<!-- TOP BAR & NAV -->
+<div class="top-bar">
+  <div class="top-bar-left">
+    <span>📞 0984085074 (Miễn phí cuộc gọi)</span>
+    <span>📍 số 6 Trịnh Văn Bô</span>
+  </div>
+  <div class="top-bar-right">
+    <a href="/profile">👤 Tài khoản</a>
+    <a href="/wishlist" th:if="${loggedIn and roleName == 'CUSTOMER'}">♡ Yêu thích</a>
+    <a href="/cart" th:if="${loggedIn and roleName == 'CUSTOMER'}">🛒 Sản phẩm</a>
+    <a href="/orders" th:if="${loggedIn and roleName == 'CUSTOMER'}">🧾 Đơn hàng</a>
+    <a th:if="${session.user == null}" href="/login">Đăng nhập</a>
+    <a th:if="${session.user != null}" href="/logout">Đăng xuất</a>
+  </div>
+</div>
+
+<header class="main-header">
   <a href="#" class="nav-logo">
-    <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
-    <strong class="nav-logo-text">HATHUB</strong>
+    <span class="nav-logo-text">hat<span>hub</span></span>
   </a>
 
   <ul class="nav-links">
-    <li><a href="#products">Sản phẩm</a></li>
-    <li><a href="#danhmuc">Bộ sưu tập</a></li>
-    <li><a href="#">Xu hướng</a></li>
-    <li><a href="#sale">Sale</a></li>
-    <li><a href="#footer">Về chúng tôi</a></li>
+    <li><a href="#hotdeal" style="color: var(--rust);">⚡ HOT DEAL ⚡</a></li>
+    <li><a href="/products?categoryId=1">NÓN BẢO HIỂM</a></li>
+    <li><a href="/products?categoryId=0">NÓN VÀNH</a></li>
+    <li><a href="/products?categoryId=4">NÓN ĐAN TAY</a></li>
+    <li><a href="#danhmuc">NÓN DA</a></li>
+    <li><a href="#danhmuc">NÓN KẾT</a></li>
+    <li><a href="#danhmuc">NÓN PHỚT</a></li>
+    <li><a href="#sale" style="color: var(--rust);">FLASH SALE</a></li>
   </ul>
+</header>
 
-  <div class="nav-actions">
-    <!--    <button title="Tìm kiếm">🔍</button>-->
-    <!--    <button title="Yêu thích">♡</button>-->
-    <a href="/profile" class="btn-cart">👤</a>
-    <a href="/cart" th:if="${loggedIn and roleName == 'CUSTOMER'}" class="btn-cart">🛒</a>
-    <a href="/orders" th:if="${loggedIn and roleName == 'CUSTOMER'}" class="btn-cart">🧾</a>
-    <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
-    <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
-  </div>
-</nav>
+<!-- HERO BACKGROUND SLIDER -->
+<section class="hero-slider">
+  <img class="hero-bg" th:src="@{/images/ab.jpg}" alt="HatHub – Mũ thời trang"/>
+  <img class="hero-bg" th:src="@{/images/qua-tang-mu-luoi-trai.png}" alt="HatHub – Mũ thời trang"/>
+  <div class="hero-overlay"></div>
 
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-left">
-    <p class="hero-eyebrow">Bộ sưu tập mới · Hè 2026</p>
-    <h1 class="hero-title">Đội<br/>phong<br/>cách<br/><em>lên đầu</em></h1>
-    <p class="hero-sub">Từ đường phố đến sân thể thao — HatHub mang đến những chiếc mũ định hình phong cách của bạn mỗi ngày.</p>
-    <div class="hero-cta">
-      <a href="#products" class="btn-primary">Mua ngay</a>
-      <a href="#categories" class="btn-outline">Xem bộ sưu tập</a>
-    </div>
+  <div class="hero-content">
+    <h1 class="hero-title">NÓN VÀNH</h1>
+    <div class="hero-divider"></div>
+    <p class="hero-desc">Thiết kế thanh lịch, form dáng hiện đại, thời trang cùng với chất liệu cao cấp được chọn lọc kỹ càng, từng đường nét đều toát lên vẻ sang trọng và duyên dáng.</p>
   </div>
-  <div class="hero-right">
-    <div class="hero-img-wrapper">
-      <img class="hero-cap-img" th:src="@{/images/oguri-cap.jpg}" alt="HatHub – Mũ thời trang"/>
-    </div>
-    <div class="hero-badge">
-      <span class="hero-badge-label">mới</span>
-      <span class="hero-badge-num">100+</span>
-      <span class="hero-badge-label">mẫu</span>
-    </div>
-  </div>
+
+  <button class="slider-arrow prev">❮</button>
+  <button class="slider-arrow next">❯</button>
+
+  <div class="slider-dots"></div>
 </section>
-
-<!-- TICKER -->
-<div class="ticker">
-  <div class="ticker-track" id="ticker">
-    <span class="ticker-item">Miễn phí ship đơn từ 299k <span class="ticker-dot">✦</span></span>
-    <span class="ticker-item">Đổi trả 30 ngày <span class="ticker-dot">✦</span></span>
-    <span class="ticker-item">Hàng chính hãng 100% <span class="ticker-dot">✦</span></span>
-    <span class="ticker-item">New Arrivals – Bộ sưu tập hè 2025 <span class="ticker-dot">✦</span></span>
-    <span class="ticker-item">Miễn phí ship đơn từ 299k <span class="ticker-dot">✦</span></span>
-    <span class="ticker-item">Đổi trả 30 ngày <span class="ticker-dot">✦</span></span>
-    <span class="ticker-item">Hàng chính hãng 100% <span class="ticker-dot">✦</span></span>
-    <span class="ticker-item">New Arrivals – Bộ sưu tập hè 2025 <span class="ticker-dot">✦</span></span>
-  </div>
-</div>
 
 <!-- BRAND STRIP -->
 <div class="brand-strip">
@@ -451,13 +383,13 @@
         <div class="cat-name">Mũ bảo hiểm</div>
       </div>
     </a>
-    <a href="/products?categoryId=3" class="cat-card cat-3">
+    <a href="/products?categoryId=2" class="cat-card cat-3">
       <div class="cat-card-bg">👒</div>
       <div class="cat-card-inner">
         <div class="cat-name">Mũ rơm</div>
       </div>
     </a>
-    <a href="/products?categoryId=9" class="cat-card cat-4">
+    <a href="/products?categoryId=3" class="cat-card cat-4">
       <div class="cat-card-bg">🎩</div>
       <div class="cat-card-inner">
         <div class="cat-name">Mũ chuyên dụng</div>
@@ -465,6 +397,7 @@
     </a>
   </div>
 </section>
+
 <!-- PRODUCTS -->
 <section class="section section-alt" id="products">
   <div class="section-header">
@@ -621,6 +554,60 @@
       setTimeout(() => { this.textContent = 'Đăng ký'; }, 2500);
     }
   });
+
+  (function () {
+    const slider = document.querySelector('.hero-slider');
+    const slides = slider.querySelectorAll('.hero-bg');
+    const dotsContainer = slider.querySelector('.slider-dots');
+    const prevBtn = slider.querySelector('.slider-arrow.prev');
+    const nextBtn = slider.querySelector('.slider-arrow.next');
+
+    if (slides.length === 0) return;
+
+    // Tự sinh dots theo đúng số ảnh
+    slides.forEach((_, i) => {
+      const dot = document.createElement('span');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => { goToSlide(i); restartAuto(); });
+      dotsContainer.appendChild(dot);
+    });
+    const dots = dotsContainer.querySelectorAll('.dot');
+
+    let current = 0;
+    let timer = null;
+    const INTERVAL = 4000;
+
+    function goToSlide(index) {
+      slides[current].classList.remove('active');
+      dots[current].classList.remove('active');
+      current = (index + slides.length) % slides.length;
+      slides[current].classList.add('active');
+      dots[current].classList.add('active');
+    }
+
+    function next() { goToSlide(current + 1); }
+    function prev() { goToSlide(current - 1); }
+
+    function startAuto() { timer = setInterval(next, INTERVAL); }
+    function stopAuto() { clearInterval(timer); }
+    function restartAuto() { stopAuto(); startAuto(); }
+
+    // Khởi tạo slide đầu
+    slides[0].classList.add('active');
+
+    if (slides.length > 1) {
+      nextBtn.addEventListener('click', () => { next(); restartAuto(); });
+      prevBtn.addEventListener('click', () => { prev(); restartAuto(); });
+      slider.addEventListener('mouseenter', stopAuto);
+      slider.addEventListener('mouseleave', startAuto);
+      startAuto();
+    } else {
+      // Chỉ 1 ảnh thì ẩn luôn nút/dots cho gọn
+      prevBtn.style.display = 'none';
+      nextBtn.style.display = 'none';
+      dotsContainer.style.display = 'none';
+    }
+  })();
 </script>
 </body>
 </html>

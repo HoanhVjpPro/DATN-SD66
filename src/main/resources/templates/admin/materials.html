@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Quản lý chất liệu | HatHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
+    aside { width:220px; background:#111; color:#fff; padding:1.5rem; }
+    aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
+    aside a.active { color:#C0633A; }
+    aside a:hover { color:#C0633A; }
+    main { flex:1; padding:2rem; background:#F5F0EA; }
+    table { width:100%; background:#fff; border-collapse:collapse; margin-top:1rem; }
+    th, td { padding:0.75rem; border-bottom:1px solid #eee; text-align:left; }
+    th { background:#111; color:#fff; }
+    .card { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; max-width:420px; }
+    label { display:block; font-weight:700; margin:0.75rem 0 0.25rem; }
+    input { width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; }
+    .success { background:#d4edda; padding:1rem; border-radius:4px; margin-bottom:1rem; }
+    .error { background:#f8d7da; padding:1rem; border-radius:4px; margin-bottom:1rem; }
+    .topbar { margin-bottom:1rem; }
+
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:4px; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.85rem; padding:9px 18px; cursor:pointer; text-decoration:none; line-height:1.2; white-space:nowrap; }
+    .btn-sm { padding:6px 12px; font-size:0.8rem; }
+    .btn-primary { background:#C0633A; color:#fff; }
+    .btn-primary:hover { background:#9B4A27; }
+    .btn-secondary { background:#444; color:#fff; }
+    .btn-secondary:hover { background:#2c2c2c; }
+    .btn-danger { background:#c00; color:#fff; }
+    .btn-danger:hover { background:#a00; }
+    .btn-neutral { background:#666; color:#fff; }
+    .btn-neutral:hover { background:#4d4d4d; }
+  </style>
+</head>
+<body>
+<aside>
+  <h2 style="color:#C0633A;">HatHub Admin</h2>
+  <a href="/admin/dashboard">Dashboard</a>
+  <a href="/admin/products">Sản phẩm</a>
+  <a href="/admin/categories">Danh mục</a>
+  <a href="/admin/brands">Thương hiệu</a>
+  <a href="/admin/materials" class="active">Chất liệu</a>
+  <a href="/admin/hat-types">Kiểu mũ</a>
+  <a href="/admin/sizes">Size</a>
+  <a href="/admin/colors">Màu sắc</a>
+  <a href="/admin/orders">Đơn hàng</a>
+  <a href="/admin/returns">Trả hàng</a>
+  <a href="/admin/vouchers">Voucher</a>
+  <a href="/admin/users">Người dùng</a>
+  <a href="/logout">Đăng xuất</a>
+</aside>
+<main>
+  <div class="topbar"><h1>Chất liệu</h1></div>
+  <div th:if="${success}" class="success" th:text="${success}"></div>
+  <div th:if="${error}" class="error" th:text="${error}"></div>
+
+  <div class="card">
+    <h3 th:text="${material.materialId != null ? 'Sửa chất liệu' : 'Thêm chất liệu mới'}">Form</h3>
+    <form action="/admin/materials" method="post">
+      <input type="hidden" name="materialId" th:value="${material.materialId}"/>
+      <label>Tên chất liệu</label>
+      <input type="text" name="materialName" th:value="${material.materialName}" required placeholder="VD: Cotton, Len, Da..."/>
+      <div style="margin-top:1rem;display:flex;gap:0.5rem;">
+        <button type="submit" class="btn btn-primary">
+          <span th:text="${material.materialId != null ? 'Cập nhật' : 'Thêm mới'}"></span>
+        </button>
+        <a th:if="${material.materialId != null}" href="/admin/materials" class="btn btn-neutral">Hủy</a>
+      </div>
+    </form>
+  </div>
+
+  <table>
+    <thead><tr><th>#</th><th>Tên chất liệu</th><th></th></tr></thead>
+    <tbody>
+    <tr th:each="m, index : ${materials}">
+      <td th:text="${index.count}">1</td>
+      <td th:text="${m.materialName}">Cotton</td>
+      <td>
+        <a th:href="@{/admin/materials(editId=${m.materialId})}" class="btn btn-secondary btn-sm" style="margin-right:4px;">Sửa</a>
+        <form th:action="@{/admin/materials/delete/{id}(id=${m.materialId})}" method="post" style="display:inline;"
+              onsubmit="return confirm('Xóa chất liệu này?')">
+          <button type="submit" class="btn btn-danger btn-sm">Xóa</button>
+        </form>
+      </td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(materials)}"><td colspan="3">Chưa có chất liệu nào.</td></tr>
+    </tbody>
+  </table>
+</main>
+</body>
+</html>

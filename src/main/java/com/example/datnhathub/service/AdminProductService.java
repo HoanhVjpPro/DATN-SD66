@@ -4,6 +4,7 @@ import com.example.datnhathub.entity.*;
 import com.example.datnhathub.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -12,6 +13,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Normalizer;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,12 +34,42 @@ public class AdminProductService {
     @Autowired
     private BrandRepository brandRepository;
 
+    @Autowired
+    private MaterialRepository materialRepository;
+
+    @Autowired
+    private HatTypeRepository hatTypeRepository;
+
+    @Autowired
+    private SizeRepository sizeRepository;
+
+    @Autowired
+    private ColorRepository colorRepository;
+
     public List<Brand> getAllBrands() {
         return brandRepository.findAll();
     }
 
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
+    }
+
+    public List<Material> getAllMaterials() {
+        return materialRepository.findAll();
+    }
+
+    public List<HatType> getAllHatTypes() {
+        return hatTypeRepository.findAll();
+    }
+
+    // Danh sách Size master data — dùng đổ vào popup "Tạo biến thể"
+    public List<Size> getAllSizes() {
+        return sizeRepository.findAll();
+    }
+
+    // Danh sách Màu master data — dùng đổ vào popup "Tạo biến thể"
+    public List<Color> getAllColors() {
+        return colorRepository.findAll();
     }
 
     // Lấy tất cả sản phẩm (admin)
@@ -53,7 +85,8 @@ public class AdminProductService {
 
     // Lưu sản phẩm (thêm mới + sửa)
     public Product saveProduct(Integer productId, String productName, Integer categoryId,
-                               Integer brandId, String description, boolean isActive) {
+                               Integer brandId, Integer materialId, Integer hatTypeId,
+                               String description, boolean isActive) {
         Product product = (productId != null)
                 ? productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm ID: " + productId))
                 : new Product();
@@ -72,6 +105,22 @@ public class AdminProductService {
             product.setBrand(null);
         }
 
+        if (materialId != null) {
+            Material material = materialRepository.findById(materialId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy chất liệu ID: " + materialId));
+            product.setMaterial(material);
+        } else {
+            product.setMaterial(null);
+        }
+
+        if (hatTypeId != null) {
+            HatType hatType = hatTypeRepository.findById(hatTypeId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy kiểu mũ ID: " + hatTypeId));
+            product.setHatType(hatType);
+        } else {
+            product.setHatType(null);
+        }
+
         return productRepository.save(product);
     }
 
@@ -80,13 +129,12 @@ public class AdminProductService {
         productRepository.deleteById(productId);
     }
 
-    // Thêm biến thể
+    // Thêm 1 biến thể lẻ — SKU luôn tự sinh, không nhận input tay (giữ lại phòng khi cần thêm bổ sung 1 dòng riêng)
     public void addDetail(Integer productId,
                           String size,
                           String color,
                           BigDecimal price,
-                          String sku,
-                          Integer stockQuantity) {  // ← thêm tham số này
+                          Integer stockQuantity) {
 
         Product product = getProductById(productId);
         ProductDetail detail = new ProductDetail();
@@ -94,15 +142,86 @@ public class AdminProductService {
         detail.setSize(size);
         detail.setColor(color);
         detail.setPrice(price);
-        detail.setSku(sku);
-        detail.setStockQuantity(stockQuantity);  // ← thêm dòng này
+        detail.setSku(buildSku(product, size, color));
+        detail.setStockQuantity(stockQuantity);
 
         productDetailRepository.save(detail);
+    }
+
+    // Tạo nhiều biến thể cùng lúc theo tổ hợp (Size x Màu), dùng chung 1 giá + 1 tồn kho ban đầu.
+    // Bỏ qua các tổ hợp Size+Màu đã tồn tại sẵn cho sản phẩm này (tránh tạo trùng).
+    public int createVariantsBatch(Integer productId, List<String> sizes, List<String> colors,
+                                   BigDecimal price, Integer stockQuantity) {
+        Product product = getProductById(productId);
+        List<ProductDetail> existing = productDetailRepository.findByProductProductId(productId);
+
+        int created = 0;
+        for (String rawSize : sizes) {
+            String size = rawSize == null ? null : rawSize.trim();
+            if (size == null || size.isEmpty()) continue;
+
+            for (String rawColor : colors) {
+                String color = rawColor == null ? null : rawColor.trim();
+                if (color == null || color.isEmpty()) continue;
+
+                boolean alreadyExists = existing.stream().anyMatch(d ->
+                        size.equalsIgnoreCase(d.getSize()) && color.equalsIgnoreCase(d.getColor()));
+                if (alreadyExists) continue;
+
+                ProductDetail detail = new ProductDetail();
+                detail.setProduct(product);
+                detail.setSize(size);
+                detail.setColor(color);
+                detail.setPrice(price);
+                detail.setSku(buildSku(product, size, color));
+                detail.setStockQuantity(stockQuantity == null ? 0 : stockQuantity);
+                productDetailRepository.save(detail);
+                created++;
+            }
+        }
+        return created;
+    }
+
+    // Sinh SKU: KHÔNG dấu tiếng Việt, chỉ gồm chữ hoa/số, và luôn đảm bảo UNIQUE toàn hệ thống
+    // (nếu trùng thì tự thêm hậu tố -2, -3... cho tới khi không còn trùng)
+    private String buildSku(Product product, String size, String color) {
+        String sizePart = toSkuToken(size);
+        String colorPart = toSkuToken(color);
+        String base = "SP" + product.getProductId()
+                + (sizePart.isEmpty() ? "" : "-" + sizePart)
+                + (colorPart.isEmpty() ? "" : "-" + colorPart);
+
+        String candidate = base;
+        int suffix = 2;
+        while (productDetailRepository.existsBySku(candidate)) {
+            candidate = base + "-" + suffix;
+            suffix++;
+        }
+        return candidate;
+    }
+
+    // Bỏ dấu tiếng Việt + chỉ giữ lại chữ/số, viết hoa toàn bộ — dùng để ghép vào SKU
+    private String toSkuToken(String input) {
+        if (input == null) return "";
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+        String noAccents = normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        noAccents = noAccents.replace('Đ', 'D').replace('đ', 'd');
+        return noAccents.toUpperCase().replaceAll("[^A-Z0-9]", "");
     }
 
     // Xóa biến thể
     public void deleteDetail(Integer detailId) {
         productDetailRepository.deleteById(detailId);
+    }
+
+    // Xóa nhiều biến thể cùng lúc (chọn nhanh nhiều dòng rồi xóa)
+    @Transactional
+    public int deleteDetails(List<Integer> detailIds) {
+        List<Integer> existingIds = detailIds.stream()
+                .filter(productDetailRepository::existsById)
+                .toList();
+        productDetailRepository.deleteAllById(existingIds);
+        return existingIds.size();
     }
 
     // Lấy biến thể theo productId
@@ -150,25 +269,23 @@ public class AdminProductService {
         productImageRepository.save(image);
     }
 
-// Ẩn / Hiện sản phẩm
+    // Ẩn / Hiện sản phẩm
     public void toggleProductStatus(Integer productId) {
         Product product = getProductById(productId);
         product.setStatus(!Boolean.TRUE.equals(product.getStatus()));
         productRepository.save(product);
     }
 
-
-// Xóa ảnh sản phẩm
+    // Xóa ảnh sản phẩm
     public void deleteImage(Integer imageId) {
         productImageRepository.deleteById(imageId);
     }
 
-    // UC13 — Sửa biến thể
+    // UC13 — Sửa biến thể (SKU KHÔNG được sửa — giữ nguyên giá trị đã sinh lúc tạo)
     public void updateDetail(Integer detailId,
                              String size,
                              String color,
                              BigDecimal price,
-                             String sku,
                              Integer stockQuantity) {
 
         ProductDetail detail = productDetailRepository.findById(detailId)
@@ -177,8 +294,8 @@ public class AdminProductService {
         detail.setSize(size);
         detail.setColor(color);
         detail.setPrice(price);
-        detail.setSku(sku);
         detail.setStockQuantity(stockQuantity);
+        // SKU: không đổi
 
         productDetailRepository.save(detail);
     }

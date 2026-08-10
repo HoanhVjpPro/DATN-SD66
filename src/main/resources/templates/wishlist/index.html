@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yêu thích | HatHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Oswald:wght@500;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" th:href="@{/shop.css}" />
+    <style>
+        .wl-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+        .wl-card {
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .wl-img-wrap {
+            position: relative;
+            aspect-ratio: 1 / 1;
+            background: #111;
+        }
+        .wl-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .wl-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .wl-name { font-weight: 700; color: #fff; font-size: 0.95rem; line-height: 1.3; }
+        .wl-price { color: #D97C4E; font-weight: 700; }
+        .wl-actions { margin-top: auto; display: flex; gap: 8px; }
+        .wl-btn {
+            flex: 1; text-align: center; padding: 9px 10px; border-radius: 6px;
+            font-size: 0.82rem; font-weight: 700; letter-spacing: .02em;
+            border: none; cursor: pointer; text-decoration: none;
+        }
+        .wl-btn-view { background: #C0633A; color: #fff; }
+        .wl-btn-view:hover { background: #9B4A27; }
+        .wl-btn-remove { background: transparent; color: #e57373; border: 1px solid #e57373; }
+        .wl-btn-remove:hover { background: rgba(229,115,115,.1); }
+        .wl-empty {
+            text-align: center; color: rgba(255,255,255,.6); padding: 60px 0;
+        }
+        .wl-empty a { color: #D97C4E; font-weight: 700; }
+    </style>
+</head>
+<body class="page">
+<nav class="shop-nav">
+    <a href="/" class="brand">
+        <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
+        <span>HatHub</span>
+    </a>
+    <ul class="nav-menu">
+        <li><a href="/products">Sản phẩm</a></li>
+        <li><a href="/cart">Giỏ hàng</a></li>
+        <li><a href="/orders">Đơn hàng</a></li>
+    </ul>
+    <div class="nav-actions"></div>
+</nav>
+<main class="page-wrap">
+    <h1 class="page-title">Danh sách yêu thích</h1>
+    <div th:if="${success}" class="alert success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert error" th:text="${error}"></div>
+
+    <div th:if="${wishlist.details == null or #lists.isEmpty(wishlist.details)}" class="wl-empty">
+        <p>Bạn chưa có sản phẩm yêu thích nào.</p>
+        <p style="margin-top:8px;"><a href="/products">Khám phá sản phẩm ngay →</a></p>
+    </div>
+
+    <div th:if="${wishlist.details != null and !#lists.isEmpty(wishlist.details)}" class="wl-grid">
+        <div class="wl-card" th:each="d : ${wishlist.details}">
+            <a th:href="@{/products/{id}(id=${d.product.productId})}" class="wl-img-wrap">
+                <img th:if="${d.product.images != null and !d.product.images.isEmpty()}"
+                     th:src="@{${d.product.images.?[isDefault == true].isEmpty()
+                                ? d.product.images[0].imageURL
+                                : d.product.images.?[isDefault == true][0].imageURL}}"
+                     alt="" />
+                <img th:unless="${d.product.images != null and !d.product.images.isEmpty()}"
+                     th:src="@{/images/no-image.jpg}" alt="" />
+            </a>
+            <div class="wl-body">
+                <div class="wl-name" th:text="${d.product.productName}">Tên sản phẩm</div>
+                <div class="wl-price"
+                     th:if="${d.product.details != null and !d.product.details.isEmpty()}"
+                     th:text="${#numbers.formatDecimal(d.product.details[0].price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                    0 đ
+                </div>
+                <div class="wl-actions">
+                    <a class="wl-btn wl-btn-view" th:href="@{/products/{id}(id=${d.product.productId})}">Xem sản phẩm</a>
+                    <form th:action="@{/wishlist/remove}" method="post" style="margin:0;">
+                        <input type="hidden" name="productId" th:value="${d.product.productId}" />
+                        <button type="submit" class="wl-btn wl-btn-remove" title="Xóa khỏi yêu thích">✕</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</body>
+</html>

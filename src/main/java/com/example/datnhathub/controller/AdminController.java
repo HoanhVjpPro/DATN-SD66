@@ -1,9 +1,8 @@
 package com.example.datnhathub.controller;
 
-import com.example.datnhathub.entity.Orders;
-import com.example.datnhathub.entity.Users;
-import com.example.datnhathub.entity.Voucher;
+import com.example.datnhathub.entity.*;
 import com.example.datnhathub.repository.OrderRepository;
+import com.example.datnhathub.repository.ReviewRepository;
 import com.example.datnhathub.repository.UserRepository;
 import com.example.datnhathub.service.*;
 import jakarta.servlet.http.HttpSession;
@@ -53,7 +52,7 @@ public class AdminController {
     private JavaMailSender mailSender;
 
     @Autowired
-    private UserRepository userRepository;
+    private ReviewRepository reviewRepository;
 
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
@@ -382,5 +381,36 @@ public class AdminController {
             ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/orders/" + id;
+    }
+
+    @GetMapping("/reviews")
+    public String adminReviewList(Model model, HttpSession session) {
+        Users user = (Users) session.getAttribute("user");
+        if (user == null) {
+            return "redirect:/login";
+        }
+        if (!user.getRole().getRoleId().equals(1)) {
+            return "access-denied";
+        }
+
+        model.addAttribute("reviews", reviewRepository.findAll());
+        return "admin/reviews"; // Trỏ tới file template: templates/admin/reviews.html
+    }
+
+    @PostMapping("/reviews/{id}/reply")
+    public String replyReview(@PathVariable Integer id,
+                              @RequestParam("adminReply") String adminReply,
+                              RedirectAttributes ra) {
+        Reviews review = reviewRepository.findById(id).orElse(null);
+        if (review == null) {
+            ra.addFlashAttribute("error", "Không tìm thấy đánh giá!");
+            return "redirect:/admin/reviews";
+        }
+
+        review.setAdminReply(adminReply);
+        reviewRepository.save(review);
+
+        ra.addFlashAttribute("success", "Đã gửi phản hồi đánh giá thành công!");
+        return "redirect:/admin/reviews";
     }
 }
