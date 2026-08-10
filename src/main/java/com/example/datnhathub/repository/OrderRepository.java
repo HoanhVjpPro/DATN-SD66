@@ -103,21 +103,21 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
             "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
             "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
             "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
-            "AND o.OrderDate >= DATEADD(DAY, -13, CAST(GETDATE() AS DATE)) " +
+            "AND o.OrderDate >= DATEADD(DAY, -6, CAST(GETDATE() AS DATE)) " +
             "GROUP BY FORMAT(o.OrderDate, 'dd/MM'), CAST(o.OrderDate AS DATE) " +
             "ORDER BY CAST(o.OrderDate AS DATE)", nativeQuery = true)
     List<DailyRevenueProjection> getDailyRevenue();
 
-    // Doanh thu theo tuần (8 tuần gần nhất, theo ISO week)
-    @Query(value = "SELECT CONCAT(N'Tuần ', DATEPART(ISO_WEEK, o.OrderDate), '/', DATEPART(YEAR, o.OrderDate)) AS week, " +
+    // Doanh thu theo tuần (8 tuần gần nhất), nhãn dạng "Tuần N tháng M"
+    @Query(value = "SELECT CONCAT(N'Tuần ', ((DAY(o.OrderDate) - 1) / 7) + 1, N' tháng ', MONTH(o.OrderDate)) AS week, " +
             "SUM(o.TotalAmount) AS revenue " +
             "FROM Orders o " +
             "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
             "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
             "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
             "AND o.OrderDate >= DATEADD(WEEK, -7, GETDATE()) " +
-            "GROUP BY DATEPART(YEAR, o.OrderDate), DATEPART(ISO_WEEK, o.OrderDate) " +
-            "ORDER BY DATEPART(YEAR, o.OrderDate), DATEPART(ISO_WEEK, o.OrderDate)", nativeQuery = true)
+            "GROUP BY DATEPART(YEAR, o.OrderDate), MONTH(o.OrderDate), ((DAY(o.OrderDate) - 1) / 7) + 1 " +
+            "ORDER BY DATEPART(YEAR, o.OrderDate), MONTH(o.OrderDate), ((DAY(o.OrderDate) - 1) / 7) + 1", nativeQuery = true)
     List<WeeklyRevenueProjection> getWeeklyRevenue();
 
     interface DailyRevenueProjection {

@@ -29,6 +29,17 @@
     a{
       text-decoration: none;
     }
+    .wish-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 6px; width: 100%; margin-top: 10px; padding: 12px;
+      border-radius: 4px; border: 1.5px solid #C0633A; background: transparent;
+      color: #C0633A; font-family: var(--font-body); font-weight: 700;
+      font-size: 0.85rem; letter-spacing: 0.03em; cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .wish-btn:hover { background: rgba(192,99,58,.08); }
+    .wish-btn.active { background: #C0633A; color: #fff; }
+    .wish-btn.active:hover { background: var(--rust-dark); }
   </style>
 </head>
 <body class="page">
@@ -44,6 +55,7 @@
   </ul>
   <div class="nav-actions">
     <a class="icon-link" th:if="${loggedIn}" href="/profile" aria-label="Tài khoản">👤</a>
+    <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/wishlist" aria-label="Yêu thích">♡</a>
     <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" aria-label="Tài khoản">🛒</a>
     <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/orders" aria-label="Tài khoản">🧾</a>
     <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
@@ -53,7 +65,7 @@
 
 <main class="page-wrap">
   <div class="breadcrumb">
-    <a href="/">Trang chủ</a> / <a th:href="@{/products}">Sản phẩm</a> / <span th:text="${product.productName}">Tên sản phẩm</span>
+    <a href="/static">Trang chủ</a> / <a th:href="@{/products}">Sản phẩm</a> / <span th:text="${product.productName}">Tên sản phẩm</span>
   </div>
 
   <section class="product-detail">
@@ -109,6 +121,32 @@
         </button>
         <a class="btn btn-outline" th:href="@{/products}">Tiếp tục xem sản phẩm</a>
       </form>
+
+      <form th:if="${loggedIn and roleName == 'CUSTOMER'}"
+            th:action="@{/products/{id}/wishlist/toggle(id=${product.productId})}" method="post">
+        <input type="hidden" name="redirectTo" th:value="@{/products/{id}(id=${product.productId})}" />
+        <button type="submit" th:class="${inWishlist} ? 'wish-btn active' : 'wish-btn'">
+          <span th:text="${inWishlist} ? '♥ Đã trong danh sách yêu thích' : '♡ Thêm vào yêu thích'">♡ Thêm vào yêu thích</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===== SẢN PHẨM ĐÃ XEM GẦN ĐÂY ===== -->
+  <section class="reviews" th:if="${viewedProducts != null and #lists.size(viewedProducts) > 1}">
+    <div class="section-head">
+      <h2>Sản phẩm đã xem gần đây</h2>
+    </div>
+    <div style="display:flex;gap:16px;overflow-x:auto;padding-bottom:8px;">
+      <div th:each="p : ${viewedProducts}" th:if="${p.productId != product.productId}"
+           style="min-width:160px;flex-shrink:0;">
+        <a th:href="@{/products/{id}(id=${p.productId})}" style="text-decoration:none;color:inherit;">
+          <img th:src="${viewedImageMap.get(p.productId)}"
+               th:alt="${p.productName}"
+               style="width:100%;height:140px;object-fit:cover;border-radius:8px;"/>
+          <p style="margin:8px 0 4px;font-size:14px;font-weight:600;" th:text="${p.productName}">Tên sản phẩm</p>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -127,8 +165,6 @@
     <div class="section-head">
       <h2>Đánh giá sản phẩm</h2>
     </div>
-    <!--    debug-->
-    <p th:text="'ten tk la: ' + ${session.username}" style="color: red"></p>
 
     <!-- Danh sách đánh giá -->
     <div class="cart-card" style="padding:24px;">
@@ -150,29 +186,52 @@
            th:text="${c.Comment}">
           Nội dung đánh giá
         </p>
+
+        <!-- PHẢN HỒI TỪ ADMIN -->
+        <div th:if="${c.AdminReply != null and !#strings.isEmpty(c.AdminReply)}"
+             style="background: #f9f9f9; border-left: 3px solid #C0633A; padding: 10px 14px; margin-top: 10px; border-radius: 4px; font-size: 13px;">
+          <strong style="color: #C0633A;">Phản hồi từ HatHub Admin:</strong>
+          <p style="margin: 4px 0 0 0; color: #333; line-height: 1.5;" th:text="${c.AdminReply}"></p>
+        </div>
       </div>
     </div>
 
     <!-- Form thêm đánh giá -->
     <div class="cart-card" style="padding:24px;margin-top:20px;">
       <h3 style="margin-bottom:16px;">Viết đánh giá của bạn</h3>
-      <p th:text="${Csuccess}" style="color: green"></p>
-      <p th:text="${Cerror}" style="color: red"></p>
+      <p th:text="${Csuccess}"></p>
+      <p th:text="${Cerror}"></p>
       <form action="/comment" method="post"
             style="display:flex;flex-direction:column;gap:14px;">
+
+        <div>
+          <label style="display:block;margin-bottom:6px;font-weight:600;">
+            Mẫu mũ
+          </label>
+
+
+          <select name="ProductDetailID"
+                  style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;">
+            <option th:each="pdi : ${listpdi}" th:value="${pdi.productDetailId}" th:text="${pdi.size}+'/'+${pdi.color}"></option>
+          </select>
+        </div>
 
         <div>
           <label style="display:block;margin-bottom:6px;font-weight:600;">
             Đánh giá
           </label>
 
+
           <select name="Rating"
-                  style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;">
-            <option value="5">★★★★★</option>
-            <option value="4">★★★★☆</option>
-            <option value="3">★★★☆☆</option>
-            <option value="2">★★☆☆☆</option>
-            <option value="1">★☆☆☆☆</option>
+                  style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"
+                  text="☆☆☆☆☆"
+
+          >
+            <option value="5" th:selected="${cmt.Rating == 5}">★★★★★</option>
+            <option value="4" th:selected="${cmt.Rating == 4}">★★★★☆</option>
+            <option value="3" th:selected="${cmt.Rating == 3}">★★★☆☆</option>
+            <option value="2" th:selected="${cmt.Rating == 2}">★★☆☆☆</option>
+            <option value="1" th:selected="${cmt.Rating == 1}">★☆☆☆☆</option>
           </select>
         </div>
 
@@ -184,8 +243,9 @@
           <textarea
                   name="Comment"
                   rows="5"
-                  placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..."
-                  style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;resize:vertical;" required></textarea>
+                  style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;resize:vertical;"
+                  th:text="${cmt.Comment}"
+          ></textarea>
         </div>
 
         <div>

@@ -51,7 +51,11 @@
     <a href="/admin/products">Sản phẩm</a>
     <a href="/admin/categories">Danh mục</a>
     <a href="/admin/brands">Thương hiệu</a>
-    <a href="/admin/orders">Đơn hàng</a>
+    <a href="/admin/materials">Chất liệu</a>
+    <a href="/admin/hat-types">Kiểu mũ</a>
+    <a href="/admin/sizes">Size</a>
+    <a href="/admin/colors" >Màu sắc</a>
+    <a href="/admin/orders" class="active">Đơn hàng</a>
     <a href="/admin/returns">Trả hàng</a>
     <a href="/admin/vouchers">Voucher</a>
     <a href="/admin/users">Người dùng</a>
@@ -60,7 +64,7 @@
 
 <main>
     <div class="topbar">
-        <h1 th:text="'Đơn hàng #' + (${order.orderId != null ? order.orderId : '#' + order.orderId})"></h1>
+        <h1 th:text="'Đơn hàng #' + (${order.orderCode != null ? order.orderCode : '#' + order.orderCode})"></h1>
         <div style="display:flex;gap:8px;">
             <a th:if="${order.status != 'Chờ thanh toán' && order.status != 'Chờ xác nhận' && order.status != 'Đã hủy'}"
                th:href="@{/admin/orders/{id}/invoice/pdf(id=${order.orderId})}" class="btn-back" style="background:#C0633A;">🧾 Xuất hóa đơn PDF</a>
@@ -79,7 +83,7 @@
                 <div class="info-grid">
                     <div class="info-block">
                         <div class="info-label">Mã đơn hàng</div>
-                        <div class="info-value" th:text="${order.orderId != null ? '#' + order.orderId : '#' + order.orderId}">1</div>
+                        <div class="info-value" th:text="${order.orderCode != null ? '#' + order.orderCode : '#' + order.orderCode}">1</div>
                     </div>
                     <div class="info-block">
                         <div class="info-label">Ngày đặt</div>
@@ -158,12 +162,7 @@
             <div class="card" th:if="${order.shipping != null}">
                 <h3>Địa chỉ giao hàng</h3>
                 <div class="info-block">
-                    <!--                    <div class="info-label">Địa chỉ</div>-->
                     <div class="info-value" th:text="${order.shipping.shippingAddress}">addr</div>
-                </div>
-                <div class="info-block" style="margin-top:0.8rem;">
-                    <!--                    <div class="info-label">Trạng thái vận chuyển</div>-->
-                    <!--                    <div class="info-value" th:text="${order.shipping.shippingStatus}">status</div>-->
                 </div>
             </div>
 

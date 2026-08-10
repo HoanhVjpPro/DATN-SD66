@@ -34,4 +34,7 @@ public class Reviews {
 
     @Column(name = "Comment")
     public String Comment;
+
+    @Column(name = "AdminReply", columnDefinition = "NVARCHAR(MAX)")
+    public String adminReply;
 }

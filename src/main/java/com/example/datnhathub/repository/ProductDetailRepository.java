@@ -15,6 +15,9 @@ public interface ProductDetailRepository extends JpaRepository<ProductDetail, In
     // Lấy tất cả biến thể theo productId
     List<ProductDetail> findByProductProductId(Integer productId);
 
+    // Kiểm tra SKU đã tồn tại chưa — dùng khi tự sinh SKU để đảm bảo unique
+    boolean existsBySku(String sku);
+
     @Modifying
     @Transactional
     @Query("UPDATE ProductDetail p SET p.stockQuantity = p.stockQuantity - :qty " +

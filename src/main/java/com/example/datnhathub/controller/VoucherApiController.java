@@ -18,7 +18,6 @@ public class VoucherApiController {
     @Autowired
     private VoucherService voucherService;
 
-    // Kiểm tra voucher hợp lệ + tính số tiền giảm dựa trên subtotal, KHÔNG trừ lượt sử dụng
     @GetMapping("/api/vouchers/check")
     @ResponseBody
     public Map<String, Object> checkVoucher(@RequestParam String code,

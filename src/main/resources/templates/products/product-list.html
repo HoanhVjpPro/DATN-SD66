@@ -69,15 +69,14 @@
 </head>
 <body class="page">
 
+
+
 <nav class="shop-nav">
     <a href="/" class="brand">
         <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
         <span>HatHub</span>
     </a>
-    <ul class="nav-menu">
-        <li><a th:href="@{/products}">Sản phẩm</a></li>
-        <li><a href="/orders" th:if="${loggedIn and roleName == 'CUSTOMER'}">Đơn hàng</a></li>
-    </ul>
+    <ul></ul>
     <div class="nav-actions">
         <a class="icon-link" th:if="${loggedIn}" href="/profile" aria-label="Tài khoản">👤</a>
         <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" aria-label="Tài khoản">🛒</a>
