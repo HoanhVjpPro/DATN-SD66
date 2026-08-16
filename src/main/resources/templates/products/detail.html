@@ -55,7 +55,6 @@
   </ul>
   <div class="nav-actions">
     <a class="icon-link" th:if="${loggedIn}" href="/profile" aria-label="Tài khoản">👤</a>
-    <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/wishlist" aria-label="Yêu thích">♡</a>
     <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" aria-label="Tài khoản">🛒</a>
     <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/orders" aria-label="Tài khoản">🧾</a>
     <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
@@ -122,13 +121,6 @@
         <a class="btn btn-outline" th:href="@{/products}">Tiếp tục xem sản phẩm</a>
       </form>
 
-      <form th:if="${loggedIn and roleName == 'CUSTOMER'}"
-            th:action="@{/products/{id}/wishlist/toggle(id=${product.productId})}" method="post">
-        <input type="hidden" name="redirectTo" th:value="@{/products/{id}(id=${product.productId})}" />
-        <button type="submit" th:class="${inWishlist} ? 'wish-btn active' : 'wish-btn'">
-          <span th:text="${inWishlist} ? '♥ Đã trong danh sách yêu thích' : '♡ Thêm vào yêu thích'">♡ Thêm vào yêu thích</span>
-        </button>
-      </form>
     </div>
   </section>
 
