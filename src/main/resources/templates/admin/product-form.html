@@ -6,7 +6,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
   <style>
     body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
-    aside { width:220px; background:#111; color:#fff; padding:1.5rem; }
+    aside { width:220px; background:#111; color:#fff; padding:1.5rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0;}
     aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
     aside a:hover, aside a.active { color:#C0633A; }
     main { flex:1; padding:2rem; background:#F5F0EA; }
@@ -227,7 +227,7 @@
   </div>
 
   <div class="card" th:if="${product.productId != null}">
-    <h3>Biến thể (SKU / Size / Màu / Giá / Tồn kho)</h3>
+    <h3>Biến thể (Mã SP / Size / Màu / Giá / Tồn kho)</h3>
     <input type="hidden" id="currentProductId" th:value="${product.productId}"/>
 
     <div class="variant-toolbar">
@@ -239,7 +239,7 @@
     <table th:if="${details != null}">
       <tr>
         <th style="width:34px;"><input type="checkbox" id="selectAllVariants" onchange="toggleSelectAllVariants(this)"/></th>
-        <th>SKU</th><th>Size</th><th>Màu</th><th>Giá</th><th>Tồn kho</th><th>Ảnh</th><th>Thao tác</th>
+        <th>Mã SP</th><th>Size</th><th>Màu</th><th>Giá</th><th>Tồn kho</th><th>Ảnh</th><th>Thao tác</th>
       </tr>
       <tr th:each="d : ${details}"
           th:with="variantImages=${product.images != null ? product.images.?[productDetail != null and productDetail.productDetailId == __${d.productDetailId}__] : {}}">
@@ -325,7 +325,7 @@
   <div class="modal-overlay" id="variantModalOverlay" th:if="${product.productId != null}">
     <div class="modal-box">
       <h3>Tạo biến thể mới</h3>
-      <p class="modal-hint">Bấm nút "+" để chọn Size/Màu (có thể chọn nhiều). Chỉ những mục đã chọn mới hiển thị bên ngoài. Tất cả tổ hợp Size × Màu sẽ dùng chung 1 giá, 1 tồn kho ban đầu, và SKU được hệ thống tự sinh (không dấu, không trùng).</p>
+<!--      <p class="modal-hint">Bấm nút "+" để chọn Size/Màu (có thể chọn nhiều). Chỉ những mục đã chọn mới hiển thị bên ngoài. Tất cả tổ hợp Size × Màu sẽ dùng chung 1 giá, 1 tồn kho ban đầu, và SKU được hệ thống tự sinh (không dấu, không trùng).</p>-->
 
       <form th:action="@{/admin/products/{id}/detail/batch(id=${product.productId})}"
             method="post" id="variantBatchForm" onsubmit="return prepareVariantSubmit()">

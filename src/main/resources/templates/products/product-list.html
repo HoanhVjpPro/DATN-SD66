@@ -6,197 +6,986 @@
     <title th:text="${selectedCategory != null ? selectedCategory.categoryName + ' | HatHub' : 'Sản phẩm | HatHub'}">Sản phẩm | HatHub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Oswald:wght@500;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" th:href="@{/shop.css}" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;700;800&display=swap" rel="stylesheet" />
     <style>
-        .listing-layout{display:grid;grid-template-columns:240px 1fr;gap:28px;align-items:start;}
-        .filter-card{background:#161616;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:20px;position:sticky;top:20px;}
-        .filter-card h3{color:#fff;font-size:14px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 14px;}
-        .filter-list{list-style:none;margin:0 0 22px;padding:0;display:flex;flex-direction:column;gap:6px;}
-        .filter-list a{display:flex;justify-content:space-between;color:rgba(255,255,255,.68);text-decoration:none;font-size:14px;padding:8px 10px;border-radius:8px;transition:background .15s,color .15s;}
-        .filter-list a:hover{background:rgba(255,255,255,.06);color:#fff;}
-        .filter-list a.active{background:#C0633A;color:#fff;font-weight:700;}
-
-        .search-box{display:flex;gap:8px;margin-bottom:18px;}
-        .search-box input{flex:1;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:#0d0d0d;color:#fff;font-size:13px;}
-        .search-box input::placeholder{color:rgba(255,255,255,.4);}
-        .search-box button{background:#C0633A;border:none;color:#fff;border-radius:8px;padding:0 14px;cursor:pointer;font-weight:700;}
-
-        .price-range{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
-        .price-range input{padding:9px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:#0d0d0d;color:#fff;font-size:13px;width:100%;}
-        .price-range button{background:#C0633A;border:none;color:#fff;border-radius:8px;padding:9px;cursor:pointer;font-weight:700;font-size:13px;margin-top:4px;}
-
-        .listing-toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;color:rgba(255,255,255,.7);font-size:14px;}
-        .listing-toolbar select{background:#161616;color:#fff;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:8px 12px;font-size:13px;}
-
-        .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:22px;}
-        .product-card{background:#161616;border:1px solid rgba(255,255,255,.08);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s,border-color .18s;}
-        .product-card:hover{transform:translateY(-4px);border-color:#C0633A;}
-        .thumb-wrap{position:relative;display:block;}
-        .product-card .thumb{aspect-ratio:1/1;background:#0d0d0d;display:block;width:100%;object-fit:cover;}
-        .badge-sold{position:absolute;top:10px;left:10px;background:#111;color:#fff;font-size:11px;font-weight:700;padding:4px 8px;border-radius:6px;}
-        .product-card .info{padding:14px 16px 18px;display:flex;flex-direction:column;gap:6px;flex:1;}
-        .product-card .cat{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#C0633A;font-weight:700;}
-        .product-card .name{color:#fff;font-size:15px;font-weight:700;line-height:1.35;min-height:40px;text-decoration:none;display:block;}
-        .product-card .price-row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:8px;}
-        .product-card .price{color:#fff;font-weight:800;font-size:16px;}
-        .product-card .view-btn{background:transparent;border:1.5px solid #C0633A;color:#C0633A;text-decoration:none;font-size:12px;font-weight:700;padding:7px 12px;border-radius:8px;transition:background .15s,color .15s;}
-        .product-card .view-btn:hover{background:#C0633A;color:#fff;}
-        .product-card.sold-out{opacity:.55;}
-
-        .pagination{display:flex;justify-content:center;gap:8px;margin-top:32px;}
-        .pagination a, .pagination span{display:inline-flex;align-items:center;justify-content:center;min-width:36px;height:36px;border-radius:8px;color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;border:1px solid rgba(255,255,255,.1);}
-        .pagination a:hover{border-color:#C0633A;color:#fff;}
-        .pagination .current{background:#C0633A;color:#fff;border-color:#C0633A;font-weight:700;}
-
-        @media(max-width:860px){
-            .listing-layout{grid-template-columns:1fr;}
-            .filter-card{position:static;}
+        /* ===== ROOT ===== */
+        :root {
+            --rust: #C0633A;
+            --rust-light: #D47A4F;
+            --rust-dark: #A04E2E;
+            --rust-glow: rgba(192, 99, 58, 0.25);
+            --bg-body: #ffffff;
+            --bg-card: #f8f8f8;
+            --bg-elevated: #eeeeee;
+            --border-subtle: #e0e0e0;
+            --border-hover: #cccccc;
+            --text-primary: #1a1a1a;
+            --text-secondary: #333333;
+            --text-muted: #777777;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08);
+            --transition: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .btn-cart {
-            background: var(--rust) !important;
-            border: none !important; border-radius: 4px !important;
-            padding: 8px 18px !important; font-family: var(--font-body);
-            font-size: 0.8rem !important; font-weight: 700 !important;
-            letter-spacing: 0.05em; color: var(--white) !important;
-            cursor: pointer; transition: background 0.2s !important;
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .btn-cart:hover { background: var(--rust-dark) !important; }
-        a{
+
+        body {
+            background: var(--bg-body);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        a {
             text-decoration: none;
+            color: inherit;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-body);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--rust);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--rust-light);
+        }
+
+        /* ===== NAV ===== */
+        .shop-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 40px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background var(--transition);
+        }
+
+        .shop-nav .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.35rem;
+            letter-spacing: -0.02em;
+            color: #1a1a1a;
+        }
+        .shop-nav .brand img {
+            height: 42px;
+            width: auto;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--rust);
+            box-shadow: 0 0 20px var(--rust-glow);
+            transition: box-shadow var(--transition);
+        }
+        .shop-nav .brand:hover img {
+            box-shadow: 0 0 32px rgba(192, 99, 58, 0.45);
+        }
+        .shop-nav .brand span {
+            color: #1a1a1a;
+            font-weight: 800;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            gap: 24px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .nav-menu a {
+            color: var(--text-secondary);
+            transition: color var(--transition);
+        }
+        .nav-menu a:hover {
+            color: var(--rust);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-actions .icon-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            transition: all var(--transition);
+            position: relative;
+        }
+        .nav-actions .icon-link:hover {
+            background: var(--rust);
+            border-color: var(--rust);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--rust-glow);
+        }
+        .nav-actions .btn-cart {
+            background: var(--rust);
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 10px 22px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            color: #fff;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-transform: uppercase;
+        }
+        .nav-actions .btn-cart:hover {
+            background: var(--rust-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px var(--rust-glow);
+        }
+
+        /* ===== PAGE WRAP ===== */
+        .page-wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 28px 40px 60px;
+        }
+
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .breadcrumb a {
+            color: var(--text-secondary);
+            transition: color var(--transition);
+        }
+        .breadcrumb a:hover {
+            color: var(--rust-light);
+        }
+        .breadcrumb span {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ===== PAGE TITLE ===== */
+        .page-title {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 800;
+            font-size: 2.6rem;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+            margin: 0 0 28px 0;
+            color: #1a1a1a;
+            line-height: 1.1;
+        }
+        .page-title span {
+            color: var(--rust);
+        }
+
+        /* ===== LAYOUT ===== */
+        .listing-layout {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        /* ===== FILTER SIDEBAR ===== */
+        .filter-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 24px 22px 28px;
+            position: sticky;
+            top: 100px;
+            backdrop-filter: blur(8px);
+            transition: border-color var(--transition);
+        }
+        .filter-card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .filter-card h3 {
+            font-size: 0.7rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin: 0 0 14px 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-card h3::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-subtle);
+        }
+        .filter-card h3:not(:first-of-type) {
+            margin-top: 24px;
+        }
+
+        /* Search */
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 12px 14px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            transition: all var(--transition);
+            outline: none;
+        }
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+        .search-box input:focus {
+            border-color: var(--rust);
+            box-shadow: 0 0 0 3px var(--rust-glow);
+        }
+        .search-box button {
+            background: var(--rust);
+            border: none;
+            color: #fff;
+            border-radius: var(--radius-sm);
+            padding: 0 18px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .search-box button:hover {
+            background: var(--rust-dark);
+            transform: scale(1.04);
+        }
+
+        /* Price range */
+        .price-range {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .price-range .range-row {
+            display: flex;
+            gap: 8px;
+        }
+        .price-range .range-row input {
+            flex: 1;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 0.82rem;
+            font-family: 'Inter', sans-serif;
+            transition: all var(--transition);
+            outline: none;
+            width: 100%;
+            min-width: 0;
+        }
+        .price-range .range-row input::placeholder {
+            color: var(--text-muted);
+        }
+        .price-range .range-row input:focus {
+            border-color: var(--rust);
+            box-shadow: 0 0 0 3px var(--rust-glow);
+        }
+        .price-range .range-row input[type="number"]::-webkit-inner-spin-button {
+            opacity: 0.5;
+        }
+        .price-range button[type="submit"] {
+            background: var(--rust);
+            border: none;
+            color: #fff;
+            border-radius: var(--radius-sm);
+            padding: 11px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.8rem;
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            transition: all var(--transition);
+            margin-top: 2px;
+        }
+        .price-range button[type="submit"]:hover {
+            background: var(--rust-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px var(--rust-glow);
+        }
+
+        /* Filter lists */
+        .filter-list {
+            list-style: none;
+            margin: 0 0 4px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .filter-list a {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+            font-weight: 500;
+            position: relative;
+        }
+        .filter-list a:hover {
+            background: rgba(0, 0, 0, 0.04);
+            color: #1a1a1a;
+            transform: translateX(4px);
+        }
+        .filter-list a.active {
+            background: var(--rust);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 4px 16px var(--rust-glow);
+            transform: translateX(0);
+        }
+        .filter-list a.active::before {
+            content: '›';
+            margin-right: 6px;
+            font-weight: 900;
+            font-size: 1.1rem;
+        }
+
+        /* ===== TOOLBAR ===== */
+        .listing-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 22px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 12px;
+            background: var(--bg-card);
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-subtle);
+        }
+        .listing-toolbar .count-label {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+        .listing-toolbar .count-label strong {
+            color: var(--rust);
+            font-size: 1.1rem;
+        }
+        .listing-toolbar form {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .listing-toolbar label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .listing-toolbar select {
+            background: #fff;
+            color: #1a1a1a;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-sm);
+            padding: 8px 14px;
+            font-size: 0.82rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            outline: none;
+            transition: all var(--transition);
+            min-width: 140px;
+        }
+        .listing-toolbar select:focus {
+            border-color: var(--rust);
+            box-shadow: 0 0 0 3px var(--rust-glow);
+        }
+
+        /* ===== PRODUCT GRID ===== */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 24px;
+        }
+
+        .product-card {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: all var(--transition);
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--rust);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--rust-glow);
+        }
+
+        .product-card .thumb-wrap {
+            position: relative;
+            display: block;
+            overflow: hidden;
+            background: #f0f0f0;
+        }
+        .product-card .thumb {
+            aspect-ratio: 1 / 1;
+            width: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: block;
+        }
+        .product-card:hover .thumb {
+            transform: scale(1.04);
+        }
+
+        .product-card .badge-sold {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .product-card .info {
+            padding: 16px 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+        .product-card .cat {
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--rust);
+            font-weight: 700;
+        }
+        .product-card .brand-tag {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .product-card .name {
+            color: #1a1a1a;
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.35;
+            min-height: 42px;
+            display: block;
+            transition: color var(--transition);
+            margin: 2px 0 4px;
+        }
+        .product-card .name:hover {
+            color: var(--rust);
+        }
+
+        .product-card .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+        .product-card .price {
+            color: #1a1a1a;
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: -0.01em;
+        }
+        .product-card .price .currency {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-left: 2px;
+        }
+        .product-card .view-btn {
+            background: transparent;
+            border: 1.5px solid var(--rust);
+            color: var(--rust);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 6px 16px;
+            border-radius: 20px;
+            transition: all var(--transition);
+        }
+        .product-card .view-btn:hover {
+            background: var(--rust);
+            color: #fff;
+            box-shadow: 0 4px 16px var(--rust-glow);
+            transform: scale(1.02);
+        }
+
+        .product-card.sold-out {
+            opacity: 0.55;
+        }
+        .product-card.sold-out .thumb-wrap::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: grayscale(0.3);
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+        }
+        .empty-state h3 {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+        .empty-state p {
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+        .empty-state .btn-primary {
+            display: inline-block;
+            background: var(--rust);
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 12px 28px;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition);
+        }
+        .empty-state .btn-primary:hover {
+            background: var(--rust-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--rust-glow);
+        }
+
+        /* ===== PAGINATION ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        .pagination a,
+        .pagination span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--border-subtle);
+            transition: all var(--transition);
+            background: #fff;
+        }
+        .pagination a:hover {
+            border-color: var(--rust);
+            color: var(--rust);
+            background: rgba(192, 99, 58, 0.05);
+            transform: translateY(-2px);
+        }
+        .pagination .current {
+            background: var(--rust);
+            color: #fff;
+            border-color: var(--rust);
+            font-weight: 700;
+            box-shadow: 0 4px 16px var(--rust-glow);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .page-wrap {
+                padding: 20px 24px 40px;
+            }
+            .listing-layout {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .filter-card {
+                position: static;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px 24px;
+                padding: 20px;
+            }
+            .filter-card h3:not(:first-of-type) {
+                margin-top: 0;
+            }
+            .filter-card h3 {
+                margin-bottom: 8px;
+            }
+            .filter-card .search-box {
+                grid-column: 1 / -1;
+            }
+            .filter-card .price-range {
+                grid-column: 1 / -1;
+            }
+            .filter-card .price-range .range-row {
+                flex-wrap: wrap;
+            }
+            .filter-card .price-range .range-row input {
+                min-width: 100px;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .shop-nav {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .shop-nav .brand {
+                font-size: 1.1rem;
+            }
+            .shop-nav .brand img {
+                height: 34px;
+            }
+            .nav-actions .icon-link {
+                width: 34px;
+                height: 34px;
+                font-size: 0.95rem;
+            }
+            .nav-actions .btn-cart {
+                padding: 6px 14px;
+                font-size: 0.7rem;
+            }
+            .page-wrap {
+                padding: 16px 14px 40px;
+            }
+            .page-title {
+                font-size: 2rem;
+            }
+            .listing-layout {
+                gap: 16px;
+            }
+            .filter-card {
+                grid-template-columns: 1fr;
+                padding: 16px;
+                gap: 4px;
+            }
+            .filter-card h3:not(:first-of-type) {
+                margin-top: 16px;
+            }
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 14px;
+            }
+            .product-card .info {
+                padding: 12px 14px 16px;
+            }
+            .product-card .name {
+                font-size: 0.85rem;
+                min-height: 36px;
+            }
+            .product-card .price {
+                font-size: 0.9rem;
+            }
+            .product-card .view-btn {
+                font-size: 0.6rem;
+                padding: 4px 12px;
+            }
+            .listing-toolbar {
+                padding: 10px 14px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .listing-toolbar form {
+                flex-wrap: wrap;
+            }
+            .listing-toolbar select {
+                min-width: 100px;
+                flex: 1;
+            }
+            .pagination a,
+            .pagination span {
+                min-width: 34px;
+                height: 34px;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .product-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .product-card .info {
+                padding: 10px 10px 14px;
+            }
+            .product-card .name {
+                font-size: 0.75rem;
+                min-height: 30px;
+            }
+            .product-card .price {
+                font-size: 0.8rem;
+            }
+            .product-card .view-btn {
+                font-size: 0.55rem;
+                padding: 3px 10px;
+            }
+            .product-card .cat {
+                font-size: 0.55rem;
+            }
+            .page-title {
+                font-size: 1.6rem;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .product-card {
+            animation: fadeUp 0.5s ease forwards;
         }
     </style>
 </head>
-<body class="page">
+<body>
 
-
-
+<!-- ===== NAV ===== -->
 <nav class="shop-nav">
     <a href="/" class="brand">
-        <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
+        <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" />
         <span>HatHub</span>
     </a>
-    <ul></ul>
+    <ul class="nav-menu"></ul>
     <div class="nav-actions">
         <a class="icon-link" th:if="${loggedIn}" href="/profile" aria-label="Tài khoản">👤</a>
-        <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" aria-label="Tài khoản">🛒</a>
-        <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/orders" aria-label="Tài khoản">🧾</a>
+        <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/cart" aria-label="Giỏ hàng">🛒</a>
+        <a class="icon-link" th:if="${loggedIn and roleName == 'CUSTOMER'}" href="/orders" aria-label="Đơn hàng">🧾</a>
         <a class="btn-cart" th:if="${session.user == null}" href="/login">Đăng nhập</a>
         <a class="btn-cart" th:if="${session.user != null}" href="/logout">Đăng xuất</a>
     </div>
 </nav>
 
+<!-- ===== MAIN ===== -->
 <main class="page-wrap">
-    <div class="breadcrumb">
-        <a href="/">Trang chủ</a> / <span th:text="${selectedCategory != null ? selectedCategory.categoryName : 'Tất cả sản phẩm'}">Sản phẩm</span>
-    </div>
-    <h1 class="page-title" th:text="${selectedCategory != null ? selectedCategory.categoryName : 'Tất cả sản phẩm'}">Tất cả sản phẩm</h1>
 
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="/">Trang chủ</a>
+        <span>›</span>
+        <span th:text="${selectedCategory != null ? selectedCategory.categoryName : 'Tất cả sản phẩm'}">Tất cả sản phẩm</span>
+    </div>
+
+    <!-- Title -->
+    <h1 class="page-title">
+        <span th:if="${selectedCategory == null}">Tất cả <span>sản phẩm</span></span>
+        <span th:if="${selectedCategory != null}" th:text="${selectedCategory.categoryName}">Danh mục</span>
+    </h1>
+
+    <!-- Layout -->
     <div class="listing-layout">
 
         <!-- ===== SIDEBAR ===== -->
         <aside class="filter-card">
+
+            <!-- Search -->
             <h3>Tìm kiếm</h3>
             <form class="search-box" th:action="@{/products}" method="get">
                 <input type="hidden" name="categoryId" th:value="${selectedCategory != null ? selectedCategory.categoryId : ''}"/>
                 <input type="hidden" name="brandId" th:value="${selectedBrand != null ? selectedBrand.brandId : ''}"/>
-                <input type="text" name="keyword" placeholder="Tên mũ, kiểu dáng..." th:value="${keyword}"/>
+                <input type="text" name="keyword" placeholder="Tên mũ, kiểu dáng..." th:value="${keyword}" />
                 <button type="submit">⌕</button>
             </form>
 
+            <!-- Price Range -->
             <h3>Khoảng giá</h3>
             <form class="price-range" th:action="@{/products}" method="get">
                 <input type="hidden" name="categoryId" th:value="${selectedCategory != null ? selectedCategory.categoryId : ''}"/>
                 <input type="hidden" name="brandId" th:value="${selectedBrand != null ? selectedBrand.brandId : ''}"/>
                 <input type="hidden" name="keyword" th:value="${keyword}"/>
-                <input type="number" min="0" step="1000" name="minPrice" placeholder="Từ (đ)" th:value="${minPrice}"/>
-                <input type="number" min="0" step="1000" name="maxPrice" placeholder="Đến (đ)" th:value="${maxPrice}"/>
+                <div class="range-row">
+                    <input type="number" min="0" step="1000" name="minPrice" placeholder="Từ (đ)" th:value="${minPrice}" />
+                    <input type="number" min="0" step="1000" name="maxPrice" placeholder="Đến (đ)" th:value="${maxPrice}" />
+                </div>
                 <button type="submit">Áp dụng</button>
             </form>
 
+            <!-- Categories -->
             <h3>Danh mục</h3>
             <ul class="filter-list">
                 <li>
-                    <a th:href="@{/products(brandId=${selectedBrand != null ? selectedBrand.brandId : null})}" th:classappend="${selectedCategory == null ? 'active' : ''}">Tất cả</a>
+                    <a th:href="@{/products(brandId=${selectedBrand != null ? selectedBrand.brandId : null})}"
+                       th:classappend="${selectedCategory == null ? 'active' : ''}">
+                        <span>Tất cả</span>
+                    </a>
                 </li>
                 <li th:each="c : ${categories}">
                     <a th:href="@{/products(categoryId=${c.categoryId}, brandId=${selectedBrand != null ? selectedBrand.brandId : null})}"
-                       th:classappend="${selectedCategory != null and selectedCategory.categoryId == c.categoryId ? 'active' : ''}"
-                       th:text="${c.categoryName}">Category</a>
+                       th:classappend="${selectedCategory != null and selectedCategory.categoryId == c.categoryId ? 'active' : ''}">
+                        <span th:text="${c.categoryName}">Danh mục</span>
+                    </a>
                 </li>
             </ul>
 
+            <!-- Brands -->
             <h3>Thương hiệu</h3>
             <ul class="filter-list">
                 <li>
-                    <a th:href="@{/products(categoryId=${selectedCategory != null ? selectedCategory.categoryId : null})}" th:classappend="${selectedBrand == null ? 'active' : ''}">Tất cả</a>
+                    <a th:href="@{/products(categoryId=${selectedCategory != null ? selectedCategory.categoryId : null})}"
+                       th:classappend="${selectedBrand == null ? 'active' : ''}">
+                        <span>Tất cả</span>
+                    </a>
                 </li>
                 <li th:each="b : ${brands}">
                     <a th:href="@{/products(categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${b.brandId})}"
-                       th:classappend="${selectedBrand != null and selectedBrand.brandId == b.brandId ? 'active' : ''}"
-                       th:text="${b.brandName}">Brand</a>
+                       th:classappend="${selectedBrand != null and selectedBrand.brandId == b.brandId ? 'active' : ''}">
+                        <span th:text="${b.brandName}">Thương hiệu</span>
+                    </a>
                 </li>
             </ul>
         </aside>
 
-        <!-- ===== MAIN ===== -->
+        <!-- ===== PRODUCT LIST ===== -->
         <section>
+
+            <!-- Toolbar -->
             <div class="listing-toolbar">
-                <span style="color: black"><strong th:text="${totalProducts}">0</strong> sản phẩm</span>
-                <form th:action="@{/products}" method="get" style="display:flex;align-items:center;gap:8px;">
+                <span class="count-label"><strong th:text="${totalProducts}">0</strong> sản phẩm</span>
+                <form th:action="@{/products}" method="get">
                     <input type="hidden" name="categoryId" th:value="${selectedCategory != null ? selectedCategory.categoryId : ''}"/>
                     <input type="hidden" name="brandId" th:value="${selectedBrand != null ? selectedBrand.brandId : ''}"/>
                     <input type="hidden" name="keyword" th:value="${keyword}"/>
                     <input type="hidden" name="minPrice" th:value="${minPrice}"/>
                     <input type="hidden" name="maxPrice" th:value="${maxPrice}"/>
-                    <label for="sort" style="font-size:13px; color: black">Sắp xếp:</label>
+                    <label for="sort">Sắp xếp</label>
                     <select id="sort" name="sort" onchange="this.form.submit()">
-                        <option value="newest"    th:selected="${sort == 'newest'}">Mới nhất</option>
+                        <option value="newest" th:selected="${sort == 'newest'}">Mới nhất</option>
                         <option value="price-asc" th:selected="${sort == 'price-asc'}">Giá tăng dần</option>
                         <option value="price-desc" th:selected="${sort == 'price-desc'}">Giá giảm dần</option>
                     </select>
                 </form>
             </div>
 
+            <!-- Empty state -->
             <div th:if="${#lists.isEmpty(products)}" class="empty-state">
                 <h3>Không tìm thấy sản phẩm</h3>
                 <p>Hãy thử từ khóa khác hoặc bỏ bộ lọc.</p>
-                <a href="/products" class="btn btn-primary">Xem tất cả sản phẩm</a>
+                <a href="/products" class="btn-primary">Xem tất cả sản phẩm</a>
             </div>
 
+            <!-- Grid sản phẩm -->
             <div th:unless="${#lists.isEmpty(products)}" class="product-grid">
+
                 <div th:each="p : ${products}" class="product-card" th:classappend="${!p.status ? 'sold-out' : ''}">
                     <a th:href="@{/products/{id}(id=${p.productId})}" class="thumb-wrap">
                         <span class="badge-sold" th:if="${!p.status}">Ngừng bán</span>
-                        <img class="thumb" th:src="${p.defaultImage != null ? p.defaultImage : '/images/no-image.jpg'}" th:alt="${p.productName}"/>
+                        <img class="thumb" th:src="${p.defaultImage != null ? p.defaultImage : '/images/no-image.jpg'}" th:alt="${p.productName}" />
                     </a>
                     <div class="info">
-                        <span class="cat" th:text="${p.categoryName}">Category</span>
-                        <span th:if="${p.brandName != null}" style="font-size:11px;color:rgba(255,255,255,.5);" th:text="${p.brandName}">Brand</span>
+                        <span class="cat" th:text="${p.categoryName}">Danh mục</span>
+                        <span class="brand-tag" th:if="${p.brandName != null}" th:text="${p.brandName}">Thương hiệu</span>
                         <a class="name" th:href="@{/products/{id}(id=${p.productId})}" th:text="${p.productName}">Tên sản phẩm</a>
                         <div class="price-row">
-                            <span class="price" th:text="${p.minPrice != null ? #numbers.formatDecimal(p.minPrice, 0, 'COMMA', 0, 'POINT') + ' đ' : 'Liên hệ'}">0 đ</span>
-                            <a class="view-btn" th:href="@{/products/{id}(id=${p.productId})}">Xem chi tiết</a>
+                            <span class="price" th:if="${p.minPrice != null}">
+                                <span th:text="${#numbers.formatDecimal(p.minPrice, 0, 'COMMA', 0, 'POINT')}">0</span>
+                                <span class="currency">đ</span>
+                            </span>
+                            <span class="price" th:if="${p.minPrice == null}">Liên hệ</span>
+                            <a class="view-btn" th:href="@{/products/{id}(id=${p.productId})}">Xem</a>
                         </div>
                     </div>
                 </div>
+
             </div>
 
-            <!-- Phân trang -->
+            <!-- Pagination -->
             <div class="pagination" th:if="${totalPages != null and totalPages > 1}">
                 <a th:if="${currentPage > 0}"
-                   th:href="@{/products(page=${currentPage - 1}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${selectedBrand != null ? selectedBrand.brandId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}">‹</a>
+                   th:href="@{/products(page=${currentPage - 1}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${selectedBrand != null ? selectedBrand.brandId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}"
+                   aria-label="Trang trước">‹</a>
                 <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-          <span th:if="${i == currentPage}" class="current" th:text="${i + 1}">1</span>
-          <a th:unless="${i == currentPage}"
-             th:href="@{/products(page=${i}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${selectedBrand != null ? selectedBrand.brandId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}"
-             th:text="${i + 1}">1</a>
-        </span>
+                    <span th:if="${i == currentPage}" class="current" th:text="${i + 1}">1</span>
+                    <a th:unless="${i == currentPage}"
+                       th:href="@{/products(page=${i}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${selectedBrand != null ? selectedBrand.brandId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}"
+                       th:text="${i + 1}">1</a>
+                </span>
                 <a th:if="${currentPage < totalPages - 1}"
-                   th:href="@{/products(page=${currentPage + 1}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${selectedBrand != null ? selectedBrand.brandId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}">›</a>
+                   th:href="@{/products(page=${currentPage + 1}, categoryId=${selectedCategory != null ? selectedCategory.categoryId : null}, brandId=${selectedBrand != null ? selectedBrand.brandId : null}, keyword=${keyword}, minPrice=${minPrice}, maxPrice=${maxPrice}, sort=${sort})}"
+                   aria-label="Trang sau">›</a>
             </div>
         </section>
     </div>
 </main>
+
 </body>
 </html>

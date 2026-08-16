@@ -127,9 +127,9 @@ public class CartController {
     }
 
     // UC20 — Đặt hàng từ giỏ hàng
+    // POST /checkout — Đặt hàng từ giỏ hàng
     @PostMapping("/checkout")
     public String placeOrder(@RequestParam String houseAddress,
-                             @RequestParam String ward,
                              @RequestParam String district,
                              @RequestParam String city,
                              @RequestParam String paymentMethod,
@@ -143,7 +143,7 @@ public class CartController {
             return "redirect:/login";
         }
 
-        String fullAddress = houseAddress.trim() + ", " + ward.trim() + ", " + district.trim() + ", " + city.trim();
+        String fullAddress = houseAddress.trim() + ", " + district.trim() + ", " + city.trim();
 
         try {
             Orders order = orderService.placeOrder(userId, fullAddress, city, paymentMethod, voucherCode);
