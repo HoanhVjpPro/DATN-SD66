@@ -137,7 +137,9 @@ public class OrderService {
 
     // Đặt hàng từ giỏ hàng
     @Transactional
-    public Orders placeOrder(Integer userId, String shippingAddress, String city, String paymentMethod, String voucherCode) {
+    public Orders placeOrder(Integer userId, String shippingAddress, String city,
+                             String paymentMethod, String voucherCode,
+                             List<Integer> selectedCartDetailIds) {
 
         Customer customer = cartService.getCustomerByUserId(userId);
         Cart cart = cartService.getOrCreateCart(customer);
@@ -146,18 +148,28 @@ public class OrderService {
             throw new RuntimeException("Giỏ hàng đang trống, không thể đặt hàng.");
         }
 
-        for (CartDetail cd : cart.getDetails()) {
+        List<CartDetail> itemsToOrder = (selectedCartDetailIds == null || selectedCartDetailIds.isEmpty())
+                ? cart.getDetails()
+                : cart.getDetails().stream()
+                .filter(cd -> selectedCartDetailIds.contains(cd.getCartDetailId()))
+                .toList();
+
+        if (itemsToOrder.isEmpty()) {
+            throw new RuntimeException("Không có sản phẩm nào được chọn để đặt hàng.");
+        }
+
+        for (CartDetail cd : itemsToOrder) {
             ProductDetail pd = cd.getProductDetail();
             int stock = pd.getStockQuantity() == null ? 0 : pd.getStockQuantity();
             if (cd.getQuantity() > stock) {
-                throw new RuntimeException(
-                        "Sản phẩm \"" + pd.getProduct().getProductName() + "\" (" + pd.getSize() + "/" + pd.getColor()
-                                + ") không đủ số lượng trong kho. Vui lòng cập nhật lại giỏ hàng."
-                );
+                throw new RuntimeException("Sản phẩm \"" + pd.getProduct().getProductName() + "\" ("
+                        + pd.getSize() + "/" + pd.getColor() + ") không đủ số lượng trong kho.");
             }
         }
 
-        BigDecimal subtotal = cartService.calculateTotal(cart);
+        BigDecimal subtotal = itemsToOrder.stream()
+                .map(d -> d.getProductDetail().getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // Phí ship tính trên subtotal (trước khi trừ voucher)
         BigDecimal shippingFee = calculateShippingFee(city, subtotal);
@@ -200,7 +212,7 @@ public class OrderService {
         order.setStockDeducted(false);
 
         List<OrderDetail> orderDetails = new ArrayList<>();
-        for (CartDetail cd : cart.getDetails()) {
+        for (CartDetail cd : itemsToOrder) {
             ProductDetail pd = cd.getProductDetail();
             OrderDetail od = new OrderDetail();
             od.setOrder(order);
@@ -231,7 +243,8 @@ public class OrderService {
             voucherRepository.save(voucher);
         }
 
-        cartDetailRepository.deleteByCartCartId(cart.getCartId());
+        List<Integer> orderedDetailIds = itemsToOrder.stream().map(CartDetail::getCartDetailId).toList();
+        cartDetailRepository.deleteAllById(orderedDetailIds);
         return savedOrder;
     }
 

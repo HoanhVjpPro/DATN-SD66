@@ -6,36 +6,510 @@
     <title>Thanh toán | HatHub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Oswald:wght@500;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" th:href="@{/shop.css}" />
+    <!-- ĐÃ THÊM &subset=vietnamese ĐỂ HỖ TRỢ TIẾNG VIỆT -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Barlow+Condensed:wght@500;700;900&display=swap&subset=vietnamese" rel="stylesheet" />
+    <style>
+        /* ===== RESET & VARIABLES ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --black: #111111;
+            --off-black: #1a1a1a;
+            --rust: #C0633A;
+            --rust-light: #D97C4E;
+            --rust-dark: #9B4A27;
+            --white: #ffffff;
+            --cream: #F5F0EA;
+            --gray-100: #f0efee;
+            --gray-200: #8a8383;
+            --gray-400: #9e9b96;
+            --gray-700: #3e3d3a;
+            /* ĐÃ THÊM FALLBACK HỖ TRỢ TIẾNG VIỆT */
+            --font-display: 'Barlow Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
+            --font-body: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+            --shadow: 0 10px 30px rgba(0,0,0,0.08);
+            --radius: 16px;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--cream);
+            color: var(--black);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* ===== PROMO BAR ===== */
+        .promo-bar {
+            background: var(--rust);
+            color: var(--white);
+            text-align: center;
+            padding: 10px 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* ===== NAV ===== */
+        .shop-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 5%;
+            background: var(--white);
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.02);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1.8rem;
+            color: var(--black);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .brand img {
+            height: 44px;
+            width: auto;
+            object-fit: contain;
+            border-radius: 50%;
+            border: 2px solid var(--rust);
+        }
+        .brand span {
+            color: var(--black);
+        }
+        .brand span::after {
+            content: 'hub';
+            color: var(--rust);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        .nav-menu a {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--gray-700);
+            transition: color 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .nav-menu a:hover {
+            color: var(--rust);
+        }
+        .nav-actions { display: flex; gap: 1rem; }
+
+        /* ===== PAGE WRAP ===== */
+        .page-wrap {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 4rem;
+        }
+
+        .page-title {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 2.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 0.5rem;
+            color: var(--black);
+            position: relative;
+        }
+        .page-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--rust);
+            margin-top: 8px;
+            border-radius: 4px;
+        }
+
+        /* ===== ALERT ===== */
+        .alert {
+            padding: 16px 20px;
+            border-radius: var(--radius);
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+        .alert.error {
+            background: #fde8e8;
+            color: #b34040;
+            border-left: 6px solid #b34040;
+        }
+        .alert ul {
+            margin: 6px 0 0 20px;
+            padding: 0;
+            font-weight: 400;
+        }
+
+        /* ===== CHECKOUT LAYOUT ===== */
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 2.5rem;
+            margin-top: 1rem;
+        }
+
+        /* ===== FORM CARD ===== */
+        .checkout-card {
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: box-shadow 0.3s;
+        }
+        .checkout-card:hover {
+            box-shadow: 0 16px 48px rgba(0,0,0,0.1);
+        }
+
+        .form-box > div {
+            margin-bottom: 1.8rem;
+        }
+
+        .form-box label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.85rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        .form-box select,
+        .form-box input,
+        .form-box textarea {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--gray-100);
+            border-radius: 10px;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            background: var(--gray-100);
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            color: var(--black);
+        }
+        .form-box select:focus,
+        .form-box input:focus,
+        .form-box textarea:focus {
+            outline: none;
+            border-color: var(--rust);
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(192, 99, 58, 0.1);
+        }
+        .form-box textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Payment options */
+        .payment-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            padding-top: 6px;
+        }
+        .payment-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            padding: 8px 16px;
+            border: 2px solid var(--gray-100);
+            border-radius: 40px;
+            transition: all 0.2s;
+            background: var(--gray-100);
+        }
+        .payment-option:hover {
+            border-color: var(--rust-light);
+            background: var(--white);
+        }
+        .payment-option input[type="radio"] {
+            width: auto;
+            margin-right: 4px;
+            accent-color: var(--rust);
+            transform: scale(1.1);
+        }
+        .payment-option:has(input:checked) {
+            border-color: var(--rust);
+            background: #fff5f0;
+        }
+
+        /* Voucher row - ĐÃ SỬA FONT */
+        .voucher-row {
+            display: flex;
+            gap: 10px;
+        }
+        .voucher-row input {
+            flex: 1;
+        }
+        .voucher-row button {
+            background: var(--black);
+            color: var(--white);
+            border: none;
+            padding: 0 24px;
+            border-radius: 40px;
+            /* GÁN RÕ RÀNG FONT CÓ FALLBACK */
+            font-family: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+            font-weight: 800;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .voucher-row button:hover {
+            background: var(--rust);
+        }
+        .voucher-row button:active {
+            transform: scale(0.96);
+        }
+
+        .voucher-message {
+            font-size: 0.85rem;
+            margin-top: 8px;
+            font-weight: 600;
+            color: var(--gray-400);
+            font-family: var(--font-body);
+        }
+        .voucher-message.success { color: #2e7d32; }
+        .voucher-message.error { color: #c62828; }
+
+        /* Submit button - ĐÃ SỬA FONT */
+        .btn-primary {
+            display: inline-block;
+            width: 100%;
+            padding: 16px 28px;
+            background: var(--rust);
+            color: var(--white);
+            border: none;
+            border-radius: 50px;
+            font-family: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 8px 24px rgba(192, 99, 58, 0.35);
+            margin-top: 4px;
+        }
+        .btn-primary:hover:not(:disabled) {
+            background: var(--rust-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(192, 99, 58, 0.45);
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* ===== SUMMARY CARD ===== */
+        .summary-card {
+            background: var(--off-black);
+            color: var(--white);
+            padding: 2.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            align-self: flex-start;
+            position: sticky;
+            top: 20px;
+        }
+        .summary-card h2 {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            margin-bottom: 1.8rem;
+            color: var(--white);
+            border-bottom: 2px solid var(--rust);
+            padding-bottom: 0.6rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 0.95rem;
+        }
+        .summary-row:last-child {
+            border-bottom: none;
+        }
+        .summary-row .product-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        .summary-row .product-info img {
+            width: 52px;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 10px;
+            background: var(--gray-700);
+            flex-shrink: 0;
+        }
+        .summary-row .product-info .details {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.4;
+        }
+        .summary-row .product-info .details strong {
+            font-weight: 700;
+            color: var(--white);
+        }
+        .summary-row .product-info .details small {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8rem;
+        }
+        .summary-row .product-price {
+            font-weight: 800;
+            color: var(--white);
+            white-space: nowrap;
+            margin-left: 12px;
+        }
+
+        .summary-row.totals {
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .summary-row.totals span {
+            color: rgba(255,255,255,0.7);
+        }
+        .summary-row.totals strong {
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .summary-total {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--rust-light) !important;
+        }
+
+        .summary-note {
+            margin-top: 1.2rem;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.06);
+            padding-top: 1.2rem;
+            font-family: var(--font-body);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .checkout-layout {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            .summary-card {
+                position: static;
+            }
+            .page-title {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .shop-nav {
+                flex-wrap: wrap;
+                gap: 12px;
+                padding: 12px 5%;
+            }
+            .nav-menu {
+                gap: 1rem;
+                font-size: 0.8rem;
+            }
+            .checkout-card {
+                padding: 1.5rem;
+            }
+            .summary-card {
+                padding: 1.5rem;
+            }
+            .payment-options {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            .voucher-row {
+                flex-direction: column;
+            }
+            .voucher-row button {
+                padding: 12px;
+            }
+            .page-wrap {
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
 </head>
-<body class="page">
-<div class="promo-bar">Kiểm tra thông tin giao hàng trước khi đặt đơn</div>
+<body>
+
+<!-- ===== PROMO BAR ===== -->
+<div class="promo-bar">✅ Kiểm tra thông tin giao hàng trước khi đặt đơn</div>
+
+<!-- ===== NAV ===== -->
 <nav class="shop-nav">
     <a href="/" class="brand">
-        <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
-        <span>HatHub</span>
+        <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" />
+        <span>Hat</span>
     </a>
-    <ul class="nav-menu"><li><a href="/cart">Quay lại giỏ</a></li><li><a th:href="@{/products}">Tiếp tục mua</a></li></ul>
+    <ul class="nav-menu">
+        <li><a href="/cart">← Quay lại giỏ</a></li>
+        <li><a th:href="@{/products}">Tiếp tục mua →</a></li>
+    </ul>
     <div class="nav-actions"></div>
 </nav>
+
+<!-- ===== MAIN ===== -->
 <main class="page-wrap">
     <h1 class="page-title">Thanh toán</h1>
+
+    <!-- ALERT -->
     <div th:if="${error}" class="alert error" th:text="${error}"></div>
     <div th:if="${outOfStockMessages != null and !outOfStockMessages.isEmpty()}" class="alert error" style="line-height:1.6;">
-        <strong>⚠ Một số sản phẩm trong giỏ không đủ số lượng tồn kho:</strong>
-        <ul style="margin:8px 0 0 18px;padding:0;">
+        <strong>⚠ Một số sản phẩm bạn chọn không đủ số lượng tồn kho:</strong>
+        <ul>
             <li th:each="msg : ${outOfStockMessages}" th:text="${msg}"></li>
         </ul>
         <div style="margin-top:8px;">
-            Vui lòng <a href="/cart" style="color:inherit;text-decoration:underline;font-weight:700;">liên hệ với CSKH</a> để cập nhật số lượng trước khi đặt hàng.
+            Vui lòng <a href="/cart" style="color:inherit;text-decoration:underline;font-weight:700;">quay lại giỏ hàng</a> để cập nhật số lượng trước khi đặt hàng.
         </div>
     </div>
+
+    <!-- CHECKOUT LAYOUT -->
     <div class="checkout-layout">
+
+        <!-- FORM -->
         <form class="checkout-card form-box" id="checkoutForm"
-              onsubmit="return confirm('Có chắc muốn đặt hàng chứ?')" action="/checkout" method="post">
+              onsubmit="return confirm('Có chắc muốn đặt hàng chứ?')"
+              action="/checkout" method="post">
+
+            <!-- Chỉ đặt hàng đúng những sản phẩm khách đã chọn từ giỏ hàng -->
+            <input type="hidden" th:each="itemId : ${selectedItems}" name="selectedItems" th:value="${itemId}" />
+
             <div>
-                <label>Tỉnh/Thành phố</label>
+                <label>Tỉnh / Thành phố</label>
                 <select name="city" id="citySelect" required onchange="updateGrandTotal()">
                     <option value="" disabled selected>-- Chọn tỉnh/thành phố --</option>
                     <option value="Hà Nội">Hà Nội (20.000VNĐ)</option>
@@ -44,88 +518,99 @@
                     <option value="Khác">Tỉnh/thành khác (35.000VNĐ)</option>
                 </select>
             </div>
+
             <div>
                 <label>Số nhà, tên đường</label>
                 <input type="text" name="houseAddress" required placeholder="VD: 123 Đường Láng" />
             </div>
+
             <div>
-                <label>Quận/Huyện</label>
+                <label>Quận / Huyện</label>
                 <input type="text" name="district" required placeholder="VD: Quận Đống Đa" />
             </div>
+
             <div>
                 <label>Phương thức thanh toán</label>
                 <div class="payment-options">
-                    <label class="payment-option"><input type="radio" name="paymentMethod" value="COD" checked /> Thanh toán khi nhận hàng (COD)</label>
-                    <label class="payment-option"><input type="radio" name="paymentMethod" value="Chuyển khoản" /> Chuyển khoản ngân hàng</label>
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="COD" checked />
+                        Thanh toán khi nhận hàng (COD)
+                    </label>
+                    <label class="payment-option">
+                        <input type="radio" name="paymentMethod" value="Chuyển khoản" />
+                        Chuyển khoản ngân hàng
+                    </label>
                 </div>
             </div>
+
             <div>
-                <label>Ghi chú</label>
-                <textarea rows="4" placeholder="VD: Để hàng trước cửa, không bấm chuông, ..."></textarea>
+                <label>Ghi chú (không bắt buộc)</label>
+                <textarea name="note" rows="3" placeholder="VD: Để hàng trước cửa, không bấm chuông, ..."></textarea>
             </div>
+
             <div>
                 <label>Mã voucher</label>
-                <div style="display:flex;gap:8px;">
-                    <input type="text" name="voucherCode" id="voucherCodeInput" placeholder="VD: HATHUB30" style="flex:1;" />
-                    <button type="button" onclick="applyVoucher()"
-                            style="background:#333;color:#fff;border:none;padding:0 16px;border-radius:4px;cursor:pointer;font-weight:700;">
-                        Áp dụng
-                    </button>
+                <div class="voucher-row">
+                    <input type="text" name="voucherCode" id="voucherCodeInput" placeholder="Nhập mã, VD: HATHUB30" />
+                    <!-- NÚT "ÁP DỤNG" ĐÃ ĐƯỢC GÁN FALLBACK -->
+                    <button type="button" onclick="applyVoucher()">Áp dụng</button>
                 </div>
-                <p id="voucherMessage" style="font-size:13px;margin-top:6px;"></p>
+                <p class="voucher-message" id="voucherMessage"></p>
             </div>
-            <button class="btn btn-primary" type="submit"
+
+            <button class="btn-primary" type="submit"
                     th:disabled="${outOfStockMessages != null and !outOfStockMessages.isEmpty()}"
-                    th:text="${outOfStockMessages != null and !outOfStockMessages.isEmpty()} ? 'Vui lòng cập nhật giỏ hàng' : 'Đặt hàng'">Đặt hàng</button>
+                    th:text="${outOfStockMessages != null and !outOfStockMessages.isEmpty()} ? 'Vui lòng cập nhật giỏ hàng' : 'Đặt hàng'">
+                Đặt hàng
+            </button>
         </form>
 
+        <!-- SUMMARY -->
         <aside class="summary-card">
             <h2>Tóm tắt đơn hàng</h2>
-            <div th:each="d : ${cart.details}">
-                <div class="summary-row" style="align-items:flex-start;">
+
+            <!-- Chỉ hiển thị các sản phẩm khách đã chọn (cartDetails), không phải toàn bộ giỏ hàng -->
+            <div th:each="d : ${cartDetails}" class="summary-row" style="align-items:flex-start;">
+                <div class="product-info">
                     <img th:if="${!d.productDetail.product.images.isEmpty()}"
                          th:src="@{${d.productDetail.product.images.?[isDefault == true].isEmpty()
-                                    ? d.productDetail.product.images[0].imageURL
-                                    : d.productDetail.product.images.?[isDefault == true][0].imageURL}}"
-                         alt=""
-                         style="width:56px;height:56px;object-fit:cover;border-radius:8px;margin-right:10px;" />
-                    <span>
-                        <strong th:text="${d.productDetail.product.productName + ' x' + d.quantity}">Tên sản phẩm x1</strong><br/>
-                        <small style="color:rgba(255,255,255,.6);"
-                               th:text="${d.productDetail.size + ' / ' + d.productDetail.color}">
-                            Size / Màu
-                        </small>
-                    </span>
-                    <strong style="margin-left:auto;"
-                            th:text="${#numbers.formatDecimal(d.productDetail.price * d.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">
-                        0 đ
-                    </strong>
+                          ? d.productDetail.product.images[0].imageURL
+                          : d.productDetail.product.images.?[isDefault == true][0].imageURL}}"
+                         alt="" />
+                    <div class="details">
+                        <strong th:text="${d.productDetail.product.productName + ' × ' + d.quantity}">Tên SP × 1</strong>
+                        <small th:text="${d.productDetail.size + ' / ' + d.productDetail.color}">Size / Màu</small>
+                    </div>
+                </div>
+                <div class="product-price" th:text="${#numbers.formatDecimal(d.productDetail.price * d.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                    0 đ
                 </div>
             </div>
 
-            <div class="summary-row">
+            <!-- Totals -->
+            <div class="summary-row totals">
                 <span>Tiền sản phẩm</span>
                 <strong th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
             </div>
-            <div class="summary-row">
+            <div class="summary-row totals">
                 <span>Phí vận chuyển</span>
                 <strong id="shippingFeeDisplay">-- đ</strong>
             </div>
-            <div class="summary-row" id="voucherRow" style="display:none;">
+            <div class="summary-row totals" id="voucherRow" style="display:none;">
                 <span>Giảm giá voucher</span>
                 <strong id="voucherDiscountDisplay" style="color:#4caf50;">-0 đ</strong>
             </div>
-            <div class="summary-row">
-                <span>Tổng thanh toán</span>
+            <div class="summary-row totals" style="border-bottom: none; padding-bottom: 0;">
+                <span style="font-size:1.1rem; font-weight:700;">Tổng thanh toán</span>
                 <strong class="summary-total" id="grandTotalDisplay" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
             </div>
-            <p style="color:rgba(255,255,255,.68);font-size:14px;">
-                Đơn hàng từ 500.000đ được miễn phí vận chuyển.
-            </p>
+
+            <p class="summary-note">🚚 Đơn hàng từ 500.000đ được miễn phí vận chuyển.</p>
         </aside>
     </div>
 </main>
 
+<!-- ===== JAVASCRIPT ===== -->
 <script th:inline="javascript">
     const subtotal = /*[[${total}]]*/ 0;
     const FREESHIP_THRESHOLD = 500000;
@@ -164,6 +649,7 @@
             voucherFreeShip = false;
             voucherRow.style.display = 'none';
             messageEl.textContent = '';
+            messageEl.className = 'voucher-message';
             updateGrandTotal();
             return;
         }
@@ -177,24 +663,25 @@
                     voucherRow.style.display = 'flex';
                     document.getElementById('voucherDiscountDisplay').textContent =
                         voucherFreeShip ? 'Miễn phí vận chuyển' : ('-' + formatVND(voucherDiscount));
-                    messageEl.style.color = '#4caf50';
-                    messageEl.textContent = 'Áp dụng voucher thành công!';
+                    messageEl.textContent = '✅ Áp dụng voucher thành công!';
+                    messageEl.className = 'voucher-message success';
                 } else {
                     voucherDiscount = 0;
                     voucherFreeShip = false;
                     voucherRow.style.display = 'none';
-                    messageEl.style.color = '#e57373';
-                    messageEl.textContent = data.message || 'Mã voucher không hợp lệ';
+                    messageEl.textContent = data.message || '❌ Mã voucher không hợp lệ';
+                    messageEl.className = 'voucher-message error';
                 }
                 updateGrandTotal();
             })
             .catch(() => {
-                messageEl.style.color = '#e57373';
-                messageEl.textContent = 'Có lỗi xảy ra, vui lòng thử lại.';
+                messageEl.textContent = '❌ Có lỗi xảy ra, vui lòng thử lại.';
+                messageEl.className = 'voucher-message error';
             });
     }
 
     document.addEventListener('DOMContentLoaded', updateGrandTotal);
 </script>
+
 </body>
 </html>

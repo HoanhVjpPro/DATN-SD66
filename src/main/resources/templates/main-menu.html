@@ -32,13 +32,13 @@
     .top-bar {
       display: flex; justify-content: space-between; align-items: center;
       padding: 10px 2.5rem;
-      background: #BC6341; /* Đã đổi sang màu nâu bạn chọn */
+      background: #BC6341;
       border-bottom: 1px solid var(--gray-700);
       font-size: 0.85rem; font-weight: 600; color: var(--white);
     }
     .top-bar-left, .top-bar-right { display: flex; gap: 1.5rem; align-items: center; }
     .top-bar a { color: var(--white); text-decoration: none; transition: color 0.2s; }
-    .top-bar a:hover { color: var(--off-black); /* Đổi màu khi di chuột để dễ nhìn hơn trên nền nâu */ }
+    .top-bar a:hover { color: var(--off-black); }
 
     .main-header {
       background: var(--black); display: flex; flex-direction: column; align-items: center;
@@ -84,7 +84,8 @@
     .hero-slider .hero-bg.active {
       opacity: 0.85;
       z-index: 2;
-    }    .hero-slider .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 65%); z-index: 2; }
+    }
+    .hero-slider .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 65%); z-index: 2; }
     .hero-slider .hero-content { position: relative; z-index: 3; padding-left: 8%; max-width: 650px; color: var(--white); }
     .hero-slider .hero-title { font-family: var(--font-display); font-weight: 900; font-size: clamp(4rem, 8vw, 7rem); line-height: 1; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.05em; }
     .hero-slider .hero-divider { width: 100%; max-width: 450px; height: 2px; background: rgba(255,255,255,0.4); margin-bottom: 20px; }
@@ -98,6 +99,42 @@
     .hero-slider .slider-dots { position: absolute; bottom: 30px; right: 5%; z-index: 4; display: flex; gap: 10px; }
     .hero-slider .slider-dots .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--white); cursor: pointer; background: transparent; transition: background 0.3s; }
     .hero-slider .slider-dots .dot.active, .hero-slider .slider-dots .dot:hover { background: var(--rust); border-color: var(--rust); }
+
+    /* ── BRAND STRIP (đã bổ sung) ── */
+    .brand-strip {
+      padding: 3rem 5rem;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+      justify-content: space-between;
+      background: var(--white);
+    }
+    .brand-strip-label {
+      font-size: 0.7rem;
+      color: var(--black);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+    .brand-logos {
+      display: flex;
+      gap: 3rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .new-brand-logo {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      color: #000000;
+      letter-spacing: 2px;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .new-brand-logo:hover { opacity: 1; }
 
     /* ── SECTIONS ── */
     .section { padding: 5rem 5rem; }
@@ -143,7 +180,6 @@
       font-family: var(--font-display); font-weight: 900; font-size: 1.3rem;
       text-transform: uppercase; color: var(--white); line-height: 1.1;
     }
-    /* cat colors */
     .cat-1 { background: #1e1b16; }
     .cat-2 { background: #162024; }
     .cat-3 { background: #1f1616; }
@@ -190,112 +226,460 @@
     }
     .product-card:hover .product-add { opacity: 1; }
 
-    /* ── SALE BANNER ── */
+    /* =========================================================
+       SALE BANNER – PHONG CÁCH MỚI
+       ========================================================= */
     .sale-banner {
-      background: var(--black);
-      display: grid; grid-template-columns: 1fr 1fr;
-      min-height: 420px; overflow: hidden;
+      background: linear-gradient(145deg, #1e1a16 0%, #0f0d0b 100%);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 480px;
+      overflow: hidden;
+      position: relative;
+      border-radius: 0;
+      box-shadow: inset 0 0 0 1px rgba(192, 99, 58, 0.15);
+    }
+    .sale-banner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 30px, rgba(255,255,255,0.02) 30px, rgba(255,255,255,0.02) 31px);
+      pointer-events: none;
+      z-index: 0;
     }
     .sale-left {
       padding: 4rem 4rem 4rem 5rem;
-      display: flex; flex-direction: column; justify-content: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
     }
     .sale-tag {
-      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--rust); margin-bottom: 1rem;
+      display: inline-block;
+      background: var(--rust);
+      color: var(--white);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 4px 16px;
+      border-radius: 30px;
+      align-self: flex-start;
+      margin-bottom: 1.2rem;
+      box-shadow: 0 4px 12px rgba(192, 99, 58, 0.3);
     }
     .sale-title {
-      font-family: var(--font-display); font-weight: 900;
-      font-size: clamp(3rem, 5vw, 5rem); text-transform: uppercase;
-      color: var(--white); line-height: 0.9; margin-bottom: 1.5rem;
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: clamp(2.8rem, 5vw, 4.5rem);
+      text-transform: uppercase;
+      color: var(--white);
+      line-height: 1.05;
+      margin-bottom: 0.5rem;
     }
-    .sale-title .big { font-size: clamp(5rem, 9vw, 9rem); color: var(--rust); display: block; }
-    .sale-desc { color: var(--gray-400); font-size: 0.9rem; max-width: 320px; margin-bottom: 2rem; }
-    .btn-primary {
-      background: var(--rust); color: var(--white); border: none;
-      padding: 14px 32px; font-family: var(--font-body); font-weight: 700;
-      font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase;
-      cursor: pointer; transition: background 0.2s; text-decoration: none;
+    .sale-title .big {
       display: inline-block;
+      font-size: clamp(4.5rem, 8vw, 7rem);
+      color: var(--rust);
+      text-shadow: 0 0 20px rgba(192, 99, 58, 0.3);
+      letter-spacing: 2px;
+      margin: 0 4px;
     }
-    .btn-primary:hover { background: var(--rust-dark); }
+    .sale-title .highlight {
+      background: linear-gradient(135deg, var(--rust-light), var(--rust-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .sale-desc {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.95rem;
+      max-width: 380px;
+      margin-bottom: 2rem;
+      line-height: 1.7;
+      border-left: 3px solid var(--rust);
+      padding-left: 1.2rem;
+    }
+    .sale-desc strong {
+      color: var(--white);
+      font-weight: 700;
+    }
+    .btn-primary {
+      background: var(--rust);
+      color: var(--white);
+      border: none;
+      padding: 14px 34px;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-decoration: none;
+      display: inline-block;
+      border-radius: 50px;
+      box-shadow: 0 8px 20px rgba(192, 99, 58, 0.35);
+      align-self: flex-start;
+    }
+    .btn-primary:hover {
+      background: var(--rust-dark);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(192, 99, 58, 0.5);
+    }
+
     .sale-right {
-      background: #1a1208;
-      display: flex; align-items: center; justify-content: center; padding: 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
       position: relative;
+      z-index: 1;
     }
-    .sale-right-inner { position: relative; width: 100%; max-width: 340px; }
-    .sale-img { width: 100%; height: 100%; max-height: 360px; object-fit: cover; border-radius: 8px; display: block; }
+    .sale-right-inner {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+      transition: transform 0.4s ease;
+    }
+    .sale-right-inner:hover {
+      transform: scale(1.02);
+    }
+    .sale-img {
+      width: 100%;
+      height: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s;
+    }
+    .sale-right-inner:hover .sale-img {
+      transform: scale(1.05);
+    }
+    .badge-flash {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--rust);
+      color: var(--white);
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      padding: 12px 18px;
+      border-radius: 12px;
+      transform: rotate(6deg);
+      box-shadow: 0 8px 20px rgba(192, 99, 58, 0.5);
+      letter-spacing: 1px;
+      border: 2px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(2px);
+    }
+    .badge-flash small {
+      font-size: 0.6rem;
+      font-weight: 600;
+      display: block;
+      opacity: 0.9;
+    }
 
-    /* ── BRAND STRIP ── */
-    .brand-strip {
-      padding: 3rem 5rem; border-bottom: 1px solid var(--gray-200);
-      display: flex; align-items: center; gap: 3rem; justify-content: space-between;
+    /* ── FEATURES – THIẾT KẾ LẠI ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2rem;
     }
-    .brand-strip-label { font-size: 0.7rem; color: black; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
-    .brand-logos { display: flex; gap: 3rem; align-items: center; flex-wrap: wrap; }
-    .new-brand-logo{
-      font-family: var(--font-display); font-weight: 900; font-size: 1.2rem;
-      text-transform: uppercase; color: #000000; letter-spacing: 2px;
+    .feature-item {
+      background: var(--white);
+      padding: 2rem 1.5rem;
+      border-radius: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.03);
+      position: relative;
+      overflow: hidden;
     }
-
-    /* ── FEATURES ── */
-    .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
-    .feature-item { text-align: center; }
+    .feature-item::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--rust), var(--rust-light));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-item:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      border-color: var(--rust-light);
+    }
+    .feature-item:hover::after {
+      opacity: 1;
+    }
     .feature-icon {
-      width: 52px; height: 52px; border: 1.5px solid var(--gray-200);
-      border-radius: 50%; display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 1rem; font-size: 1.3rem;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.2rem;
+      font-size: 2rem;
+      transition: all 0.3s;
+      color: var(--rust);
     }
-    .feature-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
-    .feature-desc { font-size: 0.82rem; color: var(--gray-400); }
+    .feature-item:hover .feature-icon {
+      background: var(--rust);
+      color: var(--white);
+      transform: scale(1.05) rotate(-4deg);
+    }
+    .feature-title {
+      font-weight: 800;
+      font-size: 1.05rem;
+      margin-bottom: 0.4rem;
+      color: var(--black);
+      letter-spacing: 0.02em;
+    }
+    .feature-desc {
+      font-size: 0.85rem;
+      color: var(--gray-400);
+      line-height: 1.5;
+      max-width: 200px;
+      margin: 0 auto;
+    }
 
-    /* ── NEWSLETTER ── */
-    .newsletter {
-      background: var(--rust); padding: 4rem 5rem;
-      display: flex; align-items: center; justify-content: space-between; gap: 2rem;
+    /* =========================================================
+       NEWSLETTER & FOOTER (giữ nguyên)
+       ========================================================= */
+    .newsletter-wrap {
+      background: var(--cream);
+      padding: 4rem 5rem;
+      border-top: 1px solid var(--gray-200);
+      border-bottom: 1px solid var(--gray-200);
     }
-    .nl-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 0.5rem; }
-    .nl-title { font-family: var(--font-display); font-weight: 900; font-size: 2.2rem; text-transform: uppercase; color: var(--white); line-height: 1.05; }
-    .nl-form { display: flex; gap: 0; min-width: 400px; }
+    .newsletter-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .newsletter-inner .nl-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--rust);
+      margin-bottom: 0.5rem;
+    }
+    .newsletter-inner .nl-title {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      text-transform: uppercase;
+      color: var(--black);
+      line-height: 1.1;
+      margin-bottom: 0.75rem;
+    }
+    .newsletter-inner .nl-desc {
+      font-size: 0.95rem;
+      color: var(--gray-700);
+      max-width: 500px;
+      margin-bottom: 2rem;
+    }
+    .nl-form {
+      display: flex;
+      gap: 0;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
     .nl-input {
-      flex: 1; padding: 14px 20px; border: none; background: rgba(0,0,0,0.25);
-      color: var(--white); font-family: var(--font-body); font-size: 0.9rem;
+      flex: 1;
+      padding: 14px 20px;
+      border: 1px solid var(--gray-200);
+      border-right: none;
+      background: var(--white);
+      color: var(--black);
+      font-family: var(--font-body);
+      font-size: 0.95rem;
       outline: none;
+      transition: border 0.2s;
     }
-    .nl-input::placeholder { color: rgba(255,255,255,0.45); }
+    .nl-input:focus {
+      border-color: var(--rust);
+    }
     .nl-btn {
-      background: var(--black); color: var(--white); border: none;
-      padding: 14px 24px; font-family: var(--font-body); font-weight: 700;
-      font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase;
-      cursor: pointer; transition: background 0.2s; white-space: nowrap;
+      background: var(--rust);
+      color: var(--white);
+      border: 1px solid var(--rust);
+      padding: 14px 28px;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      white-space: nowrap;
     }
-    .nl-btn:hover { background: #333; }
+    .nl-btn:hover {
+      background: var(--rust-dark);
+      border-color: var(--rust-dark);
+    }
 
-    /* ── FOOTER ── */
     footer {
-      background: var(--off-black); color: var(--gray-400);
+      background: var(--off-black);
+      color: var(--gray-400);
       padding: 4rem 5rem 2rem;
     }
-    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; margin-bottom: 3rem; }
-    .footer-brand-desc { font-size: 0.85rem; line-height: 1.7; color: var(--gray-400); margin-top: 0.75rem; max-width: 240px; }
-    .footer-col-title { font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--white); margin-bottom: 1rem; }
-    .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
-    .footer-links a { color: var(--gray-400); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-    .footer-links a:hover { color: var(--rust-light); }
-    .footer-bottom {
-      border-top: 1px solid var(--gray-700); padding-top: 1.5rem;
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 0.78rem;
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 3rem;
+      margin-bottom: 3rem;
     }
-    .footer-socials { display: flex; gap: 1rem; }
+    .footer-col-title {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+      border-bottom: 2px solid var(--rust);
+      padding-bottom: 0.5rem;
+      display: inline-block;
+    }
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .footer-links a {
+      color: var(--gray-400);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover {
+      color: var(--rust-light);
+    }
+    .footer-brand-desc {
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: var(--gray-400);
+      margin-top: 0.5rem;
+      max-width: 240px;
+    }
+    .footer-contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.85rem;
+      color: var(--gray-400);
+      margin-bottom: 0.5rem;
+    }
+    .footer-contact-item i {
+      font-style: normal;
+      min-width: 1.2rem;
+    }
+    .footer-socials {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
     .social-btn {
-      width: 34px; height: 34px; border: 1px solid var(--gray-700); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--gray-400); font-size: 0.8rem; cursor: pointer;
-      transition: border-color 0.2s, color 0.2s; text-decoration: none;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--gray-700);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gray-400);
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+      text-decoration: none;
+      text-transform: lowercase;
     }
-    .social-btn:hover { border-color: var(--rust); color: var(--rust); }
+    .social-btn:hover {
+      border-color: var(--rust);
+      color: var(--rust);
+      background: rgba(192, 99, 58, 0.08);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--gray-700);
+      padding-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-bottom .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .footer-bottom .footer-brand span {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: var(--white);
+      text-transform: lowercase;
+    }
+    .footer-bottom .footer-brand span em {
+      font-style: normal;
+      color: var(--rust);
+    }
+    .footer-payment-icons {
+      display: flex;
+      gap: 0.8rem;
+      font-size: 0.7rem;
+      color: var(--gray-400);
+      align-items: center;
+    }
+    .footer-payment-icons span {
+      background: var(--gray-700);
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 992px) {
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+      .newsletter-wrap { padding: 3rem 2rem; }
+      .sale-banner { grid-template-columns: 1fr; min-height: auto; }
+      .sale-left { padding: 3rem 2rem; }
+      .sale-right { padding: 2rem; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .brand-strip { flex-direction: column; align-items: flex-start; gap: 1.5rem; padding: 2rem; }
+      .brand-logos { gap: 1.5rem; }
+    }
+    @media (max-width: 600px) {
+      .footer-grid { grid-template-columns: 1fr; }
+      .nl-form { flex-direction: column; }
+      .nl-input { border-right: 1px solid var(--gray-200); border-bottom: none; }
+      .footer-bottom { flex-direction: column; align-items: flex-start; }
+      .features-grid { grid-template-columns: 1fr; }
+      .sale-left { padding: 2rem 1.5rem; }
+      .sale-right { padding: 1rem; }
+      .brand-strip { padding: 1.5rem; }
+      .brand-logos { gap: 1rem; }
+      .new-brand-logo { font-size: 1rem; }
+    }
   </style>
 </head>
 <body>
@@ -304,14 +688,21 @@
 <div class="top-bar">
   <div class="top-bar-left">
     <span>📞 0984085074 (Miễn phí cuộc gọi)</span>
-    <span>📍 số 6 Trịnh Văn Bô</span>
+    <span>📍 6 Trịnh Văn Bô, Xuân Phương, Hà Nội</span>
   </div>
   <div class="top-bar-right">
     <a href="/profile" th:if="${loggedIn and roleName == 'CUSTOMER'}" th:text="${'👤 ' + session.username}"></a>
     <a href="/cart" th:if="${loggedIn and roleName == 'CUSTOMER'}">🛒 Sản phẩm</a>
     <a href="/orders" th:if="${loggedIn and roleName == 'CUSTOMER'}">🧾 Đơn hàng</a>
     <a th:if="${session.user == null}" href="/login">Đăng nhập</a>
-    <a th:if="${session.user != null}" href="/logout">Đăng xuất</a>
+    <a th:if="${session.user != null}"
+       href="/logout"
+       title="Đăng xuất"
+       style="display:flex;align-items:center;">
+      <img th:src="@{/images/logout.png}"
+           alt="Đăng xuất"
+           style="width:28px;height:28px;object-fit:contain;">
+    </a>
   </div>
 </div>
 
@@ -322,12 +713,10 @@
 
   <ul class="nav-links">
     <li><a href="#hotdeal" style="color: var(--rust);">⚡ HOT DEAL ⚡</a></li>
-    <li><a href="/products?categoryId=1">NÓN BẢO HIỂM</a></li>
-    <li><a href="/products?categoryId=0">NÓN VÀNH</a></li>
-    <li><a href="/products?categoryId=4">NÓN ĐAN TAY</a></li>
-    <li><a href="#danhmuc">NÓN DA</a></li>
-    <li><a href="#danhmuc">NÓN KẾT</a></li>
-    <li><a href="#danhmuc">NÓN PHỚT</a></li>
+    <li><a href="/products?categoryId=1">Mũ Lưỡi Trai</a></li>
+    <li><a href="/products?categoryId=2">Mũ Snapback</a></li>
+    <li><a href="/products?categoryId=3">Mũ Tai Bèo</a></li>
+    <li><a href="/products?categoryId=4">Mũ Len</a></li>
     <li><a href="#sale" style="color: var(--rust);">FLASH SALE</a></li>
   </ul>
 </header>
@@ -350,7 +739,9 @@
   <div class="slider-dots"></div>
 </section>
 
-<!-- BRAND STRIP -->
+<!-- =========================================================
+     BRAND STRIP – ĐÃ SỬA LỖI (hiển thị đầy đủ)
+     ========================================================= -->
 <div class="brand-strip">
   <span class="brand-strip-label">Thương hiệu<br/>chính hãng</span>
   <div class="brand-logos">
@@ -370,28 +761,28 @@
     <a href="/products" class="section-link">Xem tất cả →</a>
   </div>
   <div class="cat-grid">
-    <a href="/products?categoryId=0" class="cat-card cat-1">
+    <a href="/products?categoryId=1" class="cat-card cat-1">
       <div class="cat-card-bg">🧢</div>
       <div class="cat-card-inner">
         <div class="cat-name">Mũ lưỡi trai</div>
       </div>
     </a>
-    <a href="/products?categoryId=1" class="cat-card cat-2">
+    <a href="/products?categoryId=2" class="cat-card cat-2">
       <div class="cat-card-bg">⛑️</div>
       <div class="cat-card-inner">
-        <div class="cat-name">Mũ bảo hiểm</div>
+        <div class="cat-name">Mũ Snapback</div>
       </div>
     </a>
-    <a href="/products?categoryId=2" class="cat-card cat-3">
+    <a href="/products?categoryId=3" class="cat-card cat-3">
       <div class="cat-card-bg">👒</div>
       <div class="cat-card-inner">
-        <div class="cat-name">Mũ rơm</div>
+        <div class="cat-name">Mũ Tai Bèo</div>
       </div>
     </a>
-    <a href="/products?categoryId=3" class="cat-card cat-4">
+    <a href="/products?categoryId=4" class="cat-card cat-4">
       <div class="cat-card-bg">🎩</div>
       <div class="cat-card-inner">
-        <div class="cat-name">Mũ chuyên dụng</div>
+        <div class="cat-name">Mũ Len</div>
       </div>
     </a>
   </div>
@@ -428,32 +819,37 @@
   </div>
 </section>
 
-<!-- SALE BANNER -->
+<!-- =========================================================
+     SALE BANNER – THIẾT KẾ MỚI
+     ========================================================= -->
 <div class="sale-banner" id="sale">
   <div class="sale-left">
-    <p class="sale-tag">Khuyến mãi giới hạn</p>
+    <span class="sale-tag">⚡ Flash Sale</span>
     <h2 class="sale-title">
-      Giảm
-      <span class="big">30.000VNĐ</span>
-      toàn bộ
-      Snapback
+      Giảm <span class="big">30.000VNĐ</span><br/>
+      toàn bộ <span class="highlight">Snapback</span>
     </h2>
-    <p class="sale-desc">Áp dụng đến 30 khách hàng. Không giới hạn số lượng đơn hàng. Nhập mã HATHUB30 khi thanh toán.</p>
+    <p class="sale-desc">
+      <strong>Áp dụng đến 30 khách hàng</strong> · Không giới hạn số lượng đơn hàng.<br/>
+      Nhập mã <strong style="color:var(--rust);">HATHUB30</strong> khi thanh toán.
+    </p>
     <a href="#products" class="btn-primary">Mua ngay với mã HATHUB30</a>
   </div>
   <div class="sale-right">
     <div class="sale-right-inner">
       <img class="sale-img" th:src="@{/images/banner.jpg}" alt="HatHub – Khuyến mãi Snapback"/>
-      <!-- Sale tag overlay -->
-      <div style="position:absolute;top:-10px;right:-10px;background:var(--rust);color:var(--white);font-family:var(--font-display);font-weight:900;font-size:1.1rem;text-transform:uppercase;padding:12px 18px;transform:rotate(8deg);">
-        -30K OFF
+      <div class="badge-flash">
+        -30K
+        <small>OFF</small>
       </div>
     </div>
   </div>
 </div>
 
-<!-- FEATURES -->
-<section class="section">
+<!-- =========================================================
+     FEATURES – THIẾT KẾ MỚI
+     ========================================================= -->
+<section class="section" style="background: var(--cream);">
   <div class="features-grid">
     <div class="feature-item">
       <div class="feature-icon">🚚</div>
@@ -478,68 +874,100 @@
   </div>
 </section>
 
-<!-- NEWSLETTER -->
-<div class="newsletter">
-  <div class="nl-text">
-    <p class="nl-eyebrow">Bản tin HatHub</p>
-    <h3 class="nl-title">Nhận ưu đãi<br/>sớm nhất</h3>
-  </div>
-  <div class="nl-form">
-    <input type="email" class="nl-input" placeholder="Nhập địa chỉ email của bạn..." />
-    <button class="nl-btn">Đăng ký</button>
+<!-- =========================================================
+     NEWSLETTER
+     ========================================================= -->
+<div class="newsletter-wrap">
+  <div class="newsletter-inner">
+    <p class="nl-eyebrow">📨 BẢN TIN HATHUB</p>
+    <h3 class="nl-title">NHẬN THÔNG TIN KHUYẾN MẢI MỚI NHẤT</h3>
+    <p class="nl-desc">Đăng ký ngay để nhận ưu đãi đặc biệt và cập nhật sản phẩm mới mỗi tuần.</p>
+    <div class="nl-form">
+      <input type="email" class="nl-input" placeholder="Email của bạn ..." />
+      <button class="nl-btn">Đăng ký</button>
+    </div>
   </div>
 </div>
 
-<!-- FOOTER -->
+<!-- =========================================================
+     FOOTER
+     ========================================================= -->
 <footer>
   <div class="footer-grid">
+    <!-- Cột 1: Về HatHub -->
     <div>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;">
-        <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
-        <span style="font-family:var(--font-display);font-weight:900;font-size:2rem;color:var(--white);text-transform:lowercase;">hat<span style="color:var(--rust);">hub</span></span>
-      </div>
-      <p class="footer-brand-desc">Mũ thời trang chất lượng cao. Phong cách thực sự bắt đầu từ đầu bạn.</p>
-      <p style="font-size:0.78rem;color:var(--gray-700);margin-top:0.5rem;">hathub.vn</p>
-    </div>
-    <div>
-      <div class="footer-col-title">Sản phẩm</div>
+      <div class="footer-col-title">Về HatHub</div>
       <ul class="footer-links">
-        <li><a href="#">Snapback</a></li>
-        <li><a href="#">Fitted Cap</a></li>
-        <li><a href="#">Bucket Hat</a></li>
-        <li><a href="#">Beanie</a></li>
-        <li><a href="#">Beret</a></li>
+        <li><a href="#">Giới thiệu HatHub</a></li>
+        <li><a href="#">Hệ thống cửa hàng</a></li>
+        <li><a href="#">Quy trình sản xuất</a></li>
+        <li><a href="#">Tin tức</a></li>
+        <li><a href="#">Khách hàng đối tác</a></li>
+        <li><a href="#">Khám phá HatHub</a></li>
       </ul>
     </div>
+
+    <!-- Cột 2: Hỗ trợ khách hàng -->
     <div>
-      <div class="footer-col-title">Hỗ trợ</div>
+      <div class="footer-col-title">Hỗ trợ khách hàng</div>
       <ul class="footer-links">
+        <li><a href="#">Quy định chung</a></li>
+        <li><a href="#">Bảo mật thông tin</a></li>
+        <li><a href="#">Hướng dẫn tạo tài khoản</a></li>
+        <li><a href="#">Hướng dẫn mua hàng</a></li>
         <li><a href="#">Chính sách đổi trả</a></li>
-        <li><a href="#">Hướng dẫn chọn size</a></li>
-        <li><a href="#">Theo dõi đơn hàng</a></li>
-        <li><a href="#">FAQ</a></li>
-        <li><a href="#">Liên hệ</a></li>
+        <li><a href="#">Thanh toán, giao nhận</a></li>
+        <li><a href="#">Câu hỏi thường gặp</a></li>
       </ul>
     </div>
+
+    <!-- Cột 3: Phương thức thanh toán -->
     <div>
-      <div class="footer-col-title">Công ty</div>
+      <div class="footer-col-title">Phương thức thanh toán</div>
       <ul class="footer-links">
-        <li><a href="#">Về HatHub</a></li>
-        <li><a href="#">Tuyển dụng</a></li>
-        <li><a href="#">Affiliate</a></li>
-        <li><a href="#">Blog</a></li>
-        <li><a href="#">Press Kit</a></li>
+        <li><a href="#">Thanh toán khi nhận hàng (COD)</a></li>
+        <li><a href="#">Chuyển khoản ngân hàng</a></li>
+        <li><a href="#">Thẻ ATM nội địa</a></li>
+        <li><a href="#">Ví điện tử VNPay / Mobile Banking</a></li>
       </ul>
+    </div>
+
+    <!-- Cột 4: Thông tin liên hệ -->
+    <div>
+      <div class="footer-col-title">Thông tin liên hệ</div>
+      <div class="footer-contact-item">
+        <i>📍</i> 6 Trịnh Văn Bô, Xuân Phương, Hà Nội
+      </div>
+      <div class="footer-contact-item">
+        <i>📞</i> Hotline Mua hàng: <strong>0984085074</strong>
+      </div>
+      <div class="footer-contact-item">
+        <i>📞</i> CSKH: <strong>0984085074</strong>
+      </div>
+      <div class="footer-contact-item">
+        <i>✉️</i> Email: info@hathub.vn
+      </div>
+      <div class="footer-contact-item">
+        <i>🌐</i> Website: hathub.vn
+      </div>
+      <div class="footer-socials">
+        <a href="https://web.facebook.com/huang.ang.185011" target="_blank" class="social-btn">f</a>
+        <a href="#" target="_blank" class="social-btn">ig</a>
+        <a href="#" target="_blank" class="social-btn">tk</a>
+        <a href="#" target="_blank" class="social-btn">yt</a>
+      </div>
     </div>
   </div>
 
-  <div class="footer-bottom" id="footer">
-    <span>© 2025 HatHub. Mọi quyền được bảo lưu.</span>
-    <div class="footer-socials">
-      <a href="https://web.facebook.com/huang.ang.185011" target="_blank" class="social-btn" title="Facebook">f</a>
-      <a href="#" target="_blank" class="social-btn" title="Instagram">ig</a>
-      <a href="#" target="_blank" class="social-btn" title="TikTok">tk</a>
-      <a href="#" target="_blank" class="social-btn" title="Zalo">zl</a>
+  <!-- Footer bottom -->
+  <div class="footer-bottom">
+    <div class="footer-brand">
+      <span>hat<em>hub</em></span>
+      <span style="font-weight:400;font-size:0.85rem;color:var(--gray-400);">© 2025 – Mọi quyền được bảo lưu</span>
+    </div>
+    <div class="footer-payment-icons">
+      <span>100% hàng chính hãng</span>
+      <span>🏷️</span>
     </div>
   </div>
 </footer>
@@ -563,7 +991,6 @@
 
     if (slides.length === 0) return;
 
-    // Tự sinh dots theo đúng số ảnh
     slides.forEach((_, i) => {
       const dot = document.createElement('span');
       dot.className = 'dot' + (i === 0 ? ' active' : '');
@@ -591,7 +1018,6 @@
     function stopAuto() { clearInterval(timer); }
     function restartAuto() { stopAuto(); startAuto(); }
 
-    // Khởi tạo slide đầu
     slides[0].classList.add('active');
 
     if (slides.length > 1) {
@@ -601,7 +1027,6 @@
       slider.addEventListener('mouseleave', startAuto);
       startAuto();
     } else {
-      // Chỉ 1 ảnh thì ẩn luôn nút/dots cho gọn
       prevBtn.style.display = 'none';
       nextBtn.style.display = 'none';
       dotsContainer.style.display = 'none';
