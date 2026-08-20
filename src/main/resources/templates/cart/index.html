@@ -6,46 +6,758 @@
   <title>Giỏ hàng | HatHub</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Oswald:wght@500;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" th:href="@{/shop.css}" />
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: 'Inter', sans-serif;
+      color: #333;
+      margin: 0;
+      padding-bottom: 80px;
+    }
+    .cart-container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+
+    .cart-header-grid {
+      display: grid;
+      grid-template-columns: 40px 4fr 1.5fr 1.5fr 1.5fr 1fr;
+      align-items: center;
+      background: #fff;
+      padding: 15px 20px;
+      border-radius: 3px;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 12px;
+    }
+    .cart-header-grid .col-product {
+      color: #333;
+      font-weight: 500;
+    }
+    .cart-header-grid div {
+      text-align: center;
+    }
+    .cart-header-grid div:nth-child(2) {
+      text-align: left;
+    }
+
+    .shop-section {
+      background: #fff;
+      border-radius: 3px;
+      box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+      margin-bottom: 15px;
+      overflow: hidden;
+    }
+
+    .cart-item-grid {
+      display: grid;
+      grid-template-columns: 40px 4fr 1.5fr 1.5fr 1.5fr 1fr;
+      align-items: center;
+      padding: 20px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+    .cart-item-grid:last-child {
+      border-bottom: none;
+    }
+    .item-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-right: 15px;
+    }
+    .item-name {
+      font-size: 14px;
+      line-height: 1.4;
+      color: #222;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-decoration: none;
+    }
+    .item-name:hover {
+      color: #ee4d2d;
+    }
+
+    /* Style cho nút Phân loại hàng dạng dropdown */
+    .variation-dropdown-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f8f8f8;
+      border: 1px solid #e5e5e5;
+      padding: 4px 8px;
+      border-radius: 2px;
+      font-size: 12px;
+      color: #555;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .variation-dropdown-btn:hover {
+      border-color: #ee4d2d;
+      color: #ee4d2d;
+    }
+
+    .col-center {
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .current-price {
+      color: #222;
+      font-weight: 500;
+    }
+    .total-price {
+      color: #ee4d2d;
+      font-weight: 600;
+    }
+
+    .qty-box {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid #c7c7c7;
+      border-radius: 2px;
+      background: #fff;
+      overflow: hidden;
+    }
+    .qty-box button {
+      background: #fff;
+      border: none;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 16px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .qty-box button:hover {
+      background: #f0f0f0;
+      color: #000;
+    }
+    .qty-box input[type="number"] {
+      width: 50px;
+      height: 32px;
+      border: none;
+      border-left: 1px solid #c7c7c7;
+      border-right: 1px solid #c7c7c7;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      background: #fff;
+      color: #222;
+      padding: 0;
+    }
+    .qty-box input[type="number"]::-webkit-inner-spin-button,
+    .qty-box input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .qty-box input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    .action-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .action-col button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #222;
+      font-size: 14px;
+      padding: 0;
+    }
+    .action-col button:hover {
+      color: #ee4d2d;
+    }
+
+    .checkout-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      padding: 0 20px;
+      border-radius: 3px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      margin-top: 20px;
+      position: sticky;
+      bottom: 15px;
+      z-index: 10;
+    }
+    .checkout-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 14px;
+      color: #666;
+    }
+    .checkout-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 15px 0;
+    }
+    .total-amount {
+      color: #ee4d2d;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .btn-checkout {
+      background: #ee4d2d;
+      color: #fff;
+      border: none;
+      padding: 12px 40px;
+      font-size: 16px;
+      font-weight: 500;
+      border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-checkout:hover {
+      background: #d7381d;
+    }
+
+    input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: #ee4d2d;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-box {
+      background: #fff;
+      width: 380px;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      overflow: hidden;
+      text-align: center;
+      padding: 24px 20px 20px;
+    }
+    .modal-content {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .modal-actions button {
+      padding: 8px 24px;
+      border-radius: 2px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn-back {
+      background: #fff;
+      border: 1px solid #d4d4d4;
+      color: #555;
+    }
+    .btn-back:hover {
+      background: #f8f8f8;
+    }
+    .btn-confirm-delete {
+      background: #ee4d2d;
+      border: none;
+      color: #fff;
+    }
+    .btn-confirm-delete:hover {
+      background: #d7381d;
+    }
+
+    /* Modal chọn phân loại kiểu Shopee */
+    .variation-modal-box {
+      background: #fff;
+      width: 450px;
+      max-width: 95%;
+      border-radius: 4px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      text-align: left;
+      padding: 20px;
+    }
+    .variation-group {
+      margin-bottom: 15px;
+    }
+    .variation-group label {
+      display: block;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 8px;
+    }
+    .variation-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .var-chip {
+      background: #fff;
+      border: 1px solid #c7c7c7;
+      padding: 6px 14px;
+      border-radius: 2px;
+      font-size: 13px;
+      cursor: pointer;
+      outline: none;
+    }
+    .var-chip:hover {
+      border-color: #ee4d2d;
+      color: #ee4d2d;
+    }
+    .var-chip.selected {
+      border-color: #ee4d2d;
+      color: #ee4d2d;
+      position: relative;
+    }
+    .var-chip.selected::after {
+      content: '✓';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      font-size: 10px;
+      background: #ee4d2d;
+      color: white;
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .recommend-section {
+      margin-top: 40px;
+    }
+    .recommend-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .recommend-card {
+      background: #fff;
+      padding: 12px;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+      text-decoration: none;
+      transition: .25s;
+      width: calc(20% - 16px);
+      box-sizing: border-box;
+    }
+    .recommend-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,.15);
+    }
+    .recommend-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: contain;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+    }
+    .recommend-body {
+      padding-top: 8px;
+    }
+    .recommend-name {
+      font-size: 14px;
+      color: #222;
+      margin: 10px 0 5px;
+      height: 40px;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+    .recommend-price {
+      color: #ee4d2d;
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .recommend-btn {
+      display: block;
+      text-align: center;
+      background: #ee4d2d;
+      color: #fff;
+      padding: 8px 0;
+      border-radius: 2px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .recommend-btn:hover {
+      background: #d7381d;
+    }
+
+    @media (max-width: 768px) {
+      .cart-header-grid { display: none; }
+      .cart-item-grid { grid-template-columns: 30px 1fr; gap: 10px; }
+      .recommend-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
 </head>
 <body class="page">
-<nav class="shop-nav">
-  <a href="/" class="brand">
-    <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
+<nav class="shop-nav" style="background: #222; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center;">
+  <a href="/" class="brand" style="display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font-weight: bold;">
+    <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:36px;width:auto;border-radius:50%;"/>
     <span>HatHub</span>
   </a>
-  <ul class="nav-menu">
-    <li>
-      <a href="/products">Tiếp tục mua</a>
-    </li>
-  </ul>
   <div class="nav-actions">
-    <a class="icon-link" href="/profile" aria-label="Tài khoản">👤</a>
+    <a class="icon-link" href="/profile" style="color: #fff; text-decoration: none;">Tài khoản 👤</a>
   </div>
 </nav>
-<main class="page-wrap">
-  <h1 class="page-title">Giỏ hàng</h1>
-  <div th:if="${error}" class="alert error" th:text="${error}"></div>
-  <div th:if="${cart.details == null or #lists.isEmpty(cart.details)}" class="empty-state"><h3>Giỏ hàng trống</h3><p>Chọn một chiếc mũ phù hợp rồi quay lại thanh toán.</p><a href="/" class="btn btn-primary">Mua sắm ngay</a></div>
-  <div th:unless="${cart.details == null or #lists.isEmpty(cart.details)}" class="cart-layout">
-    <section class="cart-card">
-      <div th:each="item : ${cart.details}" class="cart-item">
-        <div class="cart-product"><strong th:text="${item.productDetail.product.productName}">SẢN PHẨM</strong><small th:text="${item.productDetail.size} + ' / ' + ${item.productDetail.color}">Size</small></div>
-        <div th:text="${#numbers.formatDecimal(item.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
-        <form class="qty-form" action="/cart/update" method="post"><input type="hidden" name="cartDetailId" th:value="${item.cartDetailId}" /><input type="number" name="quantity" th:value="${item.quantity}" min="1" /><button type="submit">✓</button></form>
-        <strong th:text="${#numbers.formatDecimal(item.productDetail.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
-        <form action="/cart/remove" method="post"><input type="hidden" name="cartDetailId" th:value="${item.cartDetailId}" /><button class="remove-btn" type="submit">×</button></form>
+
+<main class="cart-container">
+  <h1 style="font-size: 22px; font-weight: 600; margin-bottom: 20px; text-transform: uppercase;">Giỏ hàng</h1>
+
+  <div th:if="${error}" class="alert error" th:text="${error}" style="color: red; margin-bottom: 15px;"></div>
+
+  <div th:if="${cart.details == null or #lists.isEmpty(cart.details)}" style="text-align: center; padding: 60px 0; background: #fff; border-radius: 3px;">
+    <h3>Giỏ hàng trống</h3>
+    <p style="color: #666; margin: 10px 0 20px;">Không có sản phẩm nào trong giỏ hàng của bạn.</p>
+    <a href="/" class="btn-checkout" style="text-decoration: none;">Mua sắm ngay</a>
+  </div>
+
+  <div th:unless="${cart.details == null or #lists.isEmpty(cart.details)}">
+
+    <!-- Thanh tiêu đề cột -->
+    <div class="cart-header-grid">
+      <div style="text-align: left;"><input type="checkbox" id="selectAllHeader" onclick="toggleSelectAll(this)" /></div>
+      <div class="col-product">Sản Phẩm</div>
+      <div>Đơn Giá</div>
+      <div>Số Lượng</div>
+      <div>Số Tiền</div>
+      <div>Thao Tác</div>
+    </div>
+
+    <!-- Khung Shop Section -->
+    <section class="shop-section">
+      <!-- Danh sách sản phẩm -->
+      <div th:each="item : ${cart.details}" class="cart-item-grid">
+        <div>
+          <input type="checkbox" class="product-checkbox"
+                 th:id="'chk-' + ${item.cartDetailId}"
+                 th:value="${item.cartDetailId}"
+                 th:data-price="${item.productDetail.price * item.quantity}"
+                 onchange="saveSelectionAndTotal()" />
+        </div>
+
+        <div class="item-info">
+          <!-- Ảnh sản phẩm -->
+          <img th:if="${item.productDetail.product.images != null and !#lists.isEmpty(item.productDetail.product.images)}"
+               th:src="@{${item.productDetail.product.images[0].imageURL}}" alt="Product" style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #e1e1e1; border-radius: 2px;" />
+          <img th:unless="${item.productDetail.product.images != null and !#lists.isEmpty(item.productDetail.product.images)}"
+               th:src="@{/images/no-image.png}" alt="Product" style="width: 60px; height: 60px; object-fit: cover; border: 1px solid #e1e1e1; border-radius: 2px;" />
+
+          <div style="flex: 1;">
+            <a class="item-name" th:href="@{'/products/' + ${item.productDetail.product.productId}}" th:text="${item.productDetail.product.productName}">Tên sản phẩm</a>
+
+            <!-- Nút Phân Loại Hàng kiểu Shopee -->
+            <div class="variation-dropdown-btn" th:onclick="'openVariationModal(' + ${item.cartDetailId} + ', ' + ${item.productDetail.product.productId} + ')'">
+              <span>Phân loại:</span>
+              <span th:text="${item.productDetail.color} + ', Size ' + ${item.productDetail.size}">Màu, Size</span>
+              <span style="font-size: 10px;">▼</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-center">
+          <span class="current-price" th:text="${#numbers.formatDecimal(item.productDetail.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+        </div>
+
+        <div class="col-center">
+          <form class="qty-form" action="/cart/update" method="post" style="display: inline-block; margin: 0;" onsubmit="saveSelectionBeforeSubmit()">
+            <input type="hidden" name="cartDetailId" th:value="${item.cartDetailId}" />
+            <div class="qty-box">
+              <button type="button" onclick="const input = this.parentNode.querySelector('input[name=\'quantity\']'); input.value = Math.max(1, parseInt(input.value || 1) - 1); saveSelectionBeforeSubmit(); this.form.submit();">-</button>
+              <input type="number" name="quantity" th:value="${item.quantity}" min="1" onchange="saveSelectionBeforeSubmit(); this.form.submit()" />
+              <button type="button" onclick="const input = this.parentNode.querySelector('input[name=\'quantity\']'); input.value = parseInt(input.value || 0) + 1; saveSelectionBeforeSubmit(); this.form.submit();">+</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="col-center">
+          <strong class="total-price" th:text="${#numbers.formatDecimal(item.productDetail.price * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+        </div>
+
+        <div class="col-center action-col">
+          <button type="button" class="remove-btn" th:onclick="'openDeleteModal(\'' + ${item.cartDetailId} + '\')'">Xóa</button>
+        </div>
       </div>
     </section>
-    <aside class="summary-card">
-      <h2>Tóm tắt đơn</h2>
-      <div class="summary-row">
-      <span>Tổng cộng</span>
-      <strong class="summary-total" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
-    </div><a href="/checkout" class="btn btn-primary" style="width:100%;margin-top:16px;">Thanh toán</a>
-      <a href="/products" class="btn btn-outline" style="width:100%;margin-top:10px;">Tiếp tục mua</a></aside>
+
+    <div class="checkout-bar">
+      <div class="checkout-left">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input type="checkbox" id="selectAllFooter" onclick="toggleSelectAll(this)" /> Chọn Tất Cả (<span id="itemCount" th:text="${#lists.size(cart.details)}">0</span>)
+        </label>
+      </div>
+
+      <div class="checkout-right">
+        <div>
+          <span>Tổng cộng (<span id="selectedCount">0</span> sản phẩm): </span>
+          <span class="total-amount" id="selectedTotal">0 đ</span>
+        </div>
+        <button type="button" class="btn-checkout" onclick="proceedToCheckout()">Mua Hàng</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="recommend-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+      <div style="font-size: 18px; font-weight: 600; text-transform: uppercase;">Có thể bạn cũng thích</div>
+      <a href="/cart/recommend" style="color: #ee4d2d; text-decoration: none; font-size: 14px; display: flex; align-items: center; gap: 4px; font-weight: 500;">
+        Xem tất cả
+        <svg enable-background="new 0 0 11 11" viewBox="0 0 11 11" x="0" y="0" class="shopee-svg-icon icon-arrow-right" style="width: 10px; height: 10px; fill: currentColor;">
+          <path d="m2.5 11c .1 0 .2 0 .3-.1l6-5c .1-.1.2-.3.2-.4s-.1-.3-.2-.4l-6-5c-.2-.2-.5-.1-.7.1s-.1.5.1.7l5.5 4.6-5.5 4.6c-.2.2-.2.5-.1.7.1.1.3.2.4.2z"></path>
+        </svg>
+      </a>
+    </div>
+
+    <div class="recommend-grid">
+      <div class="recommend-card" th:each="p : ${recommendProducts}">
+        <a th:href="@{'/products/' + ${p.productId}}" style="text-decoration: none; color: inherit;">
+          <img th:if="${p.images != null and !#lists.isEmpty(p.images)}" th:src="@{${p.images[0].imageURL}}" alt="">
+          <img th:unless="${p.images != null and !#lists.isEmpty(p.images)}" th:src="@{/images/no-image.png}" alt="">
+
+          <div class="recommend-body">
+            <div class="recommend-name" th:text="${p.productName}">Tên sản phẩm</div>
+            <div class="recommend-price" th:if="${p.details != null and !#lists.isEmpty(p.details)}" th:text="${#numbers.formatDecimal(p.details[0].price,0,'COMMA',0,'POINT')} + ' đ'">0 đ</div>
+          </div>
+        </a>
+        <!--        <a class="recommend-btn" th:href="@{'/products/' + ${p.productId}}">Xem chi tiết</a>-->
+      </div>
+    </div>
   </div>
 </main>
+
+<!-- Modal Xác Nhận Xóa -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-content">Bạn có muốn bỏ 1 sản phẩm?</div>
+    <div class="modal-actions">
+      <button type="button" class="btn-back" onclick="closeDeleteModal()">Trở Lại</button>
+      <form id="deleteForm" action="/cart/remove" method="post" style="margin: 0;">
+        <input type="hidden" name="cartDetailId" id="modalCartDetailId" />
+        <button type="submit" class="btn-confirm-delete">Có</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Đổi Phân Loại Hàng -->
+<div class="modal-overlay" id="variationModal">
+  <div class="variation-modal-box">
+    <div style="font-size: 16px; font-weight: 500; margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;">Chọn Phân Loại Hàng</div>
+
+    <form id="updateVariationForm" action="/cart/update-variation" method="post">
+      <input type="hidden" name="cartDetailId" id="popupCartDetailId" />
+      <input type="hidden" name="productDetailId" id="popupProductDetailId" />
+
+      <div class="variation-group">
+        <label>Màu sắc:</label>
+        <div class="variation-options" id="colorOptions"></div>
+      </div>
+
+      <div class="variation-group">
+        <label>Kích thước:</label>
+        <div class="variation-options" id="sizeOptions"></div>
+      </div>
+
+      <div style="margin-top: 10px; font-size: 13px; color: #666;" id="stockInfo">Kho: --</div>
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button type="button" class="btn-back" onclick="closeVariationModal()">Trở Lại</button>
+        <button type="submit" class="btn-confirm-delete">Xác Nhận</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function saveSelectionBeforeSubmit() {
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    let selectedIds = [];
+    checkboxes.forEach(cb => {
+      if (cb.checked) {
+        selectedIds.push(cb.value);
+      }
+    });
+    sessionStorage.setItem('hathub_selected_cart_items', JSON.stringify(selectedIds));
+  }
+
+  function saveSelectionAndTotal() {
+    saveSelectionBeforeSubmit();
+    updateTotal();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedIds = JSON.parse(sessionStorage.getItem('hathub_selected_cart_items')) || [];
+    savedIds.forEach(id => {
+      const cb = document.getElementById('chk-' + id);
+      if (cb) {
+        cb.checked = true;
+      }
+    });
+    updateTotal();
+  });
+
+  function openDeleteModal(cartDetailId) {
+    document.getElementById('modalCartDetailId').value = cartDetailId;
+    document.getElementById('deleteModal').style.display = 'flex';
+  }
+
+  function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+  }
+
+  function openVariationModal(cartDetailId, productId) {
+    document.getElementById('popupCartDetailId').value = cartDetailId;
+    document.getElementById('variationModal').style.display = 'flex';
+
+    fetch('/api/products/' + productId + '/details')
+            .then(response => response.json())
+            .then(data => {
+              renderVariations(data);
+            })
+            .catch(err => {
+              console.error('Không thể tải phân loại sản phẩm', err);
+            });
+  }
+
+  function closeVariationModal() {
+    document.getElementById('variationModal').style.display = 'none';
+  }
+
+  function renderVariations(details) {
+    const colorContainer = document.getElementById('colorOptions');
+    const sizeContainer = document.getElementById('sizeOptions');
+    colorContainer.innerHTML = '';
+    sizeContainer.innerHTML = '';
+
+    if (!details || !Array.isArray(details) || details.length === 0) return;
+
+    let colors = [...new Set(details.map(d => d.color || d.Color))].filter(Boolean);
+    let sizes = [...new Set(details.map(d => d.size || d.Size))].filter(Boolean);
+
+    colors.forEach(color => {
+      let btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'var-chip';
+      btn.innerText = color;
+      btn.onclick = () => {
+        document.querySelectorAll('#colorOptions .var-chip').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateSelectedProductDetail(details);
+      };
+      colorContainer.appendChild(btn);
+    });
+
+    sizes.forEach(size => {
+      let btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'var-chip';
+      btn.innerText = size;
+      btn.onclick = () => {
+        document.querySelectorAll('#sizeOptions .var-chip').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        updateSelectedProductDetail(details);
+      };
+      sizeContainer.appendChild(btn);
+    });
+
+    if(colorContainer.firstChild) colorContainer.firstChild.click();
+    if(sizeContainer.firstChild) sizeContainer.firstChild.click();
+  }
+
+  function updateSelectedProductDetail(details) {
+    const selectedColorEl = document.querySelector('#colorOptions .var-chip.selected');
+    const selectedSizeEl = document.querySelector('#sizeOptions .var-chip.selected');
+
+    if (!selectedColorEl || !selectedSizeEl) return;
+
+    let selectedColor = selectedColorEl.innerText;
+    let selectedSize = selectedSizeEl.innerText;
+
+    let matched = details.find(d =>
+            (String(d.color || d.Color) === String(selectedColor)) &&
+            (String(d.size || d.Size) === String(selectedSize))
+    );
+
+    if (matched) {
+      let detailId = matched.productDetailId || matched.ProductDetailID || matched.id;
+      let stock = matched.stockQuantity !== undefined ? matched.stockQuantity : (matched.StockQuantity || 0);
+
+      document.getElementById('popupProductDetailId').value = detailId;
+      document.getElementById('stockInfo').innerText = 'Kho: ' + stock;
+    }
+  }
+
+  function toggleSelectAll(masterCheckbox) {
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    checkboxes.forEach(cb => {
+      cb.checked = masterCheckbox.checked;
+    });
+
+    if(document.getElementById('selectAllHeader')) document.getElementById('selectAllHeader').checked = masterCheckbox.checked;
+    if(document.getElementById('selectAllFooter')) document.getElementById('selectAllFooter').checked = masterCheckbox.checked;
+
+    saveSelectionAndTotal();
+  }
+
+  function updateTotal() {
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    let total = 0;
+    let count = 0;
+
+    checkboxes.forEach(cb => {
+      if (cb.checked) {
+        total += parseFloat(cb.getAttribute('data-price')) || 0;
+        count++;
+      }
+    });
+
+    const formattedTotal = new Intl.NumberFormat('vi-VN').format(total) + ' đ';
+    document.getElementById('selectedTotal').innerText = formattedTotal;
+    document.getElementById('selectedCount').innerText = count;
+  }
+
+  function proceedToCheckout() {
+    const checkboxes = document.querySelectorAll('.product-checkbox:checked');
+    if (checkboxes.length === 0) {
+      alert('Vui lòng chọn ít nhất một sản phẩm để mua hàng!');
+      return;
+    }
+    let url = '/checkout?';
+    checkboxes.forEach((cb, index) => {
+      if (index > 0) url += '&';
+      url += 'selectedItems=' + cb.value;
+    });
+    window.location.href = url;
+  }
+</script>
 </body>
 </html>

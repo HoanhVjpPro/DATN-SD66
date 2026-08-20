@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Bán hàng tại quầy | HatHub Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+    <style>
+        body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; background:#F5F0EA; }
+        aside { width:220px; background:#111; color:#fff; padding:1.5rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0; }
+        aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
+        aside a.active { color:#C0633A; }
+        aside a:hover { color:#C0633A; }
+        main { flex:1; padding:1.5rem 2rem 3rem; }
+        h1.page-h { font-size:1.5rem; font-weight:900; margin:0 0 1.25rem; color:#1a1a1a; }
+
+        .pos-layout { display:grid; grid-template-columns:1fr 340px; gap:1.25rem; align-items:start; }
+
+        .card { background:#fff; border-radius:8px; padding:1.25rem 1.4rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:1.25rem; }
+        .card h3 { margin:0 0 1rem; font-size:0.95rem; font-weight:900; display:flex; align-items:center; gap:8px; }
+
+        label { display:block; font-weight:700; font-size:0.82rem; margin:0 0 6px; color:#333; }
+        input[type=text], input[type=tel], textarea, select {
+            width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px;
+            font-family:'Nunito',sans-serif; font-size:0.88rem; box-sizing:border-box; outline:none;
+        }
+        input:focus, textarea:focus, select:focus { border-color:#C0633A; box-shadow:0 0 0 3px rgba(192,99,58,0.12); }
+        textarea { resize:vertical; }
+
+        /* ===== Nút bấm — đồng bộ toàn hệ thống ===== */
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:4px; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.85rem; padding:9px 18px; cursor:pointer; text-decoration:none; line-height:1.2; white-space:nowrap; }
+        .btn-sm { padding:6px 12px; font-size:0.8rem; }
+        .btn-block { width:100%; }
+        .btn-primary { background:#C0633A; color:#fff; }
+        .btn-primary:hover { background:#9B4A27; }
+        .btn-primary:disabled { background:#e0b7a4; cursor:not-allowed; }
+        .btn-secondary { background:#444; color:#fff; }
+        .btn-secondary:hover { background:#2c2c2c; }
+        .btn-success { background:#27ae60; color:#fff; }
+        .btn-success:hover { background:#1e8449; }
+        .btn-danger { background:#c00; color:#fff; }
+        .btn-danger:hover { background:#a00; }
+        .btn-neutral { background:#666; color:#fff; }
+        .btn-neutral:hover { background:#4d4d4d; }
+        .btn-outline { background:#fff; color:#333; border:1px solid #ddd; }
+        .btn-outline:hover { border-color:#C0633A; color:#C0633A; }
+
+        .success { background:#d4edda; color:#155724; padding:1rem; border-radius:6px; margin-bottom:1rem; }
+        .error { background:#f8d7da; color:#721c24; padding:1rem; border-radius:6px; margin-bottom:1rem; }
+
+        /* ===== Khách hàng: ô tra cứu ===== */
+        .lookup-row { display:flex; gap:8px; }
+        .lookup-row input { flex:1; }
+        .lookup-hint { font-size:0.78rem; color:#888; margin-top:6px; }
+        .lookup-hint b { color:#555; }
+
+        .customer-found {
+            display:flex; align-items:center; gap:12px; background:#d4edda; border-radius:6px;
+            padding:12px 14px; margin-top:12px;
+        }
+        .customer-found .avatar {
+            width:38px; height:38px; border-radius:50%; background:#C0633A; color:#fff;
+            display:flex; align-items:center; justify-content:center; font-weight:900; flex-shrink:0;
+        }
+        .customer-found .info strong { color:#155724; }
+        .customer-found .info div { font-size:0.8rem; color:#3c6e4f; }
+        .customer-found .check { margin-left:auto; color:#27ae60; font-size:1.3rem; }
+
+        .customer-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 1rem; margin-top:1rem; }
+        .customer-form-grid .full { grid-column:1 / -1; }
+
+        /* ===== Sản phẩm ===== */
+        .search-box { display:flex; gap:8px; margin-bottom:1rem; }
+        .product-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:14px; }
+        .variant-card {
+            border:1px solid #eee; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;
+            transition:border-color .15s, transform .15s;
+        }
+        .variant-card:hover { border-color:#C0633A; transform:translateY(-2px); }
+        .variant-card.out-of-stock { opacity:.55; }
+        .variant-card img { width:100%; aspect-ratio:1/1; object-fit:cover; background:#f0f0f0; }
+        .variant-card .v-body { padding:10px 12px 12px; display:flex; flex-direction:column; gap:2px; flex:1; }
+        .variant-card .v-name { font-weight:700; font-size:0.85rem; line-height:1.3; min-height:34px; }
+        .variant-card .v-sku { font-size:0.72rem; color:#999; font-family:monospace; }
+        .variant-card .v-attr { font-size:0.75rem; color:#777; }
+        .variant-card .v-price { color:#C0633A; font-weight:900; font-size:0.95rem; margin-top:4px; }
+        .variant-card .v-stock { font-size:0.72rem; color:#27ae60; }
+        .variant-card .v-stock.low { color:#e67e22; }
+        .variant-card .v-stock.zero { color:#c00; }
+        .variant-card .btn { margin-top:8px; }
+
+        /* ===== Cột phải: Đơn chờ / Đơn hiện tại ===== */
+        .tabs-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+        .tabs-row .count-badge { background:#f0f0f0; color:#666; font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:10px; margin-left:6px; }
+        .order-tabs { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px; }
+        .order-tab {
+            display:inline-flex; align-items:center; gap:6px; background:#f0f0f0; color:#444;
+            border-radius:16px; padding:5px 10px 5px 12px; font-size:0.78rem; font-weight:700; cursor:pointer; border:1px solid transparent;
+        }
+        .order-tab.active { background:#C0633A; color:#fff; }
+        .order-tab button { background:transparent; border:none; color:inherit; opacity:.7; cursor:pointer; font-weight:900; padding:0 2px; }
+        .order-tab button:hover { opacity:1; }
+        .progress-track { height:6px; background:#eee; border-radius:4px; overflow:hidden; margin-top:8px; }
+        .progress-fill { height:100%; background:#C0633A; }
+        .progress-label { font-size:0.72rem; color:#888; margin-top:4px; }
+
+        .order-meta { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+        .order-meta .box { background:#f7f5f2; border-radius:6px; padding:8px 10px; }
+        .order-meta .box .lbl { font-size:0.68rem; text-transform:uppercase; color:#999; font-weight:700; letter-spacing:.03em; }
+        .order-meta .box .val { font-size:0.85rem; font-weight:700; color:#1a1a1a; margin-top:2px; }
+
+        .cart-line { display:flex; align-items:flex-start; gap:8px; padding:10px 0; border-bottom:1px solid #f0f0f0; }
+        .cart-line:last-child { border-bottom:none; }
+        .cart-line img { width:44px; height:44px; border-radius:6px; object-fit:cover; background:#f0f0f0; flex-shrink:0; }
+        .cart-line .l-info { flex:1; min-width:0; }
+        .cart-line .l-name { font-size:0.82rem; font-weight:700; }
+        .cart-line .l-attr { font-size:0.72rem; color:#999; }
+        .cart-line .l-qty { display:flex; align-items:center; gap:4px; margin-top:4px; }
+        .cart-line .l-qty button { width:20px; height:20px; border:1px solid #ddd; background:#fff; border-radius:4px; cursor:pointer; font-weight:700; line-height:1; }
+        .cart-line .l-qty span { font-size:0.8rem; font-weight:700; min-width:18px; text-align:center; }
+        .cart-line .l-price { font-size:0.82rem; font-weight:900; color:#1a1a1a; white-space:nowrap; }
+        .cart-line .l-remove { background:none; border:none; color:#c00; cursor:pointer; font-size:0.9rem; margin-left:4px; }
+        .cart-empty { text-align:center; color:#999; font-size:0.85rem; padding:24px 0; }
+
+        .summary-row { display:flex; justify-content:space-between; font-size:0.85rem; padding:4px 0; color:#444; }
+        .summary-row.total { font-size:1.05rem; font-weight:900; color:#1a1a1a; border-top:2px solid #111; margin-top:6px; padding-top:10px; }
+        .summary-row.total .amt { color:#C0633A; }
+
+        .pay-methods { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin:12px 0; }
+        .pay-methods label {
+            display:flex; flex-direction:column; align-items:center; gap:4px; border:1.5px solid #ddd; border-radius:6px;
+            padding:10px 4px; font-size:0.72rem; font-weight:700; color:#555; cursor:pointer; margin:0;
+        }
+        .pay-methods input { display:none; }
+        .pay-methods input:checked + span { color:#C0633A; }
+        .pay-methods label:has(input:checked) { border-color:#C0633A; background:#fdf3ee; }
+        .pay-methods .ic { font-size:1.3rem; }
+
+        @media (max-width: 1020px) {
+            .pos-layout { grid-template-columns:1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<aside>
+    <h2 style="color:#C0633A;">HatHub Admin</h2>
+    <a href="/admin/dashboard">Dashboard</a>
+    <a href="/admin/products">Sản phẩm</a>
+    <a href="/admin/categories">Danh mục</a>
+    <a href="/admin/brands">Thương hiệu</a>
+    <a href="/admin/materials">Chất liệu</a>
+    <a href="/admin/hat-types">Kiểu mũ</a>
+    <a href="/admin/sizes">Size</a>
+    <a href="/admin/colors">Màu sắc</a>
+    <a href="/admin/orders">Đơn hàng</a>
+    <a href="/admin/returns">Trả hàng</a>
+    <a href="/admin/vouchers">Voucher</a>
+    <a href="/admin/reviews">Đánh giá sản phẩm</a>
+    <a href="/admin/users">Người dùng</a>
+    <a href="/pos" class="active">Bán hàng tại quầy</a>
+    <a href="/pos/history">Lịch sử đơn POS</a>
+    <a href="/logout">Đăng xuất</a>
+</aside>
+
+<main>
+    <h1 class="page-h">Bán hàng tại quầy</h1>
+
+    <div class="pos-layout">
+
+        <!-- ===== CỘT TRÁI: KHÁCH HÀNG + SẢN PHẨM ===== -->
+        <div>
+            <!-- KHÁCH HÀNG -->
+            <div class="card">
+                <h3>👤 Khách hàng</h3>
+                <label for="phoneInput">Số điện thoại khách hàng</label>
+                <div class="lookup-row">
+                    <input type="tel" id="phoneInput" placeholder="Nhập SĐT khách hàng (VD: 0901234567)"/>
+                    <button type="button" class="btn btn-primary" id="lookupBtn" onclick="lookupCustomer()">🔍 Tra cứu</button>
+                    <button type="button" class="btn btn-outline" id="clearLookupBtn" style="display:none;" onclick="resetLookup()">✕</button>
+                </div>
+                <p class="lookup-hint">Tra theo <b>số điện thoại</b> trong hệ thống khách POS — không dùng tài khoản đăng nhập trên web.</p>
+
+                <!-- Kết quả: TÌM THẤY -->
+                <div id="customerFound" class="customer-found" style="display:none;">
+                    <div class="avatar" id="foundAvatar">K</div>
+                    <div class="info">
+                        <strong id="foundName">—</strong><br/>
+                        <div><span id="foundPhone">—</span> · <span id="foundEmail"></span></div>
+                    </div>
+                    <span class="check">✓</span>
+                </div>
+
+                <!-- Kết quả: KHÔNG TÌM THẤY -> Form tạo khách mới -->
+                <div id="customerNotFound" style="display:none;">
+                    <div class="error" style="margin-top:12px;">
+                        ✕ Không tìm thấy khách hàng với SĐT này.<br/>
+                        <span style="font-weight:400;">Vui lòng điền thông tin bên dưới để tạo khách mới.</span>
+                    </div>
+                    <div class="customer-form-grid">
+                        <div class="full">
+                            <label>Họ tên khách <span style="color:#c00;">*</span></label>
+                            <input type="text" id="newCustomerName" placeholder="Họ tên khách hàng"/>
+                        </div>
+                        <div class="full">
+                            <label>Số điện thoại</label>
+                            <input type="text" id="newCustomerPhone" disabled/>
+                        </div>
+                        <div class="full">
+                            <label>Địa chỉ</label>
+                            <input type="text" id="newCustomerAddress" placeholder="Số nhà, đường, quận, thành phố..."/>
+                        </div>
+                        <div class="full">
+                            <label>Email (tuỳ chọn)</label>
+                            <input type="text" id="newCustomerEmail" placeholder="email@example.com"/>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-block" style="margin-top:12px;" onclick="saveNewCustomer()">
+                        💾 Lưu thông tin khách hàng
+                    </button>
+                </div>
+            </div>
+
+            <!-- SẢN PHẨM -->
+            <div class="card">
+                <h3>📦 Sản phẩm</h3>
+                <div class="search-box">
+                    <input type="text" id="productSearch" placeholder="Tìm theo tên, SKU, màu, size..." oninput="filterVariants()"/>
+                </div>
+
+                <div class="product-grid" id="productGrid">
+                    <!-- Mỗi biến thể (ProductDetail) là 1 thẻ — dữ liệu đổ từ Thymeleaf -->
+                    <div class="variant-card"
+                         th:each="v : ${variants}"
+                         th:classappend="${v.stockQuantity == null or v.stockQuantity == 0} ? 'out-of-stock' : ''"
+                         th:attr="data-search=${#strings.toLowerCase(v.product.productName + ' ' + v.sku + ' ' + v.color + ' ' + v.size)}">
+                        <img th:src="${v.defaultImageUrl != null ? v.defaultImageUrl : '/images/no-image.jpg'}" th:alt="${v.product.productName}"/>
+                        <div class="v-body">
+                            <span class="v-name" th:text="${v.product.productName}">Tên sản phẩm</span>
+                            <span class="v-sku" th:text="${v.sku}">SKU</span>
+                            <span class="v-attr" th:text="'Màu: ' + ${v.color} + ' · Size: ' + ${v.size}">Màu / Size</span>
+                            <span class="v-price" th:text="${#numbers.formatDecimal(v.price, 0, 'COMMA', 0, 'POINT')} + 'đ'">0đ</span>
+                            <span class="v-stock"
+                                  th:classappend="${v.stockQuantity == 0} ? 'zero' : (${v.stockQuantity <= 5} ? 'low' : '')"
+                                  th:text="${v.stockQuantity == 0} ? 'Hết hàng' : ('Tồn: ' + ${v.stockQuantity})">Tồn: 0</span>
+                            <button type="button" class="btn btn-primary btn-sm"
+                                    th:disabled="${v.stockQuantity == null or v.stockQuantity == 0}"
+                                    th:attr="onclick=|addToCart(${v.productDetailId}, '${v.product.productName}', '${v.size}', '${v.color}', ${v.price}, ${v.stockQuantity}, '${v.defaultImageUrl != null ? v.defaultImageUrl : '/images/no-image.jpg'}')|">
+                                + Thêm
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== CỘT PHẢI: ĐƠN CHỜ + ĐƠN HIỆN TẠI ===== -->
+        <div>
+            <!-- ĐƠN CHỜ (nhiều đơn song song tại quầy) -->
+            <div class="card">
+                <div class="tabs-row">
+                    <h3 style="margin:0;">🕒 Đơn chờ <span class="count-badge" id="orderCountBadge">1/10</span></h3>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="createNewOrderTab()">+ Tạo đơn</button>
+                </div>
+                <div class="order-tabs" id="orderTabs"></div>
+                <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%;"></div></div>
+                <div class="progress-label" id="progressLabel">Đã dùng 1 / 10 đơn chờ</div>
+            </div>
+
+            <!-- ĐƠN HIỆN TẠI -->
+            <div class="card">
+                <h3>🛒 Đơn hiện tại <span style="margin-left:auto;color:#C0633A;" id="currentOrderCode">#1</span></h3>
+
+                <div class="order-meta">
+                    <div class="box"><div class="lbl">Khách hàng</div><div class="val" id="metaCustomerName">Khách lẻ</div></div>
+                    <div class="box"><div class="lbl">SĐT</div><div class="val" id="metaCustomerPhone">—</div></div>
+                    <div class="box"><div class="lbl">Loại đơn</div><div class="val">OFFLINE</div></div>
+                    <div class="box"><div class="lbl">Thanh toán</div><div class="val" id="metaPaymentLabel">💵 Tiền mặt</div></div>
+                </div>
+
+                <h3 style="font-size:0.85rem;">Sản phẩm trong đơn</h3>
+                <div id="cartLines">
+                    <div class="cart-empty">Chưa có sản phẩm trong đơn</div>
+                </div>
+
+                <div style="margin-top:14px;">
+                    <div class="summary-row"><span>Tạm tính</span><strong id="sumSubtotal">0đ</strong></div>
+                    <div class="summary-row"><span>Giảm giá</span><strong id="sumDiscount">-0đ</strong></div>
+                    <div class="summary-row total"><span>Tổng thanh toán</span><strong class="amt" id="sumTotal">0đ</strong></div>
+                </div>
+
+                <div class="pay-methods">
+                    <label>
+                        <input type="radio" name="payMethod" value="CASH" checked onchange="setPaymentMethod('CASH','💵 Tiền mặt')"/>
+                        <span class="ic">💵</span><span>Tiền mặt</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="payMethod" value="CARD" onchange="setPaymentMethod('CARD','📱 QR Code')"/>
+                        <span class="ic">📱</span><span>QR Code</span>
+                    </label>
+                </div>
+
+                <button type="button" class="btn btn-success btn-block" style="padding:12px;font-size:0.95rem;" onclick="checkout()">
+                    ✓ Thanh toán
+                </button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script th:inline="javascript">
+    /* ============================================================
+       STATE — mỗi "order tab" là 1 đơn tại quầy đang xử lý song song
+       (giống nhiều máy POS thật: có thể tạm giữ nhiều đơn cùng lúc
+       trước khi thanh toán từng đơn một)
+       ============================================================ */
+    let orders = [
+        { id: 1, code: '#1', customer: null, items: [], paymentMethod: 'CASH', paymentLabel: '💵 Tiền mặt' }
+    ];
+    let activeOrderId = 1;
+    let nextOrderSeq = 2;
+    const MAX_PARALLEL_ORDERS = 10;
+
+    function getActiveOrder() {
+        return orders.find(o => o.id === activeOrderId);
+    }
+
+    /* ============================================================
+       TRA CỨU KHÁCH HÀNG THEO SĐT
+       Backend cần cung cấp: GET /pos/api/customer?phone=xxx
+         -> 200 { posCustomerId, fullName, phone, email, address }
+         -> 404  không tìm thấy
+       ============================================================ */
+    function lookupCustomer() {
+        const phone = document.getElementById('phoneInput').value.trim();
+        if (!phone) { alert('Vui lòng nhập số điện thoại!'); return; }
+
+        document.getElementById('customerFound').style.display = 'none';
+        document.getElementById('customerNotFound').style.display = 'none';
+        document.getElementById('clearLookupBtn').style.display = 'inline-flex';
+
+        fetch('/pos/api/customer?phone=' + encodeURIComponent(phone))
+            .then(res => {
+                if (res.status === 404) { showNotFound(phone); return null; }
+                if (!res.ok) throw new Error('Lỗi tra cứu');
+                return res.json();
+            })
+            .then(data => { if (data) showFound(data); })
+            .catch(() => alert('Có lỗi khi tra cứu khách hàng, vui lòng thử lại.'));
+    }
+
+    function showFound(customer) {
+        document.getElementById('foundAvatar').textContent = (customer.fullName || '?').charAt(0).toUpperCase();
+        document.getElementById('foundName').textContent = customer.fullName;
+        document.getElementById('foundPhone').textContent = customer.phone;
+        document.getElementById('foundEmail').textContent = customer.email || '';
+        document.getElementById('customerFound').style.display = 'flex';
+
+        const order = getActiveOrder();
+        order.customer = customer;
+        updateOrderMetaDisplay();
+    }
+
+    function showNotFound(phone) {
+        document.getElementById('newCustomerPhone').value = phone;
+        document.getElementById('newCustomerName').value = '';
+        document.getElementById('newCustomerAddress').value = '';
+        document.getElementById('newCustomerEmail').value = '';
+        document.getElementById('customerNotFound').style.display = 'block';
+    }
+
+    function resetLookup() {
+        document.getElementById('phoneInput').value = '';
+        document.getElementById('customerFound').style.display = 'none';
+        document.getElementById('customerNotFound').style.display = 'none';
+        document.getElementById('clearLookupBtn').style.display = 'none';
+        const order = getActiveOrder();
+        order.customer = null;
+        updateOrderMetaDisplay();
+    }
+
+    /* ============================================================
+       TẠO KHÁCH HÀNG MỚI
+       Backend cần cung cấp: POST /pos/customer
+         body { phone, fullName, address, email }
+         -> 200 { posCustomerId, fullName, phone, email, address }
+       ============================================================ */
+    function saveNewCustomer() {
+        const fullName = document.getElementById('newCustomerName').value.trim();
+        const phone = document.getElementById('newCustomerPhone').value.trim();
+        const address = document.getElementById('newCustomerAddress').value.trim();
+        const email = document.getElementById('newCustomerEmail').value.trim();
+
+        if (!fullName) { alert('Vui lòng nhập họ tên khách hàng!'); return; }
+
+        fetch('/pos/customer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone, fullName, address, email })
+        })
+            .then(res => {
+                if (!res.ok) throw new Error('Không thể lưu khách hàng');
+                return res.json();
+            })
+            .then(customer => {
+                document.getElementById('customerNotFound').style.display = 'none';
+                showFound(customer);
+            })
+            .catch(() => alert('Lưu khách hàng thất bại, vui lòng thử lại.'));
+    }
+
+    /* ============================================================
+       GIỎ HÀNG TẠM (client-side, chưa lưu DB cho tới khi thanh toán)
+       ============================================================ */
+    function addToCart(productDetailId, name, size, color, price, stock, image) {
+        const order = getActiveOrder();
+        const existing = order.items.find(i => i.productDetailId === productDetailId);
+
+        if (existing) {
+            if (existing.quantity >= stock) { alert('Đã đạt số lượng tồn kho tối đa cho biến thể này!'); return; }
+            existing.quantity++;
+        } else {
+            order.items.push({ productDetailId, name, size, color, price, stock, image, quantity: 1 });
+        }
+        renderCart();
+    }
+
+    function changeQty(productDetailId, delta) {
+        const order = getActiveOrder();
+        const item = order.items.find(i => i.productDetailId === productDetailId);
+        if (!item) return;
+        item.quantity += delta;
+        if (item.quantity > item.stock) { item.quantity = item.stock; alert('Không đủ tồn kho!'); }
+        if (item.quantity <= 0) {
+            order.items = order.items.filter(i => i.productDetailId !== productDetailId);
+        }
+        renderCart();
+    }
+
+    function removeItem(productDetailId) {
+        const order = getActiveOrder();
+        order.items = order.items.filter(i => i.productDetailId !== productDetailId);
+        renderCart();
+    }
+
+    function formatVND(n) { return Math.round(n).toLocaleString('vi-VN') + 'đ'; }
+
+    function renderCart() {
+        const order = getActiveOrder();
+        const container = document.getElementById('cartLines');
+
+        if (order.items.length === 0) {
+            container.innerHTML = '<div class="cart-empty">Chưa có sản phẩm trong đơn</div>';
+        } else {
+            container.innerHTML = order.items.map(i => `
+        <div class="cart-line">
+          <img src="${i.image}" alt=""/>
+          <div class="l-info">
+            <div class="l-name">${i.name}</div>
+            <div class="l-attr">${i.size} / ${i.color}</div>
+            <div class="l-qty">
+              <button type="button" onclick="changeQty(${i.productDetailId}, -1)">−</button>
+              <span>${i.quantity}</span>
+              <button type="button" onclick="changeQty(${i.productDetailId}, 1)">+</button>
+            </div>
+          </div>
+          <div class="l-price">${formatVND(i.price * i.quantity)}</div>
+          <button type="button" class="l-remove" onclick="removeItem(${i.productDetailId})">✕</button>
+        </div>
+      `).join('');
+        }
+
+        const subtotal = order.items.reduce((s, i) => s + i.price * i.quantity, 0);
+        document.getElementById('sumSubtotal').textContent = formatVND(subtotal);
+        document.getElementById('sumDiscount').textContent = '-0đ';
+        document.getElementById('sumTotal').textContent = formatVND(subtotal);
+
+        renderOrderTabs();
+    }
+
+    function updateOrderMetaDisplay() {
+        const order = getActiveOrder();
+        document.getElementById('currentOrderCode').textContent = order.code;
+        document.getElementById('metaCustomerName').textContent = order.customer ? order.customer.fullName : 'Khách lẻ';
+        document.getElementById('metaCustomerPhone').textContent = order.customer ? order.customer.phone : '—';
+        document.getElementById('metaPaymentLabel').textContent = order.paymentLabel;
+
+        document.querySelectorAll('input[name=payMethod]').forEach(r => {
+            r.checked = (r.value === order.paymentMethod);
+        });
+
+        // Đồng bộ lại ô tra cứu khách theo đơn đang chọn
+        if (order.customer) {
+            document.getElementById('phoneInput').value = order.customer.phone;
+            showFoundSilently(order.customer);
+        } else {
+            document.getElementById('phoneInput').value = '';
+            document.getElementById('customerFound').style.display = 'none';
+            document.getElementById('customerNotFound').style.display = 'none';
+            document.getElementById('clearLookupBtn').style.display = 'none';
+        }
+    }
+
+    function showFoundSilently(customer) {
+        document.getElementById('foundAvatar').textContent = (customer.fullName || '?').charAt(0).toUpperCase();
+        document.getElementById('foundName').textContent = customer.fullName;
+        document.getElementById('foundPhone').textContent = customer.phone;
+        document.getElementById('foundEmail').textContent = customer.email || '';
+        document.getElementById('customerFound').style.display = 'flex';
+        document.getElementById('customerNotFound').style.display = 'none';
+        document.getElementById('clearLookupBtn').style.display = 'inline-flex';
+    }
+
+    function setPaymentMethod(method, label) {
+        const order = getActiveOrder();
+        order.paymentMethod = method;
+        order.paymentLabel = label;
+        document.getElementById('metaPaymentLabel').textContent = label;
+    }
+
+    /* ============================================================
+       QUẢN LÝ NHIỀU ĐƠN CHỜ SONG SONG (tab)
+       ============================================================ */
+    function renderOrderTabs() {
+        const tabsEl = document.getElementById('orderTabs');
+        tabsEl.innerHTML = orders.map(o => {
+            const label = (o.customer ? o.customer.fullName : 'Khách lẻ');
+            const removeBtn = orders.length > 1
+                ? `<button type="button" onclick="event.stopPropagation(); removeOrderTab(${o.id})">✕</button>` : '';
+            return `
+        <span class="order-tab ${o.id === activeOrderId ? 'active' : ''}" onclick="switchOrderTab(${o.id})">
+          ${o.code} · ${label} ${removeBtn}
+        </span>`;
+        }).join('');
+
+        const used = orders.length;
+        document.getElementById('orderCountBadge').textContent = used + '/' + MAX_PARALLEL_ORDERS;
+        document.getElementById('progressFill').style.width = (used / MAX_PARALLEL_ORDERS * 100) + '%';
+        document.getElementById('progressLabel').textContent = 'Đã dùng ' + used + ' / ' + MAX_PARALLEL_ORDERS + ' đơn chờ';
+    }
+
+    function createNewOrderTab() {
+        if (orders.length >= MAX_PARALLEL_ORDERS) {
+            alert('Đã đạt giới hạn ' + MAX_PARALLEL_ORDERS + ' đơn chờ cùng lúc!');
+            return;
+        }
+        const newOrder = {
+            id: nextOrderSeq,
+            code: '#' + nextOrderSeq,
+            customer: null,
+            items: [],
+            paymentMethod: 'CASH',
+            paymentLabel: '💵 Tiền mặt'
+        };
+        orders.push(newOrder);
+        activeOrderId = newOrder.id;
+        nextOrderSeq++;
+        updateOrderMetaDisplay();
+        renderCart();
+    }
+
+    function switchOrderTab(id) {
+        activeOrderId = id;
+        updateOrderMetaDisplay();
+        renderCart();
+    }
+
+    function removeOrderTab(id) {
+        if (orders.length <= 1) return;
+        if (!confirm('Bỏ đơn chờ này? Sản phẩm trong đơn sẽ mất.')) return;
+        orders = orders.filter(o => o.id !== id);
+        if (activeOrderId === id) activeOrderId = orders[0].id;
+        updateOrderMetaDisplay();
+        renderCart();
+    }
+
+    /* ============================================================
+       LỌC SẢN PHẨM
+       ============================================================ */
+    function filterVariants() {
+        const kw = document.getElementById('productSearch').value.trim().toLowerCase();
+        document.querySelectorAll('#productGrid .variant-card').forEach(card => {
+            const hay = card.getAttribute('data-search') || '';
+            card.style.display = hay.includes(kw) ? '' : 'none';
+        });
+    }
+
+    /* ============================================================
+       THANH TOÁN
+       Backend cần cung cấp: POST /pos/checkout
+         body { posCustomerId, paymentMethod,
+                items: [{productDetailId, quantity}] }
+         -> 200 { posOrderId, orderCode }
+         -> 400 { message } (VD: hết hàng)
+       ============================================================ */
+    function checkout() {
+        const order = getActiveOrder();
+        if (order.items.length === 0) { alert('Đơn hàng chưa có sản phẩm nào!'); return; }
+        if (!order.customer) { alert('Vui lòng tra cứu hoặc tạo khách hàng trước khi thanh toán!'); return; }
+
+        const payload = {
+            posCustomerId: order.customer.posCustomerId,
+            paymentMethod: order.paymentMethod,
+            items: order.items.map(i => ({ productDetailId: i.productDetailId, quantity: i.quantity }))
+        };
+
+        fetch('/pos/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+            .then(async res => {
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || 'Thanh toán thất bại');
+                return data;
+            })
+            .then(data => {
+                alert('Thanh toán thành công! Mã đơn: ' + data.orderCode);
+                // Xoá tab đơn vừa thanh toán, chuyển sang tab kế tiếp (hoặc tạo tab trống mới)
+                orders = orders.filter(o => o.id !== order.id);
+                if (orders.length === 0) {
+                    orders.push({ id: nextOrderSeq, code: '#' + nextOrderSeq, customer: null, items: [], paymentMethod: 'CASH', paymentLabel: '💵 Tiền mặt' });
+                    activeOrderId = nextOrderSeq;
+                    nextOrderSeq++;
+                } else {
+                    activeOrderId = orders[0].id;
+                }
+                updateOrderMetaDisplay();
+                renderCart();
+                // window.location.href = '/pos/orders/' + data.posOrderId + '/receipt'; // in hoá đơn
+            })
+            .catch(err => alert(err.message));
+    }
+
+    // Khởi tạo hiển thị ban đầu
+    renderOrderTabs();
+    renderCart();
+</script>
+
+</body>
+</html>
