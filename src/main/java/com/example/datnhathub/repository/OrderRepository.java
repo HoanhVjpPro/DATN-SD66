@@ -17,9 +17,6 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
     // Đơn "Chờ thanh toán" quá hạn (đặt trước thời điểm truyền vào) -> dùng cho job tự hủy
     List<Orders> findByStatusAndOrderDateBefore(String status, java.time.LocalDateTime cutoff);
 
-    List<Orders> findByStatusAndShippingShipperIsNull(String status);
-    List<Orders> findByShippingShipperShipperIdOrderByOrderDateDesc(Integer shipperId);
-
     // Lấy tất cả đơn có yêu cầu trả hàng
     List<Orders> findByReturnStatusNotNull();
 
@@ -30,7 +27,7 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
     @Query(value = "SELECT FORMAT(o.OrderDate, 'yyyy-MM') AS month, SUM(o.TotalAmount) AS revenue " +
             "FROM Orders o " +
             "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
-            "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
+            "WHERE (o.Status = N'Hoàn thành' OR o.Status = N'Đang giao') " +
             "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
             "AND o.OrderDate >= DATEADD(MONTH, -5, GETDATE()) " +
             "GROUP BY FORMAT(o.OrderDate, 'yyyy-MM') " +
@@ -46,7 +43,7 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
             "JOIN Product p ON pd.ProductID = p.ProductID " +
             "JOIN Orders o ON od.OrderID = o.OrderID " +
             "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
-            "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
+            "WHERE (o.Status = N'Hoàn thành' OR o.Status = N'Đang giao') " +
             "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
             "GROUP BY p.ProductName " +
             "ORDER BY totalQty DESC", nativeQuery = true)
@@ -70,7 +67,7 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
             "JOIN Product p ON pd.ProductID = p.ProductID " +
             "JOIN Orders o ON od.OrderID = o.OrderID " +
             "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
-            "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
+            "WHERE (o.Status = N'Hoàn thành' OR o.Status = N'Đang giao') " +
             "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
             "GROUP BY p.ProductID " +
             "ORDER BY totalQty DESC", nativeQuery = true)
@@ -91,7 +88,7 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
             "JOIN Product p ON pd.ProductID = p.ProductID " +
             "JOIN Orders o ON od.OrderID = o.OrderID " +
             "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
-            "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
+            "WHERE (o.Status = N'Hoàn thành' OR o.Status = N'Đang giao') " +
             "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
             "GROUP BY p.ProductName " +
             "ORDER BY totalQty DESC", nativeQuery = true)
@@ -101,7 +98,7 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
     @Query(value = "SELECT FORMAT(o.OrderDate, 'dd/MM') AS day, SUM(o.TotalAmount) AS revenue " +
             "FROM Orders o " +
             "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
-            "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
+            "WHERE (o.Status = N'Hoàn thành' OR o.Status = N'Đang giao') " +
             "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
             "AND o.OrderDate >= DATEADD(DAY, -6, CAST(GETDATE() AS DATE)) " +
             "GROUP BY FORMAT(o.OrderDate, 'dd/MM'), CAST(o.OrderDate AS DATE) " +
@@ -113,7 +110,7 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
             "SUM(o.TotalAmount) AS revenue " +
             "FROM Orders o " +
             "LEFT JOIN Shipping s ON o.OrderID = s.OrderID " +
-            "WHERE (o.Status = N'Hoàn thành' OR (o.Status = N'Đang giao' AND s.ConfirmedByShipper = 1)) " +
+            "WHERE (o.Status = N'Hoàn thành' OR o.Status = N'Đang giao') " +
             "AND (o.ReturnStatus IS NULL OR o.ReturnStatus <> N'Đã chấp nhận') " +
             "AND o.OrderDate >= DATEADD(WEEK, -7, GETDATE()) " +
             "GROUP BY DATEPART(YEAR, o.OrderDate), MONTH(o.OrderDate), ((DAY(o.OrderDate) - 1) / 7) + 1 " +

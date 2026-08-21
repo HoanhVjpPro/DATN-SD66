@@ -23,76 +23,21 @@ public class OrderService {
     @Autowired
     private ShipperRepository shipperRepository;
 
-    // Danh sách đơn "Đang giao" nhưng chưa ai nhận (pool cho shipper)
-    public List<Orders> getUnclaimedOrders() {
-        return orderRepository.findByStatusAndShippingShipperIsNull("Đang giao");
-    }
-
-    // Danh sách đơn shipper đang phụ trách (đã nhận, chưa xong)
-    // Loại bỏ đơn "Đã hủy" (vd: CSKH đã xử lý hoàn tiền cho đơn gặp sự cố) khỏi danh sách của shipper
-    public List<Orders> getOrdersForShipper(Integer shipperUserId) {
-        Shipper shipper = shipperRepository.findByUserUserID(shipperUserId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shipper"));
-        return orderRepository.findByShippingShipperShipperIdOrderByOrderDateDesc(shipper.getShipperId())
-                .stream()
-                .filter(o -> !"Đã hủy".equals(o.getStatus()))
-                .toList();
-    }
-
-    // Shipper nhận đơn (claim)
     @Transactional
-    public void claimOrder(Integer orderId, Integer shipperUserId) {
+    public void resolveIncidentByReship(Integer orderId) {
         Orders order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại"));
 
-        if (!"Đang giao".equals(order.getStatus()) || order.getShipping() == null) {
-            throw new IllegalStateException("Đơn hàng không ở trạng thái chờ giao");
-        }
-        if (order.getShipping().getShipper() != null) {
-            throw new IllegalStateException("Đơn hàng đã có shipper khác nhận");
+        if (!"Xử lý sự cố giao hàng".equals(order.getStatus())) {
+            throw new IllegalStateException("Đơn hàng không ở trạng thái sự cố");
         }
 
-        Shipper shipper = shipperRepository.findByUserUserID(shipperUserId)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy shipper"));
-
-        order.getShipping().setShipper(shipper);
+        order.setStatus("Đang giao");
+        if (order.getShipping() != null) {
+            order.getShipping().setIncidentReason(null);
+            order.getShipping().setShippingStatus("Đang giao");
+        }
         orderRepository.save(order);
-    }
-
-    // Shipper xác nhận đã giao thành công (khách chưa xác nhận thì chưa Hoàn thành)
-    @Transactional
-    public void confirmDeliveredByShipper(Integer orderId, Integer shipperUserId) {
-        Orders order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại"));
-
-        validateShipperOwnsOrder(order, shipperUserId);
-
-        order.getShipping().setConfirmedByShipper(true);
-        orderRepository.save(order);
-    }
-
-    // Shipper báo sự cố (mất hàng / giao thất bại)
-    @Transactional
-    public void reportIncident(Integer orderId, Integer shipperUserId, String reason) {
-        Orders order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại"));
-
-        validateShipperOwnsOrder(order, shipperUserId);
-
-        order.setStatus("Xử lý sự cố giao hàng");
-        order.getShipping().setIncidentReason(reason);
-        order.getShipping().setShippingStatus("Sự cố");
-        orderRepository.save(order);
-    }
-
-    private void validateShipperOwnsOrder(Orders order, Integer shipperUserId) {
-        if (order.getShipping() == null || order.getShipping().getShipper() == null) {
-            throw new IllegalStateException("Đơn hàng chưa được nhận bởi shipper nào");
-        }
-        Integer ownerUserId = order.getShipping().getShipper().getUser().getUserID();
-        if (!ownerUserId.equals(shipperUserId)) {
-            throw new IllegalStateException("Bạn không phải shipper phụ trách đơn này");
-        }
     }
 
 // ── Admin xử lý sự cố ──
@@ -113,26 +58,6 @@ public class OrderService {
             order.getPayment().setPaymentStatus("Cần hoàn tiền - Liên hệ CSKH");
             orderRepository.save(order);
         }
-    }
-
-    // Chọn "Giao lại": quay về pool, ai nhận cũng được, không trừ kho lần nữa (stockDeducted vẫn true)
-    @Transactional
-    public void resolveIncidentByReship(Integer orderId) {
-        Orders order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Đơn hàng không tồn tại"));
-
-        if (!"Xử lý sự cố giao hàng".equals(order.getStatus())) {
-            throw new IllegalStateException("Đơn hàng không ở trạng thái sự cố");
-        }
-
-        order.setStatus("Đang giao");
-        if (order.getShipping() != null) {
-            order.getShipping().setShipper(null); // quay lại pool
-            order.getShipping().setConfirmedByShipper(false);
-            order.getShipping().setIncidentReason(null);
-            order.getShipping().setShippingStatus("Đang giao");
-        }
-        orderRepository.save(order);
     }
 
     // Đặt hàng từ giỏ hàng

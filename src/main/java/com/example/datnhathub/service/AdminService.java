@@ -63,27 +63,4 @@ public class AdminService {
         return saved;
     }
 
-    @Transactional
-    public Users createShipper(String username, String password, String email, String phone) {
-        if (userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("Tên đăng nhập đã tồn tại");
-        }
-        Role role = roleRepository.findByRoleName("SHIPPER")
-                .orElseThrow(() -> new IllegalStateException("Role SHIPPER chưa được cấu hình"));
-
-        Users user = new Users();
-        user.setUsername(username);
-        user.setPassword(password);
-        user.setEmail(email);
-        user.setPhone(phone);
-        user.setStatus(true);
-        user.setRole(role);
-        Users saved = userRepository.save(user);
-
-        Shipper shipper = new Shipper();
-        shipper.setUser(saved);
-        shipper.setShipperCode("SH" + saved.getUserID());
-        shipperRepository.save(shipper);
-        return saved;
-    }
 }

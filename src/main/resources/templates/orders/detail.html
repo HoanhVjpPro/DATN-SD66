@@ -136,24 +136,10 @@
     </div>
   </div>
 
-  <div th:if="${order.status == 'Đang giao'}"
-       style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
-    <div class="card">
-      <p style="color:#2980b9;font-weight:700;">🚚 Đơn hàng đang trên đường giao đến bạn</p>
-
-      <div th:if="${order.shipping != null and order.shipping.confirmedByShipper}">
-        <form th:action="@{/orders/{id}/received(id=${order.orderId})}" method="post"
-              onsubmit="return confirm('Xác nhận đã nhận được hàng?')">
-          <button type="submit"
-                  style="background:#27ae60;color:#fff;border:none;padding:10px 24px;font-weight:700;cursor:pointer;border-radius:4px;margin-top:0.5rem;">
-            ✓ Đã nhận được hàng
-          </button>
-        </form>
-      </div>
-      <div th:if="${order.shipping == null or !order.shipping.confirmedByShipper}">
-        <p style="color:#888;font-size:0.9rem;">Đang chờ shipper xác nhận giao hàng thành công...</p>
-      </div>
-    </div>
+  <div th:if="${order.status == 'Đang giao'}">
+    <form th:action="@{/orders/{id}/received(id=${order.orderId})}" method="post">
+      <button type="submit" class="btn btn-success">✓ Tôi đã nhận được hàng</button>
+    </form>
   </div>
 
   <!-- Xử lý sự cố giao hàng -->

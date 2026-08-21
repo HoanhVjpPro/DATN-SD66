@@ -33,13 +33,6 @@ public class Shipping {
     @Column(name = "ShippingFee", precision = 18, scale = 2)
     private BigDecimal shippingFee;
 
-    @ManyToOne
-    @JoinColumn(name = "ShipperID")
-    private Shipper shipper;
-
-    @Column(name = "ConfirmedByShipper", nullable = false)
-    private Boolean confirmedByShipper = false;
-
     @Column(name = "IncidentReason", length = 500)
     private String incidentReason;
 }

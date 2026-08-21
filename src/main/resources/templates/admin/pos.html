@@ -144,20 +144,7 @@
 <body>
 
 <aside>
-    <h2 style="color:#C0633A;">HatHub Admin</h2>
-    <a href="/admin/dashboard">Dashboard</a>
-    <a href="/admin/products">Sản phẩm</a>
-    <a href="/admin/categories">Danh mục</a>
-    <a href="/admin/brands">Thương hiệu</a>
-    <a href="/admin/materials">Chất liệu</a>
-    <a href="/admin/hat-types">Kiểu mũ</a>
-    <a href="/admin/sizes">Size</a>
-    <a href="/admin/colors">Màu sắc</a>
-    <a href="/admin/orders">Đơn hàng</a>
-    <a href="/admin/returns">Trả hàng</a>
-    <a href="/admin/vouchers">Voucher</a>
-    <a href="/admin/reviews">Đánh giá sản phẩm</a>
-    <a href="/admin/users">Người dùng</a>
+    <h2 style="color:#C0633A;">HatHub Employee</h2>
     <a href="/pos" class="active">Bán hàng tại quầy</a>
     <a href="/pos/history">Lịch sử đơn POS</a>
     <a href="/logout">Đăng xuất</a>
@@ -168,9 +155,7 @@
 
     <div class="pos-layout">
 
-        <!-- ===== CỘT TRÁI: KHÁCH HÀNG + SẢN PHẨM ===== -->
         <div>
-            <!-- KHÁCH HÀNG -->
             <div class="card">
                 <h3>👤 Khách hàng</h3>
                 <label for="phoneInput">Số điện thoại khách hàng</label>
@@ -179,7 +164,6 @@
                     <button type="button" class="btn btn-primary" id="lookupBtn" onclick="lookupCustomer()">🔍 Tra cứu</button>
                     <button type="button" class="btn btn-outline" id="clearLookupBtn" style="display:none;" onclick="resetLookup()">✕</button>
                 </div>
-                <p class="lookup-hint">Tra theo <b>số điện thoại</b> trong hệ thống khách POS — không dùng tài khoản đăng nhập trên web.</p>
 
                 <!-- Kết quả: TÌM THẤY -->
                 <div id="customerFound" class="customer-found" style="display:none;">
