@@ -44,22 +44,13 @@
   <div th:if="${success}" class="success" th:text="${success}"></div>
   <div th:if="${error}" class="error" th:text="${error}"></div>
 
-<!--  <form action="/admin/users/employee" method="post">-->
-<!--    <h3>Tạo nhân viên mới</h3>-->
-<!--    <input type="text" name="username" placeholder="Username" required/>-->
-<!--    <input type="password" name="password" placeholder="Password" required/>-->
-<!--    <input type="email" name="email" placeholder="Email"/>-->
-<!--    <input type="text" name="phone" placeholder="Phone"/>-->
-<!--    <button type="submit">Tạo nhân viên</button>-->
-<!--  </form>-->
-
-  <form action="/admin/users/shipper" method="post">
-    <h3>Tạo shipper mới</h3>
+  <form action="/admin/users/employee" method="post">
+    <h3>Tạo nhân viên mới</h3>
     <input type="text" name="username" placeholder="Username" required/>
     <input type="password" name="password" placeholder="Password" required/>
     <input type="email" name="email" placeholder="Email"/>
     <input type="text" name="phone" placeholder="Phone"/>
-    <button type="submit">Tạo shipper</button>
+    <button type="submit">Tạo nhân viên</button>
   </form>
 
   <table>

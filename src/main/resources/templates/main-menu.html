@@ -692,7 +692,7 @@
   </div>
   <div class="top-bar-right">
     <a href="/profile" th:if="${loggedIn and roleName == 'CUSTOMER'}" th:text="${'👤 ' + session.username}"></a>
-    <a href="/cart" th:if="${loggedIn and roleName == 'CUSTOMER'}">🛒 Sản phẩm</a>
+    <a href="/cart" th:if="${loggedIn and roleName == 'CUSTOMER'}">🛒 Giỏ hàng</a>
     <a href="/orders" th:if="${loggedIn and roleName == 'CUSTOMER'}">🧾 Đơn hàng</a>
     <a th:if="${session.user == null}" href="/login">Đăng nhập</a>
     <a th:if="${session.user != null}"

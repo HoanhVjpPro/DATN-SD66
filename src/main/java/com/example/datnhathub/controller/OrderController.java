@@ -105,11 +105,6 @@ public class OrderController {
             return "redirect:/orders/" + id;
         }
 
-        if (order.getShipping() == null || !Boolean.TRUE.equals(order.getShipping().getConfirmedByShipper())) {
-            ra.addFlashAttribute("error", "Shipper chưa xác nhận giao hàng thành công. Vui lòng chờ thêm!");
-            return "redirect:/orders/" + id;
-        }
-
         order.setStatus("Hoàn thành");
         ordersRepository.save(order);
 

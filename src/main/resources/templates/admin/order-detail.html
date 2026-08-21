@@ -190,9 +190,6 @@
                 <h3>⚠ Sự cố giao hàng</h3>
                 <p th:if="${order.shipping != null}" style="color:#c00;font-weight:700;"
                    th:text="'Lý do: ' + ${order.shipping.incidentReason}">Lý do sự cố</p>
-                <p th:if="${order.shipping != null and order.shipping.shipper != null}"
-                   style="font-size:0.9rem;color:#666;"
-                   th:text="'Báo cáo bởi shipper: ' + ${order.shipping.shipper.user.username}">Shipper</p>
 
                 <div style="display:flex;gap:8px;margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
                     <form th:action="@{/admin/orders/{id}/incident/refund(id=${order.orderId})}"

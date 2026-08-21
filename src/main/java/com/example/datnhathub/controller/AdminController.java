@@ -346,20 +346,6 @@ public class AdminController {
         return "redirect:/admin/vouchers";
     }
 
-    @PostMapping("/users/shipper")
-    public String createShipper(@RequestParam String username,
-                                @RequestParam String password,
-                                @RequestParam String email,
-                                @RequestParam(required = false) String phone,
-                                RedirectAttributes ra) {
-        try {
-            adminService.createShipper(username, password, email, phone);
-            ra.addFlashAttribute("success", "Tạo shipper thành công");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
-        return "redirect:/admin/users";
-    }
 
     @PostMapping("/orders/{id}/incident/refund")
     public String resolveIncidentRefund(@PathVariable Integer id, RedirectAttributes ra) {

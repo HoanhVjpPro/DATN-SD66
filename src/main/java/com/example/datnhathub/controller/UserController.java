@@ -127,7 +127,6 @@ public class UserController {
         return switch (role) {
             case "ADMIN"    -> "redirect:/admin/dashboard";
             case "EMPLOYEE" -> "redirect:/employee/dashboard";
-            case "SHIPPER"  -> "redirect:/shipper/dashboard";
             default         -> "redirect:/";
         };
     }
