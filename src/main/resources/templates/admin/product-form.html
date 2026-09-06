@@ -1,98 +1,370 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title th:text="${product.productId != null ? 'Sửa sản phẩm' : 'Thêm sản phẩm'} + ' | HatHub'">Product Form</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Barlow+Condensed:wght@500;700;900&display=swap&subset=vietnamese" rel="stylesheet" />
   <style>
-    body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
-    aside { width:220px; background:#111; color:#fff; padding:1.5rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0;}
-    aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
-    aside a:hover, aside a.active { color:#C0633A; }
-    main { flex:1; padding:2rem; background:#F5F0EA; }
-    .card { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; }
-    label { display:block; font-weight:700; margin:0.75rem 0 0.25rem; }
-    input, select, textarea { width:100%; padding:8px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; }
-    table { width:100%; border-collapse:collapse; margin-top:1rem; }
-    td, th { padding:0.5rem; border-bottom:1px solid #eee; text-align:left; }
-    .success { background:#d4edda; padding:1rem; border-radius:4px; margin-bottom:1rem; }
-    .stock-low { color:#c0392b; font-weight:700; }
-    .stock-out { color:#fff; background:#c0392b; padding:2px 8px; border-radius:4px; font-size:0.8rem; }
-    .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; }
-    .topbar h1 { font-size:1.4rem; font-weight:900; }
-    .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:0 1rem; }
-    .variant-toolbar { display:flex; align-items:center; gap:0.75rem; margin-top:0.75rem; flex-wrap:wrap; }
-    .sku-readonly { font-family:'Courier New',monospace; font-size:0.8rem; background:#f0f0f0; padding:4px 6px; border-radius:4px; white-space:nowrap; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #111111;
+      --off-black: #1a1a1a;
+      --rust: #C0633A;
+      --rust-light: #D97C4E;
+      --rust-dark: #9B4A27;
+      --white: #ffffff;
+      --cream: #F5F0EA;
+      --gray-100: #f0efee;
+      --gray-400: #9e9b96;
+      --gray-500: #7a7772;
+      --gray-700: #3e3d3a;
+      --font-display: 'Barlow Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
+      --font-body: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+      --sidebar-width: 270px;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body { font-family: var(--font-body); background: var(--cream); color: var(--black); display: flex; min-height: 100vh; margin: 0; }
+    a { text-decoration: none; color: inherit; }
 
-    /* ===== Nút bấm — đồng bộ toàn hệ thống ===== */
-    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:4px; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.85rem; padding:9px 18px; cursor:pointer; text-decoration:none; line-height:1.2; white-space:nowrap; }
-    .btn-sm { padding:6px 12px; font-size:0.8rem; }
-    .btn-primary { background:#C0633A; color:#fff; }
-    .btn-primary:hover { background:#9B4A27; }
-    .btn-secondary { background:#444; color:#fff; }
-    .btn-secondary:hover { background:#2c2c2c; }
-    .btn-success { background:#27ae60; color:#fff; }
-    .btn-success:hover { background:#1e8449; }
-    .btn-danger { background:#c00; color:#fff; }
-    .btn-danger:hover { background:#a00; }
-    .btn-warning { background:#e67e22; color:#fff; }
-    .btn-warning:hover { background:#c8611c; }
-    .btn-info { background:#2980b9; color:#fff; }
-    .btn-info:hover { background:#20648f; }
-    .btn-neutral { background:#666; color:#fff; }
-    .btn-neutral:hover { background:#4d4d4d; }
-    .rte-toolbar {
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--black);
+      color: var(--white);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+      border-right: 3px solid var(--rust);
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.3);
+      z-index: 10;
       display: flex;
-      gap: 6px;
-      margin-bottom: 6px;
-      padding: 8px;
-      background: #f0f0f0;
-      border: 1px solid #ccc;
-      border-radius: 6px 6px 0 0;
+      flex-direction: column;
+      transition: var(--transition);
+      scrollbar-width: thin;
+      scrollbar-color: var(--rust) #2a2a2a;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--rust); border-radius: 4px; }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 1.2rem 1.6rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+      min-height: 76px;
+    }
+    .brand-logo-wrapper {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--rust);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+    }
+    .brand-logo { width:100%; height:100%; object-fit:cover; display:block; }
+    .brand-text { display:flex; flex-direction:column; line-height:1.1; }
+    .brand-text .hat { font-family: var(--font-display); font-weight:900; font-size:1.8rem; color:var(--white); letter-spacing:1px; }
+    .brand-text .hub { font-family: var(--font-display); font-weight:900; font-size:1.8rem; color:var(--rust); letter-spacing:1px; margin-top:-4px; }
+    .brand-text .sub { font-size:0.55rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--gray-500); margin-top:2px; }
+
+    .sidebar-menu-wrapper {
+      flex: 1;
+      padding: 1.2rem 0.8rem 1.2rem 1.2rem;
+      overflow-y: auto;
+    }
+    .menu-section { margin-bottom:1.2rem; }
+    .menu-section:last-child { margin-bottom:0; }
+    .menu-section-title {
+      font-size: 0.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--gray-500);
+      padding: 0 0.6rem 0.6rem 0.6rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 0.4rem;
+    }
+    .sidebar-menu { list-style:none; display:flex; flex-direction:column; gap:1px; }
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--gray-400);
+      transition: var(--transition);
+      border: 1px solid transparent;
+      position: relative;
+    }
+    .sidebar-menu li a .menu-icon {
+      width:22px; height:22px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem; opacity:0.6; transition:var(--transition);
+      font-style:normal;
+    }
+    .sidebar-menu li a .menu-label { flex:1; white-space:nowrap; }
+    .sidebar-menu li a .menu-badge {
+      background:var(--rust); color:var(--white);
+      font-size:0.6rem; font-weight:800;
+      padding:1px 8px; border-radius:20px;
+      line-height:1.5; letter-spacing:0.02em;
+    }
+    .sidebar-menu li a:hover {
+      background: rgba(192,99,58,0.15);
+      color: var(--white);
+      border-color: rgba(192,99,58,0.15);
+      transform: translateX(4px);
+    }
+    .sidebar-menu li a:hover .menu-icon { opacity:1; transform:scale(1.05); }
+    .sidebar-menu li a.active {
+      background: var(--rust);
+      color: var(--white);
+      box-shadow: 0 4px 16px rgba(192,99,58,0.35);
+      border-color: var(--rust);
+    }
+    .sidebar-menu li a.active .menu-icon { opacity:1; }
+    .sidebar-menu li a.active::before {
+      content:'';
+      position:absolute;
+      left:-8px;
+      top:50%;
+      transform:translateY(-50%);
+      width:4px;
+      height:28px;
+      background:var(--rust-light);
+      border-radius:4px;
+    }
+
+    .sidebar-footer {
+      flex-shrink:0;
+      padding:1rem 1.6rem 1.4rem;
+      border-top:1px solid rgba(255,255,255,0.06);
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .sidebar-footer .user-row {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:6px 0;
+    }
+    .sidebar-footer .user-avatar {
+      width:34px; height:34px;
+      border-radius:50%;
+      background: linear-gradient(135deg, var(--rust-dark), var(--rust));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      font-size:0.8rem;
+      color:var(--white);
+      flex-shrink:0;
+    }
+    .sidebar-footer .user-name {
+      font-weight:700;
+      font-size:0.8rem;
+      color:var(--white);
+      line-height:1.2;
+    }
+    .sidebar-footer .user-role {
+      font-size:0.65rem;
+      color:var(--gray-500);
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+    .sidebar-footer .logout-link {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      font-size:0.75rem;
+      font-weight:700;
+      color:var(--gray-500);
+      transition:var(--transition);
+      border-radius:6px;
+      margin-top:2px;
+    }
+    .sidebar-footer .logout-link:hover {
+      color:var(--rust-light);
+      background:rgba(192,99,58,0.08);
+    }
+
+    /* ===== MAIN ===== */
+    .main { flex:1; padding:2rem 2.5rem 3rem; background:var(--cream); min-width:0; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+    .page-title {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 2.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--black);
+      position: relative;
+    }
+    .page-title::after { content:''; display:block; width:60px; height:4px; background:var(--rust); margin-top:4px; border-radius:4px; }
+
+    .alert-success { background:#d4edda; color:#155724; padding:14px 20px; border-radius:var(--radius); margin-bottom:1.5rem; font-weight:700; border-left:6px solid #28a745; }
+
+    .card {
+      background: var(--white);
+      padding: 1.8rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.8rem;
+    }
+    .card h3 {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.2rem;
+      color: var(--black);
+      border-bottom: 2px solid var(--rust);
+      padding-bottom: 0.6rem;
+      display: inline-block;
+    }
+
+    .form-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:0 1.5rem; }
+    .form-group { margin-bottom:1.2rem; }
+    .form-group label { display:block; font-weight:700; font-size:0.82rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--gray-700); margin-bottom:4px; }
+    .form-group input, .form-group select, .form-group textarea {
+      width:100%;
+      padding:12px 16px;
+      border:2px solid var(--gray-100);
+      border-radius:10px;
+      font-family:var(--font-body);
+      font-size:0.95rem;
+      background:var(--gray-100);
+      transition:border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      color:var(--black);
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline:none;
+      border-color:var(--rust);
+      background:var(--white);
+      box-shadow:0 0 0 4px rgba(192,99,58,0.1);
+    }
+    .form-group textarea { resize:vertical; min-height:100px; }
+    .form-group input[type="checkbox"] { width:auto; margin-right:8px; accent-color:var(--rust); }
+
+    .rte-toolbar {
+      display:flex;
+      gap:6px;
+      margin-bottom:0;
+      padding:8px 12px;
+      background:var(--gray-100);
+      border:2px solid var(--gray-100);
+      border-radius:10px 10px 0 0;
+      flex-wrap:wrap;
     }
     .rte-toolbar button, .rte-toolbar input[type=color] {
-      width: 36px;
-      height: 32px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background: #fff;
-      cursor: pointer;
-      font-family: 'Nunito', sans-serif;
+      width:36px;
+      height:32px;
+      border:1px solid #ccc;
+      border-radius:6px;
+      background:#fff;
+      cursor:pointer;
+      font-family:'Nunito',sans-serif;
+      font-weight:700;
     }
-    .rte-toolbar button:hover { background: #eee; }
+    .rte-toolbar button:hover { background:#eee; }
     .rte-editor {
-      min-height: 180px;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-top: none;
-      border-radius: 0 0 6px 6px;
-      background: #fff;
-      outline: none;
-      line-height: 1.6;
+      min-height:180px;
+      padding:14px 16px;
+      border:2px solid var(--gray-100);
+      border-top:none;
+      border-radius:0 0 10px 10px;
+      background:var(--white);
+      outline:none;
+      line-height:1.7;
     }
-    .rte-editor:focus { border-color: #C0633A; }
+    .rte-editor:focus { border-color:var(--rust); }
 
-    /* ===== Modal tạo biến thể hàng loạt ===== */
+    .btn {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      border:none;
+      border-radius:40px;
+      font-family:'Nunito','Segoe UI',Roboto,Arial,sans-serif;
+      font-weight:800;
+      font-size:0.85rem;
+      text-transform:uppercase;
+      letter-spacing:0.04em;
+      cursor:pointer;
+      transition:all 0.2s ease;
+      padding:10px 24px;
+      text-decoration:none;
+    }
+    .btn-sm { padding:6px 16px; font-size:0.75rem; }
+    .btn-primary { background:var(--rust); color:var(--white); box-shadow:0 4px 12px rgba(192,99,58,0.3); }
+    .btn-primary:hover { background:var(--rust-dark); transform:translateY(-2px); box-shadow:0 8px 20px rgba(192,99,58,0.4); }
+    .btn-secondary { background:var(--gray-700); color:var(--white); }
+    .btn-secondary:hover { background:var(--black); transform:translateY(-2px); }
+    .btn-success { background:#27ae60; color:var(--white); }
+    .btn-success:hover { background:#1e8449; transform:translateY(-2px); }
+    .btn-danger { background:#c0392b; color:var(--white); }
+    .btn-danger:hover { background:#a93226; transform:translateY(-2px); }
+    .btn-info { background:#2980b9; color:var(--white); }
+    .btn-info:hover { background:#1f6390; transform:translateY(-2px); }
+    .btn-neutral { background:#666; color:var(--white); }
+    .btn-neutral:hover { background:#4d4d4d; transform:translateY(-2px); }
+    .btn-outline { background:transparent; color:var(--gray-400); border:2px solid var(--gray-100); }
+    .btn-outline:hover { border-color:var(--gray-400); color:var(--black); }
+
+    .variant-toolbar { display:flex; align-items:center; gap:0.75rem; margin-top:0.75rem; flex-wrap:wrap; }
+
+    .table-wrap { overflow-x:auto; margin-top:1rem; }
+    .table-wrap table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+    .table-wrap th { background:var(--black); color:var(--white); padding:10px 12px; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:800; text-align:left; white-space:nowrap; }
+    .table-wrap td { padding:10px 12px; border-bottom:1px solid var(--gray-100); vertical-align:middle; }
+    .table-wrap tr:hover { background:#faf6f2; }
+    .sku-readonly { font-family:'Courier New',monospace; font-size:0.8rem; background:#f0f0f0; padding:4px 8px; border-radius:6px; white-space:nowrap; }
+    .variant-img-thumb { width:50px; height:50px; object-fit:cover; border-radius:8px; display:block; margin-bottom:4px; }
+    .variant-img-empty { font-size:0.7rem; color:#999; display:block; margin-bottom:4px; }
+    .variant-img-form { display:none; margin-top:6px; }
+    .variant-img-form input[type=file] { font-size:0.7rem; padding:2px; margin-bottom:4px; }
+    .variant-img-form label { font-weight:400; font-size:0.75rem; margin:2px 0; }
+    .variant-img-form label input { width:auto; margin-right:4px; }
+
     .modal-overlay {
       display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55);
       align-items:center; justify-content:center; z-index:1000; padding:1rem;
     }
     .modal-overlay.open { display:flex; }
     .modal-box {
-      background:#fff; border-radius:10px; padding:1.5rem;
-      width:560px; max-width:100%; max-height:90vh; overflow-y:auto;
+      background:#fff; border-radius:var(--radius); padding:2rem;
+      width:600px; max-width:100%; max-height:90vh; overflow-y:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,0.3);
     }
-    .modal-box h3 { margin-top:0; }
+    .modal-box h3 { font-family:var(--font-display); font-weight:900; font-size:1.6rem; text-transform:uppercase; margin-top:0; margin-bottom:1.2rem; color:var(--black); border-bottom:2px solid var(--rust); padding-bottom:0.6rem; }
     .modal-hint { color:#777; font-size:0.85rem; margin-top:-0.5rem; }
-    .modal-empty-hint { color:#999; font-size:0.8rem; margin:6px 0 0; }
     .modal-actions { margin-top:1.5rem; display:flex; gap:0.5rem; justify-content:flex-end; }
-    .color-dot { width:12px; height:12px; border-radius:50%; display:inline-block; border:1px solid rgba(0,0,0,0.2); flex-shrink:0; }
 
-    /* ===== Chip đã chọn (hiển thị gọn, chỉ những cái đã chọn) ===== */
     .selected-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:6px; min-height:36px; }
     .no-selection-hint { color:#999; font-size:0.85rem; }
     .selected-chip {
-      background:#C0633A; color:#fff; border-radius:20px; padding:6px 8px 6px 14px;
+      background:var(--rust); color:#fff; border-radius:20px; padding:6px 8px 6px 14px;
       font-size:0.85rem; font-weight:700; display:inline-flex; align-items:center; gap:6px;
     }
     .selected-chip .color-dot { border-color:rgba(255,255,255,0.7); }
@@ -103,250 +375,306 @@
     }
     .selected-chip button:hover { background:rgba(255,255,255,0.45); }
     .add-chip-btn {
-      width:32px; height:32px; border-radius:50%; border:2px dashed #C0633A; background:#fff;
-      color:#C0633A; font-size:1.15rem; font-weight:900; cursor:pointer;
+      width:32px; height:32px; border-radius:50%; border:2px dashed var(--rust); background:#fff;
+      color:var(--rust); font-size:1.15rem; font-weight:900; cursor:pointer;
       display:inline-flex; align-items:center; justify-content:center; line-height:1; flex-shrink:0;
     }
-    .add-chip-btn:hover { background:#C0633A; color:#fff; }
+    .add-chip-btn:hover { background:var(--rust); color:#fff; }
 
-    /* ===== Bảng chọn (picker) xổ ra khi bấm nút + ===== */
-    .picker-panel { display:none; border:1px solid #ddd; border-radius:8px; padding:12px; margin-top:8px; background:#fafafa; }
+    .picker-panel { display:none; border:1px solid #ddd; border-radius:10px; padding:12px; margin-top:8px; background:#fafafa; }
     .picker-panel.open { display:block; }
     .picker-list { display:flex; flex-wrap:wrap; gap:8px; max-height:160px; overflow-y:auto; padding:2px; }
     .picker-item {
       border:1.5px solid #ddd; border-radius:20px; padding:5px 12px; font-size:0.82rem; font-weight:700;
       cursor:pointer; display:inline-flex; align-items:center; gap:6px; background:#fff; color:#333;
     }
-    .picker-item input { width:auto; margin:0; accent-color:#C0633A; }
-    .picker-item.checked { background:#C0633A; border-color:#C0633A; color:#fff; }
-    .picker-add-row { display:flex; gap:8px; margin-top:10px; }
-    .picker-add-row input[type=text] { flex:1; }
-    .picker-add-row input[type=color] { width:44px; padding:2px; flex-shrink:0; }
+    .picker-item input { width:auto; margin:0; accent-color:var(--rust); }
+    .picker-item.checked { background:var(--rust); border-color:var(--rust); color:#fff; }
+    .picker-add-row { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+    .picker-add-row input[type=text] { flex:1; min-width:100px; padding:8px 12px; border:2px solid var(--gray-100); border-radius:8px; }
+    .picker-add-row input[type=color] { width:44px; padding:2px; flex-shrink:0; border-radius:8px; }
     .picker-actions { margin-top:10px; text-align:right; }
 
-    /* ===== Ảnh riêng theo biến thể ===== */
-    .variant-img-cell { width:120px; }
-    .variant-img-thumb { width:56px; height:56px; object-fit:cover; border-radius:6px; display:block; margin-bottom:4px; }
-    .variant-img-empty { font-size:0.7rem; color:#999; display:block; margin-bottom:4px; }
-    .variant-img-form { display:none; margin-top:6px; }
-    .variant-img-form input[type=file] { font-size:0.7rem; padding:2px; margin-bottom:4px; }
-    .variant-img-form label { font-weight:400; font-size:0.75rem; margin:2px 0; }
-    .variant-img-form label input { width:auto; margin-right:4px; }
+    .color-dot { width:14px; height:14px; border-radius:50%; display:inline-block; border:1px solid rgba(0,0,0,0.2); flex-shrink:0; }
+
+    @media (max-width:992px) {
+      .sidebar { width:220px; }
+      .sidebar-brand { padding:1rem 1.2rem; min-height:64px; gap:10px; }
+      .brand-logo-wrapper { width:40px; height:40px; }
+      .brand-text .hat, .brand-text .hub { font-size:1.5rem; }
+      .brand-text .sub { font-size:0.5rem; }
+      .sidebar-menu-wrapper { padding:0.8rem 0.4rem 0.8rem 0.8rem; }
+      .sidebar-menu li a { padding:7px 10px; font-size:0.75rem; gap:8px; }
+      .sidebar-menu li a .menu-icon { width:18px; height:18px; font-size:0.85rem; }
+      .main { padding:1.5rem; }
+      .page-title { font-size:2rem; }
+      .form-grid-2 { grid-template-columns:1fr; }
+    }
+    @media (max-width:768px) {
+      body { flex-direction:column; }
+      .sidebar { width:100%; height:auto; position:static; border-right:none; border-bottom:3px solid var(--rust); box-shadow:0 4px 20px rgba(0,0,0,0.15); padding:0.6rem 0.8rem 0.4rem; flex-direction:row; flex-wrap:wrap; align-items:center; }
+      .sidebar-brand { padding:0.2rem 0.4rem 0.2rem 0; border-bottom:none; flex-shrink:0; min-height:auto; gap:8px; }
+      .brand-logo-wrapper { width:34px; height:34px; }
+      .brand-text .hat, .brand-text .hub { font-size:1.3rem; }
+      .brand-text .sub { display:none; }
+      .sidebar-menu-wrapper { padding:0.4rem 0; flex:1 1 100%; overflow-y:visible; max-height:220px; }
+      .menu-section { margin-bottom:0.6rem; }
+      .menu-section-title { font-size:0.5rem; padding:0 0.4rem 0.3rem 0.4rem; }
+      .sidebar-menu { flex-direction:row; flex-wrap:wrap; gap:1px; }
+      .sidebar-menu li a { padding:4px 10px; font-size:0.65rem; gap:4px; border-radius:6px; }
+      .sidebar-menu li a .menu-icon { width:16px; height:16px; font-size:0.7rem; }
+      .sidebar-menu li a .menu-label { font-size:0.6rem; }
+      .sidebar-menu li a .menu-badge { font-size:0.5rem; padding:0 5px; }
+      .sidebar-menu li a.active::before { display:none; }
+      .sidebar-footer { display:none; }
+      .form-grid-2 { grid-template-columns:1fr; }
+      .modal-box { padding:1.5rem; }
+    }
+    @media (max-width:480px) {
+      .page-title { font-size:1.6rem; }
+      .card { padding:1.2rem; }
+      .variant-toolbar { flex-direction:column; align-items:stretch; }
+    }
   </style>
 </head>
 <body>
-<aside>
-  <h2 style="color:#C0633A;">HatHub Admin</h2>
-  <a href="/admin/dashboard">Dashboard</a>
-  <a href="/admin/products" class="active">Sản phẩm</a>
-  <a href="/admin/categories">Danh mục</a>
-  <a href="/admin/brands">Thương hiệu</a>
-  <a href="/admin/materials">Chất liệu</a>
-  <a href="/admin/hat-types">Kiểu mũ</a>
-  <a href="/admin/sizes">Size</a>
-  <a href="/admin/colors">Màu sắc</a>
-  <a href="/admin/orders">Đơn hàng</a>
-  <a href="/admin/returns">Trả hàng</a>
-  <a href="/admin/vouchers">Voucher</a>
-  <a href="/admin/users">Người dùng</a>
-  <a href="/logout">Đăng xuất</a>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo-wrapper">
+      <img th:src="@{/logo.jpg}" src="logo.jpg" alt="hathub Logo" class="brand-logo" />
+    </div>
+    <div class="brand-text">
+      <div><span class="hat">hat</span><span class="hub">hub</span></div>
+      <div class="sub">Admin Panel</div>
+    </div>
+  </div>
+
+  <div class="sidebar-menu-wrapper">
+    <div class="menu-section">
+      <div class="menu-section-title">Tổng quan</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/dashboard"><i class="menu-icon">📊</i><span class="menu-label">Dashboard</span></a></li>
+      </ul>
+    </div>
+    <div class="menu-section">
+      <div class="menu-section-title">Sản phẩm</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/products" class="active"><i class="menu-icon">🧢</i><span class="menu-label">Sản phẩm</span></a></li>
+        <li><a href="/admin/categories"><i class="menu-icon">📂</i><span class="menu-label">Danh mục</span></a></li>
+        <li><a href="/admin/brands"><i class="menu-icon">🏷️</i><span class="menu-label">Thương hiệu</span></a></li>
+        <li><a href="/admin/materials"><i class="menu-icon">🧵</i><span class="menu-label">Chất liệu</span></a></li>
+        <li><a href="/admin/hat-types"><i class="menu-icon">🎩</i><span class="menu-label">Kiểu mũ</span></a></li>
+      </ul>
+    </div>
+    <div class="menu-section">
+      <div class="menu-section-title">Thuộc tính</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/sizes"><i class="menu-icon">📏</i><span class="menu-label">Size</span></a></li>
+        <li><a href="/admin/colors"><i class="menu-icon">🎨</i><span class="menu-label">Màu sắc</span></a></li>
+      </ul>
+    </div>
+    <div class="menu-section">
+      <div class="menu-section-title">Bán hàng</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/orders"><i class="menu-icon">📦</i><span class="menu-label">Đơn hàng</span><span class="menu-badge" th:text="${pendingOrders}">0</span></a></li>
+        <li><a href="/admin/returns"><i class="menu-icon">↩️</i><span class="menu-label">Trả hàng</span></a></li>
+        <li><a href="/admin/vouchers"><i class="menu-icon">🎫</i><span class="menu-label">Voucher</span></a></li>
+      </ul>
+    </div>
+    <div class="menu-section">
+      <div class="menu-section-title">Cộng đồng</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/reviews"><i class="menu-icon">⭐</i><span class="menu-label">Đánh giá</span></a></li>
+        <li><a href="/admin/users"><i class="menu-icon">👤</i><span class="menu-label">Người dùng</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">Quản trị viên</div>
+      </div>
+    </div>
+    <a href="/logout" class="logout-link"><span>🚪</span> Đăng xuất</a>
+  </div>
 </aside>
-<main>
-  <div class="topbar">
-    <h1 th:text="${product.productId != null ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}">Form</h1>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+  <div class="page-header">
+    <h1 class="page-title" th:text="${product.productId != null ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}">Sửa sản phẩm</h1>
     <a href="/admin/products" class="btn btn-neutral">← Quay lại</a>
   </div>
-  <div th:if="${success}" class="success" th:text="${success}"></div>
+
+  <div th:if="${success}" class="alert-success" th:text="${success}"></div>
+
+  <!-- ===== THÔNG TIN SẢN PHẨM ===== -->
   <div class="card">
-    <form action="/admin/products/save" method="post">
-      <input type="hidden" name="productId" th:value="${product.productId}"/>
-      <label>Tên sản phẩm</label>
-      <input type="text" name="productName" th:value="${product.productName}" required/>
+    <form action="/admin/products/save" method="post" id="productForm">
+      <input type="hidden" name="productId" th:value="${product.productId}" />
+
+      <div class="form-group">
+        <label>Tên sản phẩm</label>
+        <input type="text" name="productName" th:value="${product.productName}" required />
+      </div>
 
       <div class="form-grid-2">
-        <div>
+        <div class="form-group">
           <label>Danh mục</label>
           <select name="categoryId" required>
             <option value="" disabled>-- chưa có --</option>
-            <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.categoryName}"
-                    th:selected="${product.category != null and product.category.categoryId == c.categoryId}"></option>
+            <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.categoryName}" th:selected="${product.category != null and product.category.categoryId == c.categoryId}"></option>
           </select>
         </div>
-        <div>
+        <div class="form-group">
           <label>Thương hiệu</label>
           <select name="brandId">
             <option value="" disabled>-- chưa có --</option>
-            <option th:each="b : ${brands}" th:value="${b.brandId}" th:text="${b.brandName}"
-                    th:selected="${product.brand != null and product.brand.brandId == b.brandId}"></option>
+            <option th:each="b : ${brands}" th:value="${b.brandId}" th:text="${b.brandName}" th:selected="${product.brand != null and product.brand.brandId == b.brandId}"></option>
           </select>
         </div>
       </div>
 
       <div class="form-grid-2">
-        <div>
+        <div class="form-group">
           <label>Chất liệu</label>
           <select name="materialId">
             <option value="">-- chưa có --</option>
-            <option th:each="m : ${materials}" th:value="${m.materialId}" th:text="${m.materialName}"
-                    th:selected="${product.material != null and product.material.materialId == m.materialId}"></option>
+            <option th:each="m : ${materials}" th:value="${m.materialId}" th:text="${m.materialName}" th:selected="${product.material != null and product.material.materialId == m.materialId}"></option>
           </select>
         </div>
-        <div>
+        <div class="form-group">
           <label>Kiểu mũ</label>
           <select name="hatTypeId">
             <option value="">-- chưa có --</option>
-            <option th:each="h : ${hatTypes}" th:value="${h.hatTypeId}" th:text="${h.hatTypeName}"
-                    th:selected="${product.hatType != null and product.hatType.hatTypeId == h.hatTypeId}"></option>
+            <option th:each="h : ${hatTypes}" th:value="${h.hatTypeId}" th:text="${h.hatTypeName}" th:selected="${product.hatType != null and product.hatType.hatTypeId == h.hatTypeId}"></option>
           </select>
         </div>
       </div>
 
-      <label>Mô tả</label>
-      <!-- Toolbar -->
-      <div class="rte-toolbar">
-        <button type="button" onclick="document.execCommand('bold')" title="Đậm"><b>B</b></button>
-        <button type="button" onclick="document.execCommand('italic')" title="Nghiêng"><i>I</i></button>
-        <button type="button" onclick="document.execCommand('underline')" title="Gạch chân"><u>U</u></button>
-        <button type="button" onclick="toggleUppercase()" title="In hoa">AA</button>
-        <input type="color" onchange="document.execCommand('foreColor', false, this.value)" title="Màu chữ" value="#000000"/>
-        <button type="button" onclick="document.execCommand('removeFormat')" title="Xóa định dạng">✕</button>
+      <div class="form-group">
+        <label>Mô tả</label>
+        <div class="rte-toolbar">
+          <button type="button" onclick="document.execCommand('bold')" title="Đậm"><b>B</b></button>
+          <button type="button" onclick="document.execCommand('italic')" title="Nghiêng"><i>I</i></button>
+          <button type="button" onclick="document.execCommand('underline')" title="Gạch chân"><u>U</u></button>
+          <button type="button" onclick="toggleUppercase()" title="In hoa">AA</button>
+          <input type="color" onchange="document.execCommand('foreColor', false, this.value)" title="Màu chữ" value="#000000" />
+          <button type="button" onclick="document.execCommand('removeFormat')" title="Xóa định dạng">✕</button>
+        </div>
+        <div id="descriptionEditor" class="rte-editor" contenteditable="true" th:utext="${product.description}"></div>
+        <textarea name="description" id="descriptionHidden" style="display:none;"></textarea>
       </div>
 
-      <!-- Vùng soạn thảo hiển thị cho admin -->
-      <div id="descriptionEditor"
-           class="rte-editor"
-           contenteditable="true"
-           th:utext="${product.description}">
+      <div class="form-group" style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" name="status" value="true" th:checked="${product.status == null or product.status}" style="width:auto;" />
+        <label style="margin:0; cursor:pointer; font-weight:700;">Đang bán</label>
       </div>
 
-      <!-- Ô ẩn thực sự gửi lên server -->
-      <textarea name="description" id="descriptionHidden" style="display:none;"></textarea>
-      <label><input type="checkbox" name="status" value="true" th:checked="${product.status == null or product.status}" style="width:auto;"/> Đang bán</label>
-      <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Lưu sản phẩm</button>
+      <button type="submit" class="btn btn-primary" style="margin-top:0.5rem;">Lưu sản phẩm</button>
     </form>
   </div>
 
+  <!-- ===== BIẾN THỂ SẢN PHẨM ===== -->
   <div class="card" th:if="${product.productId != null}">
-    <h3>Biến thể (Mã SP / Size / Màu / Giá / Tồn kho)</h3>
-    <input type="hidden" id="currentProductId" th:value="${product.productId}"/>
+    <h3>Biến thể sản phẩm</h3>
+    <input type="hidden" id="currentProductId" th:value="${product.productId}" />
 
     <div class="variant-toolbar">
       <button type="button" class="btn btn-primary" onclick="openVariantModal()">+ Tạo biến thể</button>
-      <button type="button" class="btn btn-danger" onclick="deleteSelectedVariants()">🗑 Xóa các mục đã chọn</button>
+      <button type="button" class="btn btn-danger" onclick="deleteSelectedVariants()">🗑 Xóa đã chọn</button>
     </div>
 
-    <!-- BẢNG BIẾN THỂ — SKU ở đầu (không sửa được), Ảnh ở cuối ngay cạnh nút Lưu -->
-    <table th:if="${details != null}">
-      <tr>
-        <th style="width:34px;"><input type="checkbox" id="selectAllVariants" onchange="toggleSelectAllVariants(this)"/></th>
-        <th>Mã SP</th><th>Size</th><th>Màu</th><th>Giá</th><th>Tồn kho</th><th>Ảnh</th><th>Thao tác</th>
-      </tr>
-      <tr th:each="d : ${details}"
-          th:with="variantImages=${product.images != null ? product.images.?[productDetail != null and productDetail.productDetailId == __${d.productDetailId}__] : {}}">
+    <div class="table-wrap" th:if="${details != null}">
+      <table>
+        <thead>
+        <tr>
+          <th style="width:34px;"><input type="checkbox" id="selectAllVariants" onchange="toggleSelectAllVariants(this)" /></th>
+          <th>Mã SP</th>
+          <th>Size</th>
+          <th>Màu</th>
+          <th>Giá</th>
+          <th>Tồn kho</th>
+          <th>Ảnh</th>
+          <th style="text-align:right;">Thao tác</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="d : ${details}" th:with="variantImages=${product.images != null ? product.images.?[productDetail != null and productDetail.productDetailId == __${d.productDetailId}__] : {}}">
+          <td style="text-align:center;">
+            <form th:id="|detailForm${d.productDetailId}|" th:action="@{/admin/products/detail/update/{id}(id=${d.productDetailId})}" method="post" style="display:none;">
+              <input type="hidden" name="productId" th:value="${product.productId}" />
+            </form>
+            <input type="checkbox" class="variant-checkbox" th:value="${d.productDetailId}" />
+          </td>
+          <td><span class="sku-readonly" th:text="${d.sku}"></span></td>
+          <td><input name="size" type="text" th:value="${d.size}" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:100%;" /></td>
+          <td><input name="color" type="text" th:value="${d.color}" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:100%;" /></td>
+          <td><input name="price" type="number" th:value="${d.price}" step="1000" min="0" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:100%;" /></td>
+          <td>
+            <input name="stockQuantity" type="number" th:value="${d.stockQuantity != null ? d.stockQuantity : 0}" min="0" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:70px;" />
+            <span th:if="${d.stockQuantity != null and d.stockQuantity == 0}" style="color:#c0392b; font-size:0.7rem; display:block;">Hết hàng</span>
+            <span th:if="${d.stockQuantity != null and d.stockQuantity > 0 and d.stockQuantity <= 5}" style="color:#e67e22; font-size:0.7rem; display:block;">Sắp hết</span>
+          </td>
+          <td>
+            <img th:if="${!#lists.isEmpty(variantImages)}" th:src="${variantImages[0].imageURL}" class="variant-img-thumb" />
+            <span th:if="${#lists.isEmpty(variantImages)}" class="variant-img-empty">Chưa có ảnh</span>
+            <button type="button" class="btn btn-info btn-sm" th:onclick="|toggleImgForm(${d.productDetailId})|">Chọn ảnh</button>
+            <form th:id="|imgForm${d.productDetailId}|" class="variant-img-form" th:action="@{/admin/products/{id}/image(id=${product.productId})}" method="post" enctype="multipart/form-data">
+              <input type="hidden" name="productDetailId" th:value="${d.productDetailId}" />
+              <input type="file" name="file" accept="image/*" required />
+              <label><input type="checkbox" name="isDefault" value="true" /> Ảnh mặc định</label>
+              <button type="submit" class="btn btn-success btn-sm" style="margin-top:4px;">Lưu ảnh</button>
+            </form>
+          </td>
+          <td style="text-align:right; white-space:nowrap;">
+            <button type="submit" th:attr="form=|detailForm${d.productDetailId}|" class="btn btn-success btn-sm" style="margin-bottom:4px;">Lưu</button>
+            <form th:action="@{/admin/products/detail/delete/{id}(id=${d.productDetailId})}" method="post" style="display:inline;">
+              <input type="hidden" name="productId" th:value="${product.productId}" />
+              <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Xóa biến thể này?')">Xóa</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
 
-        <!-- Checkbox chọn để xóa hàng loạt + form ẩn dùng để cập nhật dòng này (input ở các ô khác tham chiếu qua thuộc tính form=) -->
-        <td style="text-align:center;">
-          <form th:id="|detailForm${d.productDetailId}|"
-                th:action="@{/admin/products/detail/update/{id}(id=${d.productDetailId})}"
-                method="post" style="display:none;">
-            <input type="hidden" name="productId" th:value="${product.productId}"/>
-          </form>
-          <input type="checkbox" class="variant-checkbox" th:value="${d.productDetailId}"/>
-        </td>
-
-        <!-- SKU — chỉ hiển thị, KHÔNG cho sửa -->
-        <td><span class="sku-readonly" th:text="${d.sku}"></span></td>
-
-        <td>
-          <input name="size" type="text" th:value="${d.size}" required
-                 th:attr="form=|detailForm${d.productDetailId}|"
-                 style="padding:4px;border:1px solid #ddd;width:100%;"/>
-        </td>
-        <td>
-          <input name="color" type="text" th:value="${d.color}" required
-                 th:attr="form=|detailForm${d.productDetailId}|"
-                 style="padding:4px;border:1px solid #ddd;width:100%;"/>
-        </td>
-        <td>
-          <input name="price" type="number" th:value="${d.price}" step="1000" min="0" required
-                 th:attr="form=|detailForm${d.productDetailId}|"
-                 style="padding:4px;border:1px solid #ddd;width:100%;"/>
-        </td>
-        <td>
-          <input name="stockQuantity" type="number" th:value="${d.stockQuantity != null ? d.stockQuantity : 0}" min="0" required
-                 th:attr="form=|detailForm${d.productDetailId}|"
-                 style="padding:4px;border:1px solid #ddd;width:70px;"/>
-          <span th:if="${d.stockQuantity != null and d.stockQuantity == 0}"  style="color:#c00;font-size:0.75rem;display:block;">Hết hàng</span>
-          <span th:if="${d.stockQuantity != null and d.stockQuantity > 0 and d.stockQuantity <= 5}" style="color:#e67e22;font-size:0.75rem;display:block;">Sắp hết</span>
-        </td>
-
-        <!-- Ảnh riêng cho từng biến thể — đặt cuối, ngay bên trái nút Lưu -->
-        <td class="variant-img-cell">
-          <img th:if="${!#lists.isEmpty(variantImages)}" th:src="${variantImages[0].imageURL}" class="variant-img-thumb"/>
-          <span th:if="${#lists.isEmpty(variantImages)}" class="variant-img-empty">Chưa có ảnh</span>
-
-          <button type="button" class="btn btn-info btn-sm"
-                  th:onclick="|toggleImgForm(${d.productDetailId})|">Chọn ảnh</button>
-
-          <form th:id="|imgForm${d.productDetailId}|"
-                class="variant-img-form"
-                th:action="@{/admin/products/{id}/image(id=${product.productId})}"
-                method="post" enctype="multipart/form-data">
-            <input type="hidden" name="productDetailId" th:value="${d.productDetailId}"/>
-            <input type="file" name="file" accept="image/*" required/>
-            <label><input type="checkbox" name="isDefault" value="true"/> Ảnh mặc định</label>
-            <button type="submit" class="btn btn-success btn-sm" style="margin-top:4px;">Lưu ảnh</button>
-          </form>
-        </td>
-
-        <!-- Thao tác: Lưu (submit tới detailForm{id} qua thuộc tính form=) + Xóa -->
-        <td style="white-space:nowrap;">
-          <button type="submit" th:attr="form=|detailForm${d.productDetailId}|" class="btn btn-success btn-sm" style="margin-bottom:4px;">Lưu</button>
-          <form th:action="@{/admin/products/detail/delete/{id}(id=${d.productDetailId})}" method="post" style="display:inline;">
-            <input type="hidden" name="productId" th:value="${product.productId}"/>
-            <button type="submit" class="btn btn-danger btn-sm"
-                    onclick="return confirm('Xóa biến thể này?')">Xóa</button>
-          </form>
-        </td>
-      </tr>
-    </table>
-
-    <!-- UPLOAD ẢNH CHUNG SẢN PHẨM (không gắn biến thể cụ thể) -->
-    <h3 style="margin-top:1.5rem;">Upload ảnh chung sản phẩm</h3>
-    <form th:action="@{/admin/products/{id}/image(id=${product.productId})}" method="post" enctype="multipart/form-data">
-      <label>Hình ảnh</label>
-      <input type="file" name="file" accept="image/*" required/>
-      <label><input type="checkbox" name="isDefault" value="true" checked style="width:auto;"/> Ảnh mặc định</label>
-      <button type="submit" class="btn btn-primary" style="margin-top:1rem;">Upload</button>
+    <!-- UPLOAD ẢNH CHUNG -->
+    <h3 style="margin-top:1.5rem; font-family:var(--font-display); font-weight:900; font-size:1.1rem; text-transform:uppercase;">Upload ảnh chung sản phẩm</h3>
+    <form th:action="@{/admin/products/{id}/image(id=${product.productId})}" method="post" enctype="multipart/form-data" style="display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin-top:0.5rem;">
+      <input type="file" name="file" accept="image/*" required style="padding:8px; border:2px solid var(--gray-100); border-radius:8px;" />
+      <label style="display:flex; align-items:center; gap:4px; font-weight:700;"><input type="checkbox" name="isDefault" value="true" checked style="width:auto;" /> Ảnh mặc định</label>
+      <button type="submit" class="btn btn-primary">Upload</button>
     </form>
   </div>
 
-  <!-- ===== MODAL: TẠO BIẾN THỂ HÀNG LOẠT ===== -->
+  <!-- ===== MODAL TẠO BIẾN THỂ ===== -->
   <div class="modal-overlay" id="variantModalOverlay" th:if="${product.productId != null}">
     <div class="modal-box">
       <h3>Tạo biến thể mới</h3>
-<!--      <p class="modal-hint">Bấm nút "+" để chọn Size/Màu (có thể chọn nhiều). Chỉ những mục đã chọn mới hiển thị bên ngoài. Tất cả tổ hợp Size × Màu sẽ dùng chung 1 giá, 1 tồn kho ban đầu, và SKU được hệ thống tự sinh (không dấu, không trùng).</p>-->
+      <form th:action="@{/admin/products/{id}/detail/batch(id=${product.productId})}" method="post" id="variantBatchForm" onsubmit="return prepareVariantSubmit()">
 
-      <form th:action="@{/admin/products/{id}/detail/batch(id=${product.productId})}"
-            method="post" id="variantBatchForm" onsubmit="return prepareVariantSubmit()">
-
-        <!-- ===== SIZE ===== -->
-        <label>Size</label>
+        <!-- SIZE -->
+        <label style="font-weight:700; display:block; margin:0.75rem 0 0.25rem;">Size</label>
         <div class="selected-row" id="sizeSelectedRow">
           <span class="no-selection-hint" id="sizeNoSelectionHint">Chưa chọn size nào</span>
           <button type="button" class="add-chip-btn" onclick="togglePicker('size')" title="Chọn / thêm size">+</button>
         </div>
-
         <div class="picker-panel" id="sizePickerPanel">
           <div class="picker-list" id="sizePickerList">
             <label class="picker-item" th:each="s : ${allSizes}">
-              <input type="checkbox" th:value="${s.sizeName}" onchange="onPickerChange('size')"/>
+              <input type="checkbox" th:value="${s.sizeName}" onchange="onPickerChange('size')" />
               <span th:text="${s.sizeName}"></span>
             </label>
           </div>
           <p class="modal-empty-hint" th:if="${allSizes == null or #lists.isEmpty(allSizes)}">Chưa có size nào — thêm ngay bên dưới.</p>
           <div class="picker-add-row">
-            <input type="text" id="newSizeInput" placeholder="Thêm size mới (VD: 2XL)..."/>
+            <input type="text" id="newSizeInput" placeholder="Thêm size mới (VD: 2XL)..." />
             <button type="button" class="btn btn-secondary btn-sm" onclick="quickAddSize()">+ Thêm</button>
           </div>
           <div class="picker-actions">
@@ -354,25 +682,24 @@
           </div>
         </div>
 
-        <!-- ===== MÀU SẮC ===== -->
-        <label style="margin-top:1.25rem;">Màu sắc</label>
+        <!-- MÀU SẮC -->
+        <label style="font-weight:700; display:block; margin:1.25rem 0 0.25rem;">Màu sắc</label>
         <div class="selected-row" id="colorSelectedRow">
           <span class="no-selection-hint" id="colorNoSelectionHint">Chưa chọn màu nào</span>
           <button type="button" class="add-chip-btn" onclick="togglePicker('color')" title="Chọn / thêm màu">+</button>
         </div>
-
         <div class="picker-panel" id="colorPickerPanel">
           <div class="picker-list" id="colorPickerList">
             <label class="picker-item" th:each="c : ${allColors}">
-              <input type="checkbox" th:value="${c.colorName}" th:attr="data-code=${c.colorCode}" onchange="onPickerChange('color')"/>
+              <input type="checkbox" th:value="${c.colorName}" th:attr="data-code=${c.colorCode}" onchange="onPickerChange('color')" />
               <span class="color-dot" th:if="${c.colorCode != null}" th:style="'background:' + ${c.colorCode}"></span>
               <span th:text="${c.colorName}"></span>
             </label>
           </div>
           <p class="modal-empty-hint" th:if="${allColors == null or #lists.isEmpty(allColors)}">Chưa có màu nào — thêm ngay bên dưới.</p>
           <div class="picker-add-row">
-            <input type="text" id="newColorInput" placeholder="Thêm màu mới..."/>
-            <input type="color" id="newColorCodeInput" value="#c0633a"/>
+            <input type="text" id="newColorInput" placeholder="Thêm màu mới..." />
+            <input type="color" id="newColorCodeInput" value="#c0633a" />
             <button type="button" class="btn btn-secondary btn-sm" onclick="quickAddColor()">+ Thêm</button>
           </div>
           <div class="picker-actions">
@@ -381,18 +708,18 @@
         </div>
 
         <div class="form-grid-2" style="margin-top:1.25rem;">
-          <div>
+          <div class="form-group">
             <label>Giá (áp dụng cho tất cả)</label>
-            <input type="number" name="price" min="0" step="1000" required/>
+            <input type="number" name="price" min="0" step="1000" required />
           </div>
-          <div>
+          <div class="form-group">
             <label>Tồn kho ban đầu (mỗi biến thể)</label>
-            <input type="number" name="stockQuantity" min="0" value="0" required/>
+            <input type="number" name="stockQuantity" min="0" value="0" required />
           </div>
         </div>
 
-        <input type="hidden" name="sizes" id="sizesHidden"/>
-        <input type="hidden" name="colors" id="colorsHidden"/>
+        <input type="hidden" name="sizes" id="sizesHidden" />
+        <input type="hidden" name="colors" id="colorsHidden" />
 
         <div class="modal-actions">
           <button type="button" class="btn btn-neutral" onclick="closeVariantModal()">Hủy</button>
@@ -403,9 +730,10 @@
   </div>
 
 </main>
-</body>
+
+<!-- ===== SCRIPTS ===== -->
 <script>
-  // In hoa phần văn bản đang bôi đen (execCommand không có sẵn lệnh này)
+  // In hoa phần văn bản đang bôi đen
   function toggleUppercase() {
     const selection = window.getSelection();
     if (!selection.rangeCount || selection.isCollapsed) {
@@ -421,30 +749,22 @@
   }
 
   // Đồng bộ nội dung HTML vào textarea ẩn trước khi submit form sản phẩm
-  document.querySelector('form[action="/admin/products/save"]').addEventListener('submit', function () {
+  document.querySelector('form[action="/admin/products/save"]')?.addEventListener('submit', function () {
     const editor = document.getElementById('descriptionEditor');
     document.getElementById('descriptionHidden').value = editor.innerHTML;
   });
 
-  // ===== Modal tạo biến thể =====
-  function openVariantModal() {
-    document.getElementById('variantModalOverlay').classList.add('open');
-  }
-  function closeVariantModal() {
-    document.getElementById('variantModalOverlay').classList.remove('open');
-  }
+  // ===== MODAL =====
+  function openVariantModal() { document.getElementById('variantModalOverlay').classList.add('open'); }
+  function closeVariantModal() { document.getElementById('variantModalOverlay').classList.remove('open'); }
   document.addEventListener('click', function (e) {
     const overlay = document.getElementById('variantModalOverlay');
     if (overlay && e.target === overlay) closeVariantModal();
   });
 
-  // ===== Picker (bảng chọn) Size / Màu — mở khi bấm nút "+" =====
-  function togglePicker(type) {
-    document.getElementById(type + 'PickerPanel').classList.toggle('open');
-  }
-  function closePicker(type) {
-    document.getElementById(type + 'PickerPanel').classList.remove('open');
-  }
+  // ===== PICKER =====
+  function togglePicker(type) { document.getElementById(type + 'PickerPanel').classList.toggle('open'); }
+  function closePicker(type) { document.getElementById(type + 'PickerPanel').classList.remove('open'); }
 
   function onPickerChange(type) {
     document.querySelectorAll('#' + type + 'PickerList .picker-item').forEach(item => {
@@ -458,7 +778,6 @@
     const row = document.getElementById(type + 'SelectedRow');
     const hint = document.getElementById(type + 'NoSelectionHint');
     const addBtn = row.querySelector('.add-chip-btn');
-
     row.querySelectorAll('.selected-chip').forEach(el => el.remove());
 
     const checked = Array.from(document.querySelectorAll('#' + type + 'PickerList input:checked'));
@@ -467,7 +786,6 @@
     checked.forEach(cb => {
       const chip = document.createElement('span');
       chip.className = 'selected-chip';
-
       if (type === 'color') {
         const code = cb.getAttribute('data-code');
         if (code) {
@@ -477,31 +795,25 @@
           chip.appendChild(dot);
         }
       }
-
       chip.appendChild(document.createTextNode(cb.value));
-
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.innerHTML = '&times;';
       removeBtn.title = 'Bỏ chọn';
       removeBtn.onclick = () => { cb.checked = false; onPickerChange(type); };
       chip.appendChild(removeBtn);
-
       row.insertBefore(chip, addBtn);
     });
   }
 
   function addOrCheckPickerItem(type, name, code) {
     const list = document.getElementById(type + 'PickerList');
-    const existingCb = Array.from(list.querySelectorAll('input[type=checkbox]'))
-            .find(cb => cb.value.toLowerCase() === name.toLowerCase());
-
+    const existingCb = Array.from(list.querySelectorAll('input[type=checkbox]')).find(cb => cb.value.toLowerCase() === name.toLowerCase());
     if (existingCb) {
       existingCb.checked = true;
     } else {
       const label = document.createElement('label');
       label.className = 'picker-item';
-
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.value = name;
@@ -509,7 +821,6 @@
       if (type === 'color' && code) checkbox.setAttribute('data-code', code);
       checkbox.addEventListener('change', () => onPickerChange(type));
       label.appendChild(checkbox);
-
       if (type === 'color' && code) {
         const dot = document.createElement('span');
         dot.className = 'color-dot';
@@ -519,29 +830,27 @@
       label.appendChild(document.createTextNode(' ' + name));
       list.appendChild(label);
     }
-
     onPickerChange(type);
   }
 
-  // ===== Thêm Size / Màu NHANH — gọi API thật, lưu vào bảng Product_Size / Product_Color =====
+  // ===== THÊM NHANH SIZE / MÀU =====
   function quickAddSize() {
     const input = document.getElementById('newSizeInput');
     const value = input.value.trim();
     if (!value) return;
-
     fetch('/admin/sizes/quick-add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'sizeName=' + encodeURIComponent(value)
     })
-            .then(res => res.json())
-            .then(data => {
-              if (!data.success) { alert(data.message || 'Không thể thêm size!'); return; }
-              addOrCheckPickerItem('size', data.sizeName, null);
-              input.value = '';
-              input.focus();
-            })
-            .catch(() => alert('Lỗi kết nối, không thể thêm size!'));
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) { alert(data.message || 'Không thể thêm size!'); return; }
+      addOrCheckPickerItem('size', data.sizeName, null);
+      input.value = '';
+      input.focus();
+    })
+    .catch(() => alert('Lỗi kết nối, không thể thêm size!'));
   }
 
   function quickAddColor() {
@@ -549,20 +858,19 @@
     const codeInput = document.getElementById('newColorCodeInput');
     const value = input.value.trim();
     if (!value) return;
-
     fetch('/admin/colors/quick-add', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'colorName=' + encodeURIComponent(value) + '&colorCode=' + encodeURIComponent(codeInput.value || '')
     })
-            .then(res => res.json())
-            .then(data => {
-              if (!data.success) { alert(data.message || 'Không thể thêm màu!'); return; }
-              addOrCheckPickerItem('color', data.colorName, data.colorCode);
-              input.value = '';
-              input.focus();
-            })
-            .catch(() => alert('Lỗi kết nối, không thể thêm màu!'));
+    .then(res => res.json())
+    .then(data => {
+      if (!data.success) { alert(data.message || 'Không thể thêm màu!'); return; }
+      addOrCheckPickerItem('color', data.colorName, data.colorCode);
+      input.value = '';
+      input.focus();
+    })
+    .catch(() => alert('Lỗi kết nối, không thể thêm màu!'));
   }
 
   document.getElementById('newSizeInput')?.addEventListener('keydown', function (e) {
@@ -575,48 +883,42 @@
   function prepareVariantSubmit() {
     const sizes = Array.from(document.querySelectorAll('#sizePickerList input:checked')).map(cb => cb.value);
     const colors = Array.from(document.querySelectorAll('#colorPickerList input:checked')).map(cb => cb.value);
-
     if (sizes.length === 0 || colors.length === 0) {
       alert('Vui lòng chọn ít nhất 1 Size và 1 Màu!');
       return false;
     }
-
     document.getElementById('sizesHidden').value = sizes.join(',');
     document.getElementById('colorsHidden').value = colors.join(',');
     return true;
   }
 
-  // ===== Toggle form upload ảnh riêng cho từng biến thể =====
+  // ===== ẢNH BIẾN THỂ =====
   function toggleImgForm(detailId) {
     const form = document.getElementById('imgForm' + detailId);
     if (!form) return;
     form.style.display = (form.style.display === 'block') ? 'none' : 'block';
   }
 
-  // ===== Chọn nhiều biến thể để xóa nhanh =====
+  // ===== CHỌN NHIỀU XÓA =====
   function toggleSelectAllVariants(checkbox) {
     document.querySelectorAll('.variant-checkbox').forEach(cb => cb.checked = checkbox.checked);
   }
 
   function deleteSelectedVariants() {
     const selected = Array.from(document.querySelectorAll('.variant-checkbox:checked')).map(cb => cb.value);
-
     if (selected.length === 0) {
       alert('Vui lòng chọn ít nhất 1 biến thể để xóa!');
       return;
     }
     if (!confirm('Xóa ' + selected.length + ' biến thể đã chọn? Hành động này không thể hoàn tác.')) return;
-
     const form = document.createElement('form');
     form.method = 'post';
     form.action = '/admin/products/detail/delete-batch';
-
     const productIdInput = document.createElement('input');
     productIdInput.type = 'hidden';
     productIdInput.name = 'productId';
     productIdInput.value = document.getElementById('currentProductId').value;
     form.appendChild(productIdInput);
-
     selected.forEach(id => {
       const input = document.createElement('input');
       input.type = 'hidden';
@@ -624,9 +926,9 @@
       input.value = id;
       form.appendChild(input);
     });
-
     document.body.appendChild(form);
     form.submit();
   }
 </script>
+</body>
 </html>

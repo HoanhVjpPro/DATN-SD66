@@ -5,9 +5,14 @@ import com.example.datnhathub.entity.Orders;
 import com.example.datnhathub.entity.ProductDetail;
 import com.example.datnhathub.repository.OrderRepository;
 import com.example.datnhathub.repository.ProductDetailRepository;
+import com.example.datnhathub.service.InvoiceService;
 import com.example.datnhathub.service.OrderService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +29,9 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    @Autowired
+    private InvoiceService invoiceService;
 
     // ── Danh sách đơn hàng của Customer ──
     @GetMapping("/orders")
@@ -110,5 +118,30 @@ public class OrderController {
 
         ra.addFlashAttribute("success", "Xác nhận nhận hàng thành công!");
         return "redirect:/orders/" + id;
+    }
+
+    // ── Customer tự tải hóa đơn PDF — áp dụng cho MỌI phương thức thanh toán (COD, Chuyển khoản...) ──
+    @GetMapping("/orders/{id}/invoice/pdf")
+    public ResponseEntity<byte[]> downloadInvoice(@PathVariable Integer id, HttpSession session) throws Exception {
+        Integer customerId = (Integer) session.getAttribute("customerId");
+        if (customerId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Orders order = ordersRepository.findById(id).orElse(null);
+        if (order == null || !order.getCustomer().getCustomerId().equals(customerId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        byte[] pdfBytes = invoiceService.generateInvoicePdf(order);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=hoadon-donhang-" + order.getOrderCode() + ".pdf");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfBytes);
     }
 }
