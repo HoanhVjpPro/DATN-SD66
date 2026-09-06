@@ -1,172 +1,472 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quản lý đơn hàng | HatHub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Barlow+Condensed:wght@500;700;900&display=swap&subset=vietnamese" rel="stylesheet" />
   <style>
-    body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
-    aside { width:220px; background:#111; color:#fff; padding:1.5rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0;}
-    aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
-    aside a:hover, aside a.active { color:#C0633A; }
-    main { flex:1; padding:2rem; background:#F5F0EA; }
-    table { width:100%; background:#fff; border-collapse:collapse; }
-    th, td { padding:0.75rem; border-bottom:1px solid #eee; text-align:left; font-size:0.9rem; }
-    th { background:#111; color:#fff; }
-    input#searchInput { padding:10px 14px; border:1px solid #ddd; border-radius:4px; width:340px; margin-bottom:1rem; font-family:'Nunito',sans-serif; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black: #111111;
+      --off-black: #1a1a1a;
+      --rust: #C0633A;
+      --rust-light: #D97C4E;
+      --rust-dark: #9B4A27;
+      --white: #ffffff;
+      --cream: #F5F0EA;
+      --gray-100: #f0efee;
+      --gray-400: #9e9b96;
+      --gray-500: #7a7772;
+      --gray-700: #3e3d3a;
+      --font-display: 'Barlow Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
+      --font-body: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+      --sidebar-width: 270px;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    body { font-family: var(--font-body); background: var(--cream); color: var(--black); display: flex; min-height: 100vh; margin: 0; }
+    a { text-decoration: none; color: inherit; }
 
-    /* ===== Nút bấm — đồng bộ toàn hệ thống ===== */
-    .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:4px; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.85rem; padding:9px 18px; cursor:pointer; text-decoration:none; line-height:1.2; white-space:nowrap; }
-    .btn-sm { padding:6px 12px; font-size:0.8rem; }
-    .btn-primary { background:#C0633A; color:#fff; }
-    .btn-primary:hover { background:#9B4A27; }
-    .btn-secondary { background:#444; color:#fff; }
-    .btn-secondary:hover { background:#2c2c2c; }
-    .btn-success { background:#27ae60; color:#fff; }
-    .btn-success:hover { background:#1e8449; }
-    .btn-danger { background:#c00; color:#fff; }
-    .btn-danger:hover { background:#a00; }
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--black);
+      color: var(--white);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+      border-right: 3px solid var(--rust);
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      scrollbar-width: thin;
+      scrollbar-color: var(--rust) #2a2a2a;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--rust); border-radius: 4px; }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 1.2rem 1.6rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      flex-shrink: 0;
+      min-height: 76px;
+    }
+    .brand-logo-wrapper {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--rust);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+    }
+    .brand-logo { width:100%; height:100%; object-fit:cover; display:block; }
+    .brand-text { display:flex; flex-direction:column; line-height:1.1; }
+    .brand-text .hat { font-family: var(--font-display); font-weight:900; font-size:1.8rem; color:var(--white); letter-spacing:1px; }
+    .brand-text .hub { font-family: var(--font-display); font-weight:900; font-size:1.8rem; color:var(--rust); letter-spacing:1px; margin-top:-4px; }
+    .brand-text .sub { font-size:0.55rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--gray-500); margin-top:2px; }
+
+    .sidebar-menu-wrapper {
+      flex: 1;
+      padding: 1.2rem 0.8rem 1.2rem 1.2rem;
+      overflow-y: auto;
+    }
+    .menu-section { margin-bottom:1.2rem; }
+    .menu-section:last-child { margin-bottom:0; }
+    .menu-section-title {
+      font-size: 0.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--gray-500);
+      padding: 0 0.6rem 0.6rem 0.6rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      margin-bottom: 0.4rem;
+    }
+    .sidebar-menu { list-style:none; display:flex; flex-direction:column; gap:1px; }
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--gray-400);
+      transition: var(--transition);
+      border: 1px solid transparent;
+      position: relative;
+    }
+    .sidebar-menu li a .menu-icon {
+      width:22px; height:22px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:1rem; opacity:0.6; transition:var(--transition);
+      font-style:normal;
+    }
+    .sidebar-menu li a .menu-label { flex:1; white-space:nowrap; }
+    .sidebar-menu li a .menu-badge {
+      background:var(--rust); color:var(--white);
+      font-size:0.6rem; font-weight:800;
+      padding:1px 8px; border-radius:20px;
+      line-height:1.5; letter-spacing:0.02em;
+    }
+    .sidebar-menu li a:hover {
+      background: rgba(192,99,58,0.15);
+      color: var(--white);
+      border-color: rgba(192,99,58,0.15);
+      transform: translateX(4px);
+    }
+    .sidebar-menu li a:hover .menu-icon { opacity:1; transform:scale(1.05); }
+    .sidebar-menu li a.active {
+      background: var(--rust);
+      color: var(--white);
+      box-shadow: 0 4px 16px rgba(192,99,58,0.35);
+      border-color: var(--rust);
+    }
+    .sidebar-menu li a.active .menu-icon { opacity:1; }
+    .sidebar-menu li a.active::before {
+      content:'';
+      position:absolute;
+      left:-8px;
+      top:50%;
+      transform:translateY(-50%);
+      width:4px;
+      height:28px;
+      background:var(--rust-light);
+      border-radius:4px;
+    }
+
+    .sidebar-footer {
+      flex-shrink:0;
+      padding:1rem 1.6rem 1.4rem;
+      border-top:1px solid rgba(255,255,255,0.06);
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .sidebar-footer .user-row {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:6px 0;
+    }
+    .sidebar-footer .user-avatar {
+      width:34px; height:34px;
+      border-radius:50%;
+      background: linear-gradient(135deg, var(--rust-dark), var(--rust));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      font-size:0.8rem;
+      color:var(--white);
+      flex-shrink:0;
+    }
+    .sidebar-footer .user-name {
+      font-weight:700;
+      font-size:0.8rem;
+      color:var(--white);
+      line-height:1.2;
+    }
+    .sidebar-footer .user-role {
+      font-size:0.65rem;
+      color:var(--gray-500);
+      font-weight:600;
+      letter-spacing:0.02em;
+    }
+    .sidebar-footer .logout-link {
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 10px;
+      font-size:0.75rem;
+      font-weight:700;
+      color:var(--gray-500);
+      transition:var(--transition);
+      border-radius:6px;
+      margin-top:2px;
+    }
+    .sidebar-footer .logout-link:hover {
+      color:var(--rust-light);
+      background:rgba(192,99,58,0.08);
+    }
+
+    /* ===== MAIN ===== */
+    .main { flex:1; padding:2rem 2.5rem 3rem; background:var(--cream); min-width:0; }
+    .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem; }
+    .page-title {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 2.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--black);
+      position: relative;
+    }
+    .page-title::after { content:''; display:block; width:60px; height:4px; background:var(--rust); margin-top:4px; border-radius:4px; }
+
+    .filter-section { margin-bottom:1.5rem; display:flex; flex-wrap:wrap; gap:1rem; align-items:center; }
+    .filter-section input[type="text"] { padding:10px 16px; border:2px solid var(--gray-100); border-radius:10px; font-family:var(--font-body); font-size:0.9rem; background:var(--white); flex:1; min-width:200px; transition:border-color 0.2s; }
+    .filter-section input:focus { outline:none; border-color:var(--rust); }
+
+    .filter-tabs { display:flex; gap:8px; flex-wrap:wrap; }
+    .filter-tabs button { padding:6px 16px; border:2px solid var(--gray-100); border-radius:40px; background:transparent; font-family:var(--font-body); font-weight:700; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--gray-400); cursor:pointer; transition:all 0.2s; }
+    .filter-tabs button:hover { border-color:var(--rust-light); color:var(--black); }
+    .filter-tabs button.active { background:var(--rust); border-color:var(--rust); color:var(--white); box-shadow:0 4px 12px rgba(192,99,58,0.3); }
+
+    .table-card { background:var(--white); border-radius:var(--radius); box-shadow:var(--shadow); overflow-x:auto; }
+    .table-card table { width:100%; border-collapse:collapse; font-size:0.9rem; }
+    .table-card thead { background:var(--black); color:var(--white); }
+    .table-card thead th { padding:14px 16px; text-align:left; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.06em; font-weight:800; white-space:nowrap; }
+    .table-card tbody td { padding:12px 16px; border-bottom:1px solid var(--gray-100); vertical-align:middle; }
+    .table-card tbody tr:hover { background:#faf6f2; }
+    .order-code { color:var(--rust); font-weight:700; }
+
+    .btn-sm { padding:5px 12px; border:none; border-radius:30px; font-family:'Nunito','Segoe UI',Roboto,Arial,sans-serif; font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em; cursor:pointer; transition:all 0.2s ease; }
+    .btn-sm:hover { transform:translateY(-2px); }
+    .btn-info { background:#2980b9; color:#fff; }
+    .btn-info:hover { background:#1f6390; }
+    .btn-danger { background:#c0392b; color:#fff; }
+    .btn-danger:hover { background:#a93226; }
     .btn-warning { background:#e67e22; color:#fff; }
     .btn-warning:hover { background:#c8611c; }
-    .btn-info { background:#2980b9; color:#fff; }
-    .btn-info:hover { background:#20648f; }
     .btn-neutral { background:#666; color:#fff; }
     .btn-neutral:hover { background:#4d4d4d; }
+    .btn-success { background:#27ae60; color:#fff; }
+    .btn-success:hover { background:#1e8449; }
+    .action-group { display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
 
-    /* FILTER TABS — dùng chung kiểu với trang Trả hàng / Voucher */
-    .filter-tabs { display:flex; gap:8px; margin-bottom:1rem; flex-wrap:wrap; }
-    .filter-tabs button { background:#fff; border:1px solid #ddd; color:#333; }
-    .filter-tabs button.active { background:#C0633A; color:#fff; border-color:#C0633A; }
+    .badge { padding:3px 10px; border-radius:20px; font-size:0.7rem; font-weight:700; display:inline-block; }
+    .badge-pending { background:#fff3cd; color:#856404; }
+    .badge-processing { background:#cce5ff; color:#004085; }
+    .badge-shipping { background:#e2d9f3; color:#6f42c1; }
+    .badge-done { background:#d4edda; color:#155724; }
+    .badge-cancelled { background:#f8d7da; color:#721c24; }
+    .badge-waiting { background:#fff3cd; color:#856404; }
+    .badge-trouble { background:#ffdd98; color:#a85400; }
+
+    .count-display { font-size:0.85rem; color:var(--gray-400); margin-bottom:0.8rem; }
+
+    @media (max-width:992px) {
+      .sidebar { width:220px; }
+      .sidebar-brand { padding:1rem 1.2rem; min-height:64px; gap:10px; }
+      .brand-logo-wrapper { width:40px; height:40px; }
+      .brand-text .hat, .brand-text .hub { font-size:1.5rem; }
+      .brand-text .sub { font-size:0.5rem; }
+      .sidebar-menu-wrapper { padding:0.8rem 0.4rem 0.8rem 0.8rem; }
+      .sidebar-menu li a { padding:7px 10px; font-size:0.75rem; gap:8px; }
+      .sidebar-menu li a .menu-icon { width:18px; height:18px; font-size:0.85rem; }
+      .main { padding:1.5rem; }
+      .page-title { font-size:2rem; }
+    }
+    @media (max-width:768px) {
+      body { flex-direction:column; }
+      .sidebar { width:100%; height:auto; position:static; border-right:none; border-bottom:3px solid var(--rust); box-shadow:0 4px 20px rgba(0,0,0,0.15); padding:0.6rem 0.8rem 0.4rem; flex-direction:row; flex-wrap:wrap; align-items:center; }
+      .sidebar-brand { padding:0.2rem 0.4rem 0.2rem 0; border-bottom:none; flex-shrink:0; min-height:auto; gap:8px; }
+      .brand-logo-wrapper { width:34px; height:34px; }
+      .brand-text .hat, .brand-text .hub { font-size:1.3rem; }
+      .brand-text .sub { display:none; }
+      .sidebar-menu-wrapper { padding:0.4rem 0; flex:1 1 100%; overflow-y:visible; max-height:220px; }
+      .menu-section { margin-bottom:0.6rem; }
+      .menu-section-title { font-size:0.5rem; padding:0 0.4rem 0.3rem 0.4rem; }
+      .sidebar-menu { flex-direction:row; flex-wrap:wrap; gap:1px; }
+      .sidebar-menu li a { padding:4px 10px; font-size:0.65rem; gap:4px; border-radius:6px; }
+      .sidebar-menu li a .menu-icon { width:16px; height:16px; font-size:0.7rem; }
+      .sidebar-menu li a .menu-label { font-size:0.6rem; }
+      .sidebar-menu li a .menu-badge { font-size:0.5rem; padding:0 5px; }
+      .sidebar-menu li a.active::before { display:none; }
+      .sidebar-footer { display:none; }
+      .filter-section { flex-direction:column; align-items:stretch; }
+    }
+    @media (max-width:480px) {
+      .page-title { font-size:1.6rem; }
+      .table-card thead th, .table-card tbody td { padding:8px 10px; font-size:0.75rem; }
+      .action-group { flex-direction:column; align-items:flex-start; }
+    }
   </style>
 </head>
 <body>
-<aside>
-  <h2 style="color:#C0633A;">HatHub Admin</h2>
-  <a href="/admin/dashboard">Dashboard</a>
-  <a href="/admin/products">Sản phẩm</a>
-  <a href="/admin/categories">Danh mục</a>
-  <a href="/admin/brands">Thương hiệu</a>
-  <a href="/admin/materials">Chất liệu</a>
-  <a href="/admin/hat-types">Kiểu mũ</a>
-  <a href="/admin/sizes">Size</a>
-  <a href="/admin/colors">Màu sắc</a>
-  <a href="/admin/orders" class="active">Đơn hàng</a>
-  <a href="/admin/returns">Trả hàng</a>
-  <a href="/admin/vouchers">Voucher</a>
-  <a href="/admin/users">Người dùng</a>
-  <a href="/logout">Đăng xuất</a>
-</aside>
-<main>
-  <h1>Đơn hàng</h1>
 
-  <input type="text" id="searchInput" placeholder="Tìm theo mã đơn, tên khách hoặc ngày (dd/MM/yyyy)..."
-         onkeyup="applyFilters()"/>
-
-  <!-- BỘ LỌC TRẠNG THÁI -->
-  <div class="filter-tabs">
-    <button type="button" class="btn btn-sm active" onclick="filterStatus('ALL')" id="btn-ALL">Tất cả</button>
-    <button type="button" class="btn btn-sm" onclick="filterStatus('Chờ thanh toán')" id="btn-Chờ thanh toán">Chờ thanh toán</button>
-    <button type="button" class="btn btn-sm" onclick="filterStatus('Chờ xác nhận')" id="btn-Chờ xác nhận">Chờ xác nhận</button>
-    <button type="button" class="btn btn-sm" onclick="filterStatus('Đang xử lý')" id="btn-Đang xử lý">Đang xử lý</button>
-    <button type="button" class="btn btn-sm" onclick="filterStatus('Đang giao')" id="btn-Đang giao">Đang giao</button>
-    <button type="button" class="btn btn-sm" onclick="filterStatus('Xử lý sự cố giao hàng')" id="btn-Xử lý sự cố giao hàng">Xử lý sự cố giao hàng</button>
-    <button type="button" class="btn btn-sm" onclick="filterStatus('Hoàn thành')" id="btn-Hoàn thành">Hoàn thành</button>
-    <button type="button" class="btn btn-sm" onclick="filterStatus('Đã hủy')" id="btn-Đã hủy">Đã hủy</button>
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo-wrapper">
+      <img th:src="@{/logo.jpg}" src="logo.jpg" alt="hathub Logo" class="brand-logo" />
+    </div>
+    <div class="brand-text">
+      <div><span class="hat">hat</span><span class="hub">hub</span></div>
+      <div class="sub">Admin Panel</div>
+    </div>
   </div>
 
-  <!-- SỐ LƯỢNG HIỂN THỊ -->
-  <p id="countDisplay"
-     style="font-size:0.85rem;color:#666;margin-bottom:0.8rem;">
-    Đang hiển thị tất cả đơn hàng
-  </p>
+  <div class="sidebar-menu-wrapper">
+    <div class="menu-section">
+      <div class="menu-section-title">Tổng quan</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/dashboard"><i class="menu-icon">📊</i><span class="menu-label">Dashboard</span></a></li>
+      </ul>
+    </div>
+    <div class="menu-section">
+      <div class="menu-section-title">Sản phẩm</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/products"><i class="menu-icon">🧢</i><span class="menu-label">Sản phẩm</span></a></li>
+        <li><a href="/admin/categories"><i class="menu-icon">📂</i><span class="menu-label">Danh mục</span></a></li>
+        <li><a href="/admin/brands"><i class="menu-icon">🏷️</i><span class="menu-label">Thương hiệu</span></a></li>
+        <li><a href="/admin/materials"><i class="menu-icon">🧵</i><span class="menu-label">Chất liệu</span></a></li>
+        <li><a href="/admin/hat-types"><i class="menu-icon">🎩</i><span class="menu-label">Kiểu mũ</span></a></li>
+      </ul>
+    </div>
+    <div class="menu-section">
+      <div class="menu-section-title">Thuộc tính</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/sizes"><i class="menu-icon">📏</i><span class="menu-label">Size</span></a></li>
+        <li><a href="/admin/colors"><i class="menu-icon">🎨</i><span class="menu-label">Màu sắc</span></a></li>
+      </ul>
+    </div>
+    <div class="menu-section">
+      <div class="menu-section-title">Bán hàng</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/orders" class="active"><i class="menu-icon">📦</i><span class="menu-label">Đơn hàng</span><span class="menu-badge" th:text="${pendingOrders}">0</span></a></li>
+        <li><a href="/admin/returns"><i class="menu-icon">↩️</i><span class="menu-label">Trả hàng</span></a></li>
+        <li><a href="/admin/vouchers"><i class="menu-icon">🎫</i><span class="menu-label">Voucher</span></a></li>
+      </ul>
+    </div>
+    <div class="menu-section">
+      <div class="menu-section-title">Cộng đồng</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/reviews"><i class="menu-icon">⭐</i><span class="menu-label">Đánh giá</span></a></li>
+        <li><a href="/admin/users"><i class="menu-icon">👤</i><span class="menu-label">Người dùng</span></a></li>
+      </ul>
+    </div>
+  </div>
 
-  <table>
-    <thead>
-    <tr><th>Mã</th><th>Khách hàng</th><th>Ngày</th><th>Tổng</th><th>Trạng thái</th><th>Cập nhật</th></tr>
-    </thead>
-    <tbody id="orderTableBody">
-    <tr th:each="o : ${orders}" th:data-status="${o.status}">
-      <td >
-        <a th:href="@{/admin/orders/{id}(id=${o.orderId})}"
-           th:text="${'#' + o.orderCode}"
-           class="order-code"
-           style="color:#C0633A;font-weight:700;">HH00000000</a>
-      </td>
-      <td th:text="${o.customer.user.username}" class="order-user">user</td>
-      <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy')}" class="order-date">date</td>
-      <td style="text-align: right" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0</td>
-      <td th:text="${o.status}">status</td>
-      <td>
-        <!-- nút theo trạng thái -->
-        <div th:if="${o.status == 'Chờ xác nhận'}" style="display:flex;gap:4px;">
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post" onsubmit="return confirm('Xác nhận đơn hàng?')">
-            <input type="hidden" name="status" value="Đang xử lý"/>
-            <button type="submit" class="btn btn-info btn-sm">Xác nhận</button>
-          </form>
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
-                onsubmit="return confirm('Hủy đơn hàng này?')">
-            <input type="hidden" name="status" value="Đã hủy"/>
-            <button type="submit" class="btn btn-danger btn-sm">Hủy</button>
-          </form>
-        </div>
-        <div th:if="${o.status == 'Đang xử lý'}" style="display:flex;gap:4px;">
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post" onsubmit="return confirm('Giao đơn hàng này?')">
-            <input type="hidden" name="status" value="Đang giao"/>
-            <button type="submit" class="btn btn-warning btn-sm">Giao hàng</button>
-          </form>
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
-                onsubmit="return confirm('Chuyển đơn về trạng thái Chờ xác nhận?')">
-            <input type="hidden" name="status" value="Chờ xác nhận"/>
-            <button type="submit" class="btn btn-neutral btn-sm">↩ Quay lại</button>
-          </form>
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
-                onsubmit="return confirm('Hủy đơn hàng này?')">
-            <input type="hidden" name="status" value="Đã hủy"/>
-            <button type="submit" class="btn btn-danger btn-sm">Hủy</button>
-          </form>
-        </div>
-        <div th:if="${o.status == 'Đang giao'}">
-          <span style="color:#888;font-size:0.85rem;">Chờ khách nhận hàng</span>
-        </div>
-        <div th:if="${o.status == 'Hoàn thành'}">
-          <span style="color:green;font-weight:700;">✓ Hoàn thành</span>
-        </div>
-        <div th:if="${o.status == 'Đã hủy'}">
-          <span style="color:#c00;font-weight:700;">✗ Đã hủy</span>
-        </div>
-        <div th:if="${o.status == 'Chờ thanh toán'}" style="display:flex;gap:4px;align-items:center;">
-          <span style="color:#e67e22;font-size:0.85rem;">Chờ thanh toán</span>
-          <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post"
-                onsubmit="return confirm('Hủy đơn hàng này?')">
-            <input type="hidden" name="status" value="Đã hủy"/>
-            <button type="submit" class="btn btn-danger btn-sm">Hủy</button>
-          </form>
-        </div>
-      </td>
-    </tr>
-    </tbody>
-  </table>
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">Quản trị viên</div>
+      </div>
+    </div>
+    <a href="/logout" class="logout-link"><span>🚪</span> Đăng xuất</a>
+  </div>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+  <div class="page-header"><h1 class="page-title">Đơn hàng</h1></div>
+
+  <div class="filter-section">
+    <input type="text" id="searchInput" placeholder="Tìm theo mã đơn, tên khách hoặc ngày (dd/MM/yyyy)..." onkeyup="applyFilters()" />
+    <div class="filter-tabs">
+      <button type="button" class="active" onclick="filterStatus('ALL')" id="btn-ALL">Tất cả</button>
+      <button type="button" onclick="filterStatus('Chờ thanh toán')" id="btn-Chờ thanh toán">Chờ thanh toán</button>
+      <button type="button" onclick="filterStatus('Chờ xác nhận')" id="btn-Chờ xác nhận">Chờ xác nhận</button>
+      <button type="button" onclick="filterStatus('Đang xử lý')" id="btn-Đang xử lý">Đang xử lý</button>
+      <button type="button" onclick="filterStatus('Đang giao')" id="btn-Đang giao">Đang giao</button>
+      <button type="button" onclick="filterStatus('Xử lý sự cố giao hàng')" id="btn-Xử lý sự cố giao hàng">Sự cố</button>
+      <button type="button" onclick="filterStatus('Hoàn thành')" id="btn-Hoàn thành">Hoàn thành</button>
+      <button type="button" onclick="filterStatus('Đã hủy')" id="btn-Đã hủy">Đã hủy</button>
+    </div>
+  </div>
+
+  <p class="count-display" id="countDisplay">Đang hiển thị tất cả đơn hàng</p>
+
+  <div class="table-card">
+    <table>
+      <thead><tr><th>Mã</th><th>Khách hàng</th><th>Ngày</th><th>Tổng</th><th>Trạng thái</th><th>Cập nhật</th></tr></thead>
+      <tbody id="orderTableBody">
+      <tr th:each="o : ${orders}" th:data-status="${o.status}">
+        <td><a th:href="@{/admin/orders/{id}(id=${o.orderId})}" th:text="'#' + ${o.orderCode}" class="order-code"></a></td>
+        <td th:text="${o.customer.user.username}" class="order-user"></td>
+        <td th:text="${#temporals.format(o.orderDate, 'dd/MM/yyyy')}" class="order-date"></td>
+        <td th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+        <td>
+          <span th:text="${o.status}" th:class="${o.status == 'Hoàn thành'} ? 'badge badge-done' : (${o.status == 'Đang giao'} ? 'badge badge-shipping' : (${o.status == 'Đang xử lý'} ? 'badge badge-processing' : (${o.status == 'Đã hủy'} ? 'badge badge-cancelled' : (${o.status == 'Chờ thanh toán'} ? 'badge badge-waiting' : (${o.status == 'Xử lý sự cố giao hàng'} ? 'badge badge-trouble' : 'badge badge-pending')))))"></span>
+        </td>
+        <td>
+          <div class="action-group">
+            <div th:if="${o.status == 'Chờ xác nhận'}">
+              <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post" style="display:inline;" onsubmit="return confirm('Xác nhận đơn hàng?')">
+                <input type="hidden" name="status" value="Đang xử lý" />
+                <button type="submit" class="btn-sm btn-info">Xác nhận</button>
+              </form>
+              <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post" style="display:inline;" onsubmit="return confirm('Hủy đơn hàng này?')">
+                <input type="hidden" name="status" value="Đã hủy" />
+                <button type="submit" class="btn-sm btn-danger">Hủy</button>
+              </form>
+            </div>
+            <div th:if="${o.status == 'Đang xử lý'}">
+              <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post" style="display:inline;" onsubmit="return confirm('Giao đơn hàng này?')">
+                <input type="hidden" name="status" value="Đang giao" />
+                <button type="submit" class="btn-sm btn-warning">Giao hàng</button>
+              </form>
+              <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post" style="display:inline;" onsubmit="return confirm('Chuyển đơn về trạng thái Chờ xác nhận?')">
+                <input type="hidden" name="status" value="Chờ xác nhận" />
+                <button type="submit" class="btn-sm btn-neutral">↩ Quay lại</button>
+              </form>
+              <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post" style="display:inline;" onsubmit="return confirm('Hủy đơn hàng này?')">
+                <input type="hidden" name="status" value="Đã hủy" />
+                <button type="submit" class="btn-sm btn-danger">Hủy</button>
+              </form>
+            </div>
+            <div th:if="${o.status == 'Đang giao'}">
+              <span style="color:#888; font-size:0.8rem;">Chờ khách nhận hàng</span>
+            </div>
+            <div th:if="${o.status == 'Hoàn thành'}">
+              <span style="color:green; font-weight:700;">✓ Hoàn thành</span>
+            </div>
+            <div th:if="${o.status == 'Đã hủy'}">
+              <span style="color:#c00; font-weight:700;">✗ Đã hủy</span>
+            </div>
+            <div th:if="${o.status == 'Chờ thanh toán'}">
+              <span style="color:#e67e22; font-size:0.8rem;">Chờ thanh toán</span>
+              <form th:action="@{/admin/orders/{id}/status(id=${o.orderId})}" method="post" style="display:inline;" onsubmit="return confirm('Hủy đơn hàng này?')">
+                <input type="hidden" name="status" value="Đã hủy" />
+                <button type="submit" class="btn-sm btn-danger">Hủy</button>
+              </form>
+            </div>
+          </div>
+        </td>
+      </tr>
+      <tr th:if="${orders == null or #lists.isEmpty(orders)}">
+        <td colspan="6" style="text-align:center;padding:2.5rem;color:var(--gray-400);">Chưa có đơn hàng nào</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 </main>
-</body>
 <script>
   let currentStatus = 'ALL';
-
   function filterStatus(status) {
     currentStatus = status;
-    document.querySelectorAll('.filter-tabs button').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.filter-tabs button').forEach(b => b.classList.remove('active'));
     document.getElementById('btn-' + status)?.classList.add('active');
     applyFilters();
   }
-
   function applyFilters() {
     const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
     const rows = document.querySelectorAll('#orderTableBody tr[data-status]');
     let count = 0;
-
     rows.forEach(row => {
       const rowStatus = row.getAttribute('data-status');
       const matchesStatus = (currentStatus === 'ALL' || rowStatus === currentStatus);
-
       let matchesKeyword = true;
       if (keyword) {
         const code = row.querySelector('.order-code')?.textContent.toLowerCase() || '';
@@ -174,7 +474,6 @@
         const date = row.querySelector('.order-date')?.textContent.toLowerCase() || '';
         matchesKeyword = code.includes(keyword) || user.includes(keyword) || date.includes(keyword);
       }
-
       if (matchesStatus && matchesKeyword) {
         row.style.display = '';
         count++;
@@ -182,12 +481,10 @@
         row.style.display = 'none';
       }
     });
-
     const countEl = document.getElementById('countDisplay');
     const statusLabel = currentStatus === 'ALL' ? 'tất cả' : 'trạng thái "' + currentStatus + '"';
-    countEl.textContent = keyword
-            ? 'Tìm "' + keyword + '" trong ' + statusLabel + ' — ' + count + ' đơn hàng'
-            : 'Đang hiển thị ' + statusLabel + ' — ' + count + ' đơn hàng';
+    countEl.textContent = keyword ? 'Tìm "' + keyword + '" trong ' + statusLabel + ' — ' + count + ' đơn hàng' : 'Đang hiển thị ' + statusLabel + ' — ' + count + ' đơn hàng';
   }
 </script>
+</body>
 </html>
