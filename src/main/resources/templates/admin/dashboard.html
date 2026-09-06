@@ -1,101 +1,864 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8"/>
-  <title>Admin Dashboard | HatHub</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | hathub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Barlow+Condensed:wght@500;700;900&display=swap&subset=vietnamese" rel="stylesheet" />
   <style>
-    body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; }
-    aside { width:220px; background:#111; color:#fff; padding:1.5rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0;}
-    aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
-    aside a:hover, aside a.active { color:#C0633A; }
-    main { flex:1; padding:2rem; background:#F5F0EA; }
-    .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; }
-    .stat { background:#fff; padding:1.5rem; border-radius:8px; }
-    .stat-num { font-size:2rem; font-weight:900; color:#C0633A; }
-    .rev-tab {
-      padding:0.5rem 1.2rem; border:none; border-radius:6px; cursor:pointer;
-      background:#eee; font-weight:700; font-family:'Nunito',sans-serif; font-size:0.85rem;
+    /* ===== RESET & VARIABLES ===== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
-    .rev-tab.active { background:#C0633A; color:#fff; }
+
+    :root {
+      --black: #111111;
+      --off-black: #1a1a1a;
+      --rust: #C0633A;
+      --rust-light: #D97C4E;
+      --rust-dark: #9B4A27;
+      --rust-soft: rgba(192, 99, 58, 0.15);
+      --white: #ffffff;
+      --cream: #F5F0EA;
+      --gray-100: #f0efee;
+      --gray-300: #c5c2bd;
+      --gray-400: #9e9b96;
+      --gray-500: #7a7772;
+      --gray-600: #5a5854;
+      --gray-700: #3e3d3a;
+      --font-display: 'Barlow Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
+      --font-body: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+      --sidebar-width: 270px;
+      --shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--cream);
+      color: var(--black);
+      display: flex;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* =========================================================
+       SIDEBAR – NỀN ĐEN, "hat" TRẮNG, "hub" #C0633A, KHÔNG VIẾT HOA
+       ========================================================= */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--black);
+      color: var(--white);
+      padding: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+      border-right: 3px solid var(--rust);
+      box-shadow: 4px 0 30px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+      scrollbar-width: thin;
+      scrollbar-color: var(--rust) #2a2a2a;
+    }
+
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar::-webkit-scrollbar-track {
+      background: #2a2a2a;
+      border-radius: 4px;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--rust);
+      border-radius: 4px;
+    }
+
+    /* -- Brand: Logo bo tròn + chữ "hathub" (không viết hoa) -- */
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 1.2rem 1.6rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      flex-shrink: 0;
+      min-height: 76px;
+    }
+
+    .brand-logo-wrapper {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid var(--rust);
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--white);
+    }
+
+    .brand-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .brand-text .hat {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.8rem;
+      color: var(--white);
+      letter-spacing: 1px;
+      /* không viết hoa */
+    }
+
+    .brand-text .hub {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.8rem;
+      color: var(--rust);
+      letter-spacing: 1px;
+      /* không viết hoa */
+    }
+
+    .brand-text .sub {
+      font-size: 0.55rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--gray-500);
+      margin-top: 2px;
+    }
+
+    /* -- Menu wrapper -- */
+    .sidebar-menu-wrapper {
+      flex: 1;
+      padding: 1.2rem 0.8rem 1.2rem 1.2rem;
+      overflow-y: auto;
+    }
+
+    .menu-section {
+      margin-bottom: 1.2rem;
+    }
+    .menu-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .menu-section-title {
+      font-size: 0.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--gray-500);
+      padding: 0 0.6rem 0.6rem 0.6rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 0.4rem;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 9px 14px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.82rem;
+      color: var(--gray-400);
+      transition: var(--transition);
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .sidebar-menu li a .menu-icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      opacity: 0.6;
+      transition: var(--transition);
+      font-style: normal;
+    }
+
+    .sidebar-menu li a .menu-label {
+      flex: 1;
+      white-space: nowrap;
+    }
+
+    .sidebar-menu li a .menu-badge {
+      background: var(--rust);
+      color: var(--white);
+      font-size: 0.6rem;
+      font-weight: 800;
+      padding: 1px 8px;
+      border-radius: 20px;
+      line-height: 1.5;
+      letter-spacing: 0.02em;
+    }
+
+    .sidebar-menu li a:hover {
+      background: var(--rust-soft);
+      color: var(--white);
+      border-color: rgba(192, 99, 58, 0.15);
+      transform: translateX(4px);
+    }
+
+    .sidebar-menu li a:hover .menu-icon {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    .sidebar-menu li a.active {
+      background: var(--rust);
+      color: var(--white);
+      box-shadow: 0 4px 16px rgba(192, 99, 58, 0.35);
+      border-color: var(--rust);
+    }
+
+    .sidebar-menu li a.active .menu-icon {
+      opacity: 1;
+    }
+
+    .sidebar-menu li a.active::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 28px;
+      background: var(--rust-light);
+      border-radius: 4px;
+    }
+
+    /* -- Footer -- */
+    .sidebar-footer {
+      flex-shrink: 0;
+      padding: 1rem 1.6rem 1.4rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-footer .user-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+    }
+    .sidebar-footer .user-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--rust-dark), var(--rust));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.8rem;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .sidebar-footer .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .sidebar-footer .user-name {
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--white);
+      line-height: 1.2;
+    }
+    .sidebar-footer .user-role {
+      font-size: 0.65rem;
+      color: var(--gray-500);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .sidebar-footer .logout-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--gray-500);
+      transition: var(--transition);
+      border-radius: 6px;
+      padding: 6px 10px;
+      margin-top: 2px;
+    }
+    .sidebar-footer .logout-link:hover {
+      color: var(--rust-light);
+      background: rgba(192, 99, 58, 0.08);
+    }
+
+    /* =========================================================
+       MAIN CONTENT (giữ nguyên)
+       ========================================================= */
+    .main {
+      flex: 1;
+      padding: 2rem 2.5rem 3rem;
+      background: var(--cream);
+      min-width: 0;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .page-title {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 2.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--black);
+      position: relative;
+    }
+    .page-title::after {
+      content: '';
+      display: block;
+      width: 60px;
+      height: 4px;
+      background: var(--rust);
+      margin-top: 4px;
+      border-radius: 4px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--white);
+      padding: 1.5rem 1.2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.3s;
+      border-left: 5px solid var(--rust);
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .stat-card .stat-number {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 2.2rem;
+      color: var(--black);
+      line-height: 1.2;
+    }
+
+    .stat-card .stat-label {
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gray-400);
+      margin-top: 2px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 2.5rem 0 1.2rem;
+    }
+    .section-header h2 {
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 1.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: var(--black);
+    }
+
+    .btn-export {
+      background: #27ae60;
+      color: var(--white);
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: background 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-export:hover {
+      background: #1e8449;
+      transform: translateY(-2px);
+    }
+
+    .btn-link {
+      background: var(--black);
+      color: var(--white);
+      padding: 8px 20px;
+      border-radius: 40px;
+      font-weight: 800;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      transition: background 0.2s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-link:hover {
+      background: var(--off-black);
+      transform: translateY(-2px);
+    }
+
+    .chart-card {
+      background: var(--white);
+      padding: 1.8rem 1.8rem 2rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 1rem;
+    }
+
+    .chart-tabs {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+    .chart-tabs button {
+      padding: 6px 18px;
+      border: 2px solid var(--gray-100);
+      border-radius: 40px;
+      background: transparent;
+      font-family: var(--font-body);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--gray-400);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chart-tabs button:hover {
+      border-color: var(--rust-light);
+      color: var(--black);
+    }
+    .chart-tabs button.active {
+      background: var(--rust);
+      border-color: var(--rust);
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(192, 99, 58, 0.3);
+    }
+
+    #revenueChart {
+      width: 100% !important;
+      max-height: 240px;
+    }
+
+    .table-card {
+      background: var(--white);
+      padding: 1.8rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow-x: auto;
+    }
+
+    .table-card table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    .table-card thead {
+      background: var(--black);
+      color: var(--white);
+    }
+    .table-card thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 800;
+    }
+
+    .table-card tbody td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gray-100);
+    }
+
+    .table-card tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-card tbody tr:hover {
+      background: #faf6f2;
+    }
+
+    .table-card .empty-row td {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gray-400);
+      font-weight: 600;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+       ========================================================= */
+    @media (max-width: 992px) {
+      .sidebar {
+        width: 220px;
+      }
+      .sidebar-brand {
+        padding: 1rem 1.2rem;
+        min-height: 64px;
+        gap: 10px;
+      }
+      .brand-logo-wrapper {
+        width: 40px;
+        height: 40px;
+      }
+      .brand-text .hat,
+      .brand-text .hub {
+        font-size: 1.5rem;
+      }
+      .brand-text .sub {
+        font-size: 0.5rem;
+      }
+      .sidebar-menu-wrapper {
+        padding: 0.8rem 0.4rem 0.8rem 0.8rem;
+      }
+      .sidebar-menu li a {
+        padding: 7px 10px;
+        font-size: 0.75rem;
+        gap: 8px;
+      }
+      .sidebar-menu li a .menu-icon {
+        width: 18px;
+        height: 18px;
+        font-size: 0.85rem;
+      }
+      .main {
+        padding: 1.5rem;
+      }
+      .page-title {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 3px solid var(--rust);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        padding: 0.6rem 0.8rem 0.4rem;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .sidebar-brand {
+        padding: 0.2rem 0.4rem 0.2rem 0;
+        border-bottom: none;
+        flex-shrink: 0;
+        min-height: auto;
+        gap: 8px;
+      }
+      .brand-logo-wrapper {
+        width: 34px;
+        height: 34px;
+      }
+      .brand-text .hat,
+      .brand-text .hub {
+        font-size: 1.3rem;
+      }
+      .brand-text .sub {
+        display: none;
+      }
+      .sidebar-menu-wrapper {
+        padding: 0.4rem 0 0.4rem 0;
+        flex: 1 1 100%;
+        overflow-y: visible;
+        max-height: 220px;
+      }
+      .menu-section {
+        margin-bottom: 0.6rem;
+      }
+      .menu-section-title {
+        font-size: 0.5rem;
+        padding: 0 0.4rem 0.3rem 0.4rem;
+      }
+      .sidebar-menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 1px;
+      }
+      .sidebar-menu li a {
+        padding: 4px 10px;
+        font-size: 0.65rem;
+        gap: 4px;
+        border-radius: 6px;
+      }
+      .sidebar-menu li a .menu-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 0.7rem;
+      }
+      .sidebar-menu li a .menu-label {
+        font-size: 0.6rem;
+      }
+      .sidebar-menu li a .menu-badge {
+        font-size: 0.5rem;
+        padding: 0 5px;
+      }
+      .sidebar-menu li a.active::before {
+        display: none;
+      }
+      .sidebar-footer {
+        display: none;
+      }
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      .page-title {
+        font-size: 1.6rem;
+      }
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .chart-tabs {
+        flex-wrap: wrap;
+      }
+      .sidebar-menu li a {
+        padding: 3px 8px;
+        font-size: 0.55rem;
+      }
+      .sidebar-menu li a .menu-label {
+        font-size: 0.55rem;
+      }
+      .brand-logo-wrapper {
+        width: 28px;
+        height: 28px;
+      }
+      .brand-text .hat,
+      .brand-text .hub {
+        font-size: 1.1rem;
+      }
+    }
   </style>
 </head>
 <body>
-<aside>
-  <h2 style="color:#C0633A;">HatHub Admin</h2>
-  <a href="/admin/dashboard" class="active">Dashboard</a>
-  <a href="/admin/products">Sản phẩm</a>
-  <a href="/admin/categories">Danh mục</a>
-  <a href="/admin/brands">Thương hiệu</a>
-  <a href="/admin/materials">Chất liệu</a>
-  <a href="/admin/hat-types">Kiểu mũ</a>
-  <a href="/admin/sizes">Size</a>
-  <a href="/admin/colors">Màu sắc</a>
-  <a href="/admin/orders">Đơn hàng</a>
-  <a href="/admin/returns">Trả hàng</a>
-  <a href="/admin/vouchers">Voucher</a>
-  <a href="/admin/users">Người dùng</a>
-  <a href="/logout">Đăng xuất</a>
-</aside>
-<main>
-  <h1>Dashboard</h1>
-  <div class="stats">
-    <div class="stat"><div class="stat-num" th:text="${totalProducts}">0</div><div>Sản phẩm</div></div>
-    <div class="stat"><div class="stat-num" th:text="${totalCategories}">0</div><div>Danh mục</div></div>
-    <div class="stat"><div class="stat-num" th:text="${totalOrders}">0</div><div>Đơn hàng</div></div>
-    <div class="stat"><div class="stat-num" th:text="${pendingOrders}">0</div><div>Chờ xác nhận</div></div>
-    <div class="stat"><div class="stat-num" th:text="${totalUsers}">0</div><div>Người dùng</div></div>
-  </div>
-  <br>
-  <div style="display:flex;align-items:center;justify-content:space-between;">
+
+<!-- =========================================================
+SIDEBAR – NỀN ĐEN, "hat" TRẮNG, "hub" #C0633A, KHÔNG VIẾT HOA
+========================================================= -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo-wrapper">
+      <img th:src="@{/logo.jpg}" src="logo.jpg" alt="hathub Logo" class="brand-logo" />
     </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;">
-    <h1>Doanh thu</h1>
-    <a href="/admin/dashboard/export/excel" style="background:#27ae60;color:#fff;padding:8px 18px;border-radius:4px;font-weight:700;text-decoration:none;font-size:0.85rem;">📊 Xuất Excel doanh thu</a>
+    <div class="brand-text">
+      <div>
+        <span class="hat">hat</span><span class="hub">hub</span>
       </div>
-  <div class="stat" style="max-width:100%;">
-    <div style="display:flex; gap:0.5rem; margin-bottom:1rem;">
+      <div class="sub">Admin Panel</div>
+    </div>
+  </div>
+
+  <div class="sidebar-menu-wrapper">
+    <div class="menu-section">
+      <div class="menu-section-title">Tổng quan</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/dashboard" class="active">
+          <i class="menu-icon">📊</i>
+          <span class="menu-label">Dashboard</span>
+        </a></li>
+      </ul>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Sản phẩm</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/products"><i class="menu-icon">🧢</i><span class="menu-label">Sản phẩm</span></a></li>
+        <li><a href="/admin/categories"><i class="menu-icon">📂</i><span class="menu-label">Danh mục</span></a></li>
+        <li><a href="/admin/brands"><i class="menu-icon">🏷️</i><span class="menu-label">Thương hiệu</span></a></li>
+        <li><a href="/admin/materials"><i class="menu-icon">🧵</i><span class="menu-label">Chất liệu</span></a></li>
+        <li><a href="/admin/hat-types"><i class="menu-icon">🎩</i><span class="menu-label">Kiểu mũ</span></a></li>
+      </ul>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Thuộc tính</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/sizes"><i class="menu-icon">📏</i><span class="menu-label">Size</span></a></li>
+        <li><a href="/admin/colors"><i class="menu-icon">🎨</i><span class="menu-label">Màu sắc</span></a></li>
+      </ul>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Bán hàng</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/orders"><i class="menu-icon">📦</i><span class="menu-label">Đơn hàng</span><span class="menu-badge" th:text="${pendingOrders}">0</span></a></li>
+        <li><a href="/admin/returns"><i class="menu-icon">↩️</i><span class="menu-label">Trả hàng</span></a></li>
+        <li><a href="/admin/vouchers"><i class="menu-icon">🎫</i><span class="menu-label">Voucher</span></a></li>
+      </ul>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title">Cộng đồng</div>
+      <ul class="sidebar-menu">
+        <li><a href="/admin/reviews"><i class="menu-icon">⭐</i><span class="menu-label">Đánh giá</span></a></li>
+        <li><a href="/admin/users"><i class="menu-icon">👤</i><span class="menu-label">Người dùng</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name">Admin</div>
+        <div class="user-role">Quản trị viên</div>
+      </div>
+    </div>
+    <a href="/logout" class="logout-link"><span>🚪</span> Đăng xuất</a>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+  <div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" th:text="${totalProducts}">0</div>
+      <div class="stat-label">Sản phẩm</div>
+    </div>
+    <div class="stat-card" style="border-left-color: #2e86de;">
+      <div class="stat-number" th:text="${totalCategories}">0</div>
+      <div class="stat-label">Danh mục</div>
+    </div>
+    <div class="stat-card" style="border-left-color: #27ae60;">
+      <div class="stat-number" th:text="${totalOrders}">0</div>
+      <div class="stat-label">Đơn hàng</div>
+    </div>
+    <div class="stat-card" style="border-left-color: #f39c12;">
+      <div class="stat-number" th:text="${pendingOrders}">0</div>
+      <div class="stat-label">Chờ xác nhận</div>
+    </div>
+    <div class="stat-card" style="border-left-color: #8e44ad;">
+      <div class="stat-number" th:text="${totalUsers}">0</div>
+      <div class="stat-label">Người dùng</div>
+    </div>
+  </div>
+
+  <div class="section-header">
+    <h2>📈 Doanh thu</h2>
+    <a href="/admin/dashboard/export/excel" class="btn-export">📩 Xuất Excel</a>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-tabs">
       <button type="button" class="rev-tab active" data-period="daily">Theo ngày</button>
       <button type="button" class="rev-tab" data-period="weekly">Theo tuần</button>
       <button type="button" class="rev-tab" data-period="monthly">Theo tháng</button>
     </div>
     <canvas id="revenueChart" height="90"></canvas>
   </div>
-  <br>
-  <div style="display:flex;align-items:center;justify-content:space-between;">
-    <h1>Top 5 sản phẩm bán chạy nhất</h1>
-    <a href="/admin/products/sales" style="background:#333;color:#fff;padding:8px 18px;border-radius:4px;font-weight:700;text-decoration:none;font-size:0.85rem;">📋 Xem toàn bộ doanh số</a>
+
+  <div class="section-header">
+    <h2>🏆 Top 5 sản phẩm bán chạy</h2>
+    <a href="/admin/products/sales" class="btn-link">🪟 Xem toàn bộ</a>
   </div>
-  <div class="stat">
-    <table style="width:100%; border-collapse:collapse;">
+
+  <div class="table-card">
+    <table>
       <thead>
-      <tr style="background:#111; color:#fff;">
-        <th style="padding:0.75rem; text-align:left; font-size:0.8rem; text-transform:uppercase;">Sản phẩm</th>
-        <th style="padding:0.75rem; text-align:right; font-size:0.8rem; text-transform:uppercase;">Số lượng bán</th>
-        <th style="padding:0.75rem; text-align:right; font-size:0.8rem; text-transform:uppercase;">Doanh thu</th>
-      </tr>
+      <tr><th>Sản phẩm</th><th style="text-align:right;">Số lượng bán</th><th style="text-align:right;">Doanh thu</th></tr>
       </thead>
       <tbody>
       <tr th:each="p : ${topProducts}">
-        <td style="padding:0.75rem; border-bottom:1px solid #eee;" th:text="${p.productName}">Tên sản phẩm</td>
-        <td style="padding:0.75rem; border-bottom:1px solid #eee; text-align:right;" th:text="${p.totalQty}">0</td>
-        <td style="padding:0.75rem; border-bottom:1px solid #eee; text-align:right;"
-            th:text="${#numbers.formatDecimal(p.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+        <td th:text="${p.productName}">Tên sản phẩm</td>
+        <td style="text-align:right;" th:text="${p.totalQty}">0</td>
+        <td style="text-align:right;" th:text="${#numbers.formatDecimal(p.totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
       </tr>
       <tr th:if="${topProducts == null or #lists.isEmpty(topProducts)}">
-        <td colspan="3" style="padding:1rem; text-align:center; color:#999;">Chưa có dữ liệu bán hàng</td>
+        <td colspan="3" class="empty-row">Chưa có dữ liệu bán hàng</td>
       </tr>
       </tbody>
     </table>
   </div>
 </main>
-</body>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js">
+</script>
 <script th:inline="javascript">
   const revenueByPeriod = {
-    daily:   { labels: /*[[${dailyLabels}]]*/ [],   data: /*[[${dailyData}]]*/ [] },
-    weekly:  { labels: /*[[${weeklyLabels}]]*/ [],  data: /*[[${weeklyData}]]*/ [] },
+    daily: { labels: /*[[${dailyLabels}]]*/ [], data: /*[[${dailyData}]]*/ [] },
+    weekly: { labels: /*[[${weeklyLabels}]]*/ [], data: /*[[${weeklyData}]]*/ [] },
     monthly: { labels: /*[[${revenueLabels}]]*/ [], data: /*[[${revenueData}]]*/ [] }
   };
 
@@ -109,19 +872,22 @@
       datasets: [{
         label: 'Doanh thu (đ)',
         data: revenueByPeriod[currentPeriod].data,
-        backgroundColor: '#C0633A'
+        backgroundColor: '#C0633A',
+        borderRadius: 6,
+        borderSkipped: false,
       }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
       plugins: { legend: { display: false } },
       scales: {
         y: {
           beginAtZero: true,
-          ticks: {
-            callback: function(value) { return value.toLocaleString('vi-VN') + ' đ'; }
-          }
-        }
+          ticks: { callback: function(value) { return value.toLocaleString('vi-VN') + ' đ'; } },
+          grid: { color: 'rgba(0,0,0,0.04)' }
+        },
+        x: { grid: { display: false } }
       }
     }
   });
@@ -130,7 +896,6 @@
     btn.addEventListener('click', () => {
       document.querySelectorAll('.rev-tab').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-
       const period = btn.dataset.period;
       revenueChart.data.labels = revenueByPeriod[period].labels;
       revenueChart.data.datasets[0].data = revenueByPeriod[period].data;
@@ -138,4 +903,5 @@
     });
   });
 </script>
+</body>
 </html>
