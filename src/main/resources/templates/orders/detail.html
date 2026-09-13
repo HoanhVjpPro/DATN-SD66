@@ -183,9 +183,16 @@
     <a th:if="${order.status == 'Đang xử lý' || order.status == 'Đang giao' || order.status == 'Hoàn thành'}" th:href="@{/admin/orders/{id}/invoice/pdf(id=${order.orderId})}" class="btn-back" style="background:#C0633A;">🧾 Xuất hóa đơn PDF</a>
     <h3>Sản phẩm</h3>
     <table>
+      <tr>
+        <th>tên sản phẩm</th>
+        <th>size</th>
+        <th>màu</th>
+        <th>số lượng</th>
+      </tr>
       <tr th:each="d : ${order.details}">
         <td th:text="${d.productDetail.product.productName}">Product</td>
-        <td th:text="${d.productDetail.size} + ' / ' + ${d.productDetail.color}">variant</td>
+        <td th:text="${d.productDetail.size}"></td>
+        <td th:text="${d.productDetail.color}">variant</td>
         <td th:text="${d.quantity} + ' x ' + ${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">qty</td>
       </tr>
     </table>

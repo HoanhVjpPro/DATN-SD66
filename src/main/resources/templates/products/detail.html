@@ -9,13 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Oswald:wght@500;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" th:href="@{/shop.css}" />
   <style>
-    .variant-options{display:flex !important;flex-wrap:wrap;gap:8px;margin:10px 0 4px;}
-    .variant-options label{position:relative !important;display:inline-flex !important;width:auto !important;margin:0 !important;}
-    .variant-options input[type=radio]{position:absolute;opacity:0;width:1px;height:1px;}
+    .size-guide-btn{
+      display:inline-flex;align-items:center;gap:6px;
+      background:none;border:1.5px solid #C0633A;color:#C0633A;
+      padding:6px 12px;border-radius:6px;font-size:12.5px;font-weight:700;
+      cursor:pointer;white-space:nowrap;transition:background .2s,color .2s;
+    }
+    .size-guide-btn:hover{background:#C0633A;color:#fff;}
+
+    .size-guide-overlay{
+      position:fixed;inset:0;background:rgba(0,0,0,.65);
+      display:none;align-items:center;justify-content:center;
+      z-index:1000;padding:20px;
+    }
+    .size-guide-overlay.active{display:flex;}
+    .size-guide-box{position:relative;max-width:92vw;max-height:92vh;}
+    .size-guide-box img{
+      max-width:100%;max-height:92vh;display:block;
+      border-radius:8px;background:#fff;
+    }
+    .size-guide-close{
+      position:absolute;top:-14px;right:-14px;width:32px;height:32px;
+      border-radius:50%;border:none;background:#fff;font-size:16px;
+      cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.35);
+    }
+    .variant-group{margin-bottom:14px;}
+    .variant-group label{display:block;font-size:14px;color:#333;margin-bottom:8px;font-weight:600;}
+    .variant-options{display:flex !important;flex-wrap:wrap;gap:8px;margin:0;}
     .variant-chip{display:inline-flex !important;align-items:center;padding:9px 14px;border-radius:8px;
       border:1.5px solid #ccc;background:#fff;color:#333;font-size:13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
-    .variant-options input[type=radio]:checked + .variant-chip{border-color:#C0633A;background:#C0633A;color:#fff;font-weight:700;}
-    .variant-options input[type=radio]:disabled + .variant-chip{opacity:.4;cursor:not-allowed;text-decoration:line-through;}
+    .variant-chip:hover{border-color:#C0633A;color:#C0633A;}
+    .variant-chip.selected{border-color:#C0633A;background:#C0633A;color:#fff;font-weight:700;}
+    .variant-chip.unavailable{opacity:.4;cursor:not-allowed;text-decoration:line-through;}
     .reviews-placeholder{color:#999;font-size:14px;padding:24px 0;text-align:center;}
     .btn-cart {
       background: var(--rust) !important;
@@ -85,18 +110,27 @@
 
       <form class="form-box" id="addToCartForm" th:action="@{/products/{id}/add-to-cart(id=${product.productId})}" method="post">
         <div th:if="${details != null and !#lists.isEmpty(details)}">
-          <label>Chọn biến thể (Size / Màu)</label>
-          <div class="variant-options">
-            <label th:each="d, iter : ${details}"
-                   th:with="variantImages=${product.images != null ? product.images.?[productDetail != null and productDetail.productDetailId == __${d.productDetailId}__] : {}}">
-              <input type="radio" name="productDetailId" th:value="${d.productDetailId}"
-                     th:checked="${iter.index == 0}"
-                     th:attr="data-stock=${d.stockQuantity != null ? d.stockQuantity : 0}, data-price=${d.price}, data-image=${!#lists.isEmpty(variantImages) ? variantImages[0].imageURL : imageUrl}"
-                     th:disabled="${d.stockQuantity == null or d.stockQuantity == 0}"
-                     onchange="onVariantChange(this)" required/>
-              <span class="variant-chip" th:text="${d.size} + ' / ' + ${d.color} + (${d.stockQuantity != null and d.stockQuantity == 0} ? ' (Hết hàng)' : '')">Size/Color</span>
-            </label>
+          <!-- Nguồn dữ liệu ẩn: mỗi biến thể 1 thẻ data-* để JS tự khớp màu+size -->
+          <div id="variantDataSource" style="display:none;">
+            <div th:each="d : ${details}"
+                 th:with="variantImages=${product.images != null ? product.images.?[productDetail != null and productDetail.productDetailId == __${d.productDetailId}__] : {}}"
+                 class="variant-data"
+                 th:attr="data-id=${d.productDetailId}, data-color=${d.color}, data-size=${d.size}, data-price=${d.price}, data-stock=${d.stockQuantity != null ? d.stockQuantity : 0}, data-image=${!#lists.isEmpty(variantImages) ? variantImages[0].imageURL : imageUrl}">
+            </div>
           </div>
+
+          <input type="hidden" name="productDetailId" id="selectedProductDetailId"
+                 th:value="${selectedDetail != null ? selectedDetail.productDetailId : ''}" required/>
+
+          <div class="variant-group">
+            <label>Màu sắc:</label>
+            <div class="variant-options" id="colorOptions"></div>
+          </div>
+          <div class="variant-group">
+            <label>Kích thước:</label>
+            <div class="variant-options" id="sizeOptions"></div>
+          </div>
+
           <p style="font-size:13px;margin-top:6px;" id="stockDisplay">
             <span th:if="${selectedDetail != null and selectedDetail.stockQuantity != null and selectedDetail.stockQuantity > 0}"
                   style="color:#666;" th:text="'Còn ' + ${selectedDetail.stockQuantity} + ' sản phẩm'">Còn hàng</span>
@@ -146,6 +180,11 @@
   <section class="reviews">
     <div class="section-head">
       <h2>Mô tả</h2>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <button type="button" class="size-guide-btn" onclick="openSizeGuide()">
+          📏 Hướng dẫn chọn size
+        </button>
+      </div>
     </div>
     <div class="cart-card">
       <div style="color: black; white-space: pre-wrap;" class="detail-desc" th:utext="${product.description}">Mô tả sản phẩm</div>
@@ -250,37 +289,128 @@
     </div>
   </section>
 </main>
-
+<div class="size-guide-overlay" id="sizeGuideOverlay" onclick="closeSizeGuide(event)">
+  <div class="size-guide-box" onclick="event.stopPropagation()">
+    <button type="button" class="size-guide-close" onclick="closeSizeGuide()">✕</button>
+    <img th:src="@{/images/size.png}" src="/images/size.png" alt="Hướng dẫn chọn size" />
+  </div>
+</div>
 <script>
-  // Khi người dùng chọn biến thể khác -> cập nhật giá, tồn kho, max số lượng,
-  // và bật/tắt nút "Thêm vào giỏ" theo thời gian thực (không cần reload trang)
-  function onVariantChange(radio) {
-    const stock = parseInt(radio.getAttribute('data-stock'), 10) || 0;
-    const price = parseFloat(radio.getAttribute('data-price')) || 0;
-    const image = radio.getAttribute('data-image');
+  function openSizeGuide() {
+    document.getElementById('sizeGuideOverlay').classList.add('active');
+  }
+
+  function closeSizeGuide(e) {
+    document.getElementById('sizeGuideOverlay').classList.remove('active');
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeSizeGuide();
+  });
+  // ===== Chọn biến thể theo Màu sắc / Kích thước (giống UX ở giỏ hàng) =====
+  let variants = [];
+  let selectedColor = null;
+  let selectedSize = null;
+
+  function parseVariantData() {
+    const els = document.querySelectorAll('#variantDataSource .variant-data');
+    return Array.from(els).map(el => ({
+      id: el.getAttribute('data-id'),
+      color: el.getAttribute('data-color') || '',
+      size: el.getAttribute('data-size') || '',
+      price: parseFloat(el.getAttribute('data-price')) || 0,
+      stock: parseInt(el.getAttribute('data-stock'), 10) || 0,
+      image: el.getAttribute('data-image')
+    }));
+  }
+
+  function initVariants() {
+    variants = parseVariantData();
+    if (variants.length === 0) return;
+
+    const colors = [...new Set(variants.map(v => v.color))].filter(Boolean);
+    const sizes = [...new Set(variants.map(v => v.size))].filter(Boolean);
+
+    const colorContainer = document.getElementById('colorOptions');
+    const sizeContainer = document.getElementById('sizeOptions');
+    colorContainer.innerHTML = '';
+    sizeContainer.innerHTML = '';
+
+    colors.forEach(color => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'variant-chip';
+      btn.textContent = color;
+      btn.onclick = () => { selectedColor = color; syncSelectionUI(); updateVariant(); };
+      colorContainer.appendChild(btn);
+    });
+
+    sizes.forEach(size => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'variant-chip';
+      btn.textContent = size;
+      btn.onclick = () => { selectedSize = size; syncSelectionUI(); updateVariant(); };
+      sizeContainer.appendChild(btn);
+    });
+
+    // Chọn sẵn theo selectedDetail hiện tại (từ server), hoặc biến thể đầu tiên
+    const currentId = document.getElementById('selectedProductDetailId').value;
+    const current = variants.find(v => String(v.id) === String(currentId)) || variants[0];
+    selectedColor = current.color;
+    selectedSize = current.size;
+
+    syncSelectionUI();
+    updateVariant();
+  }
+
+  function syncSelectionUI() {
+    document.querySelectorAll('#colorOptions .variant-chip').forEach(b => {
+      b.classList.toggle('selected', b.textContent === selectedColor);
+    });
+    document.querySelectorAll('#sizeOptions .variant-chip').forEach(b => {
+      b.classList.toggle('selected', b.textContent === selectedSize);
+    });
+  }
+
+  // Khi người dùng chọn màu/size -> tìm đúng biến thể, cập nhật giá, tồn kho,
+  // max số lượng, ảnh, và bật/tắt nút "Thêm vào giỏ" theo thời gian thực
+  function updateVariant() {
+    const matched = variants.find(v => v.color === selectedColor && v.size === selectedSize);
 
     const btn = document.getElementById('addToCartBtn');
     const qtyInput = document.getElementById('quantityInput');
     const stockDisplay = document.getElementById('stockDisplay');
     const priceDisplay = document.getElementById('priceDisplay');
     const mainImage = document.getElementById('mainProductImage');
+    const hiddenId = document.getElementById('selectedProductDetailId');
 
-    priceDisplay.textContent = price.toLocaleString('vi-VN') + ' đ';
-    if (image && mainImage) {
-      mainImage.src = image;
+    if (!matched) {
+      hiddenId.value = '';
+      stockDisplay.innerHTML = '<span style="color:#e53e3e;">Hết hàng</span>';
+      btn.disabled = true;
+      return;
     }
 
-    if (stock > 0) {
-      stockDisplay.innerHTML = '<span style="color:#666;">Còn ' + stock + ' sản phẩm</span>';
+    hiddenId.value = matched.id;
+    priceDisplay.textContent = matched.price.toLocaleString('vi-VN') + ' đ';
+    if (matched.image && mainImage) {
+      mainImage.src = matched.image;
+    }
+
+    if (matched.stock > 0) {
+      stockDisplay.innerHTML = '<span style="color:#666;">Còn ' + matched.stock + ' sản phẩm</span>';
       btn.disabled = false;
-      qtyInput.max = stock;
-      if (parseInt(qtyInput.value, 10) > stock) qtyInput.value = stock;
+      qtyInput.max = matched.stock;
+      if (parseInt(qtyInput.value, 10) > matched.stock) qtyInput.value = matched.stock;
     } else {
       stockDisplay.innerHTML = '<span style="color:#e53e3e;">Hết hàng</span>';
       btn.disabled = true;
       qtyInput.max = 1;
     }
   }
+
+  document.addEventListener('DOMContentLoaded', initVariants);
 </script>
 
 </body>
