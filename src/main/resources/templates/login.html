@@ -4,7 +4,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Đăng nhập – HatHub</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap&subset=vietnamese" rel="stylesheet"/>
     <style>
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         :root{
@@ -22,7 +22,8 @@
         nav{background:var(--black);display:flex;align-items:center;justify-content:space-between;padding:0 2.5rem;height:64px;border-bottom:1px solid #222;flex-shrink:0;}
         .nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
         .nav-logo img{height:44px;width:auto;object-fit:contain;border-radius:50%;}
-        .nav-logo-text{font-family:var(--font-display);font-size:1.7rem;font-weight:900;color:var(--white);letter-spacing:1px;text-transform:lowercase;}
+        /* ĐÃ XÓA text-transform: lowercase để hiển thị "HatHub" */
+        .nav-logo-text{font-family:var(--font-display);font-size:1.7rem;font-weight:900;color:var(--white);letter-spacing:1px;}
         .nav-logo-text span{color:var(--rust);}
         .nav-back{color:var(--gray-400);text-decoration:none;font-size:0.82rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.2s;}
         .nav-back:hover{color:var(--rust-light);}
@@ -36,7 +37,8 @@
         .auth-left::after{content:'';position:absolute;width:260px;height:260px;border-radius:50%;border:1px solid rgba(192,99,58,0.1);bottom:-70px;left:-70px;}
         .auth-left-content{position:relative;z-index:2;text-align:center;}
         .auth-left-logo{width:130px;height:130px;border-radius:50%;object-fit:cover;margin:0 auto 1.8rem;display:block;box-shadow:0 0 0 4px var(--rust),0 0 0 8px rgba(192,99,58,0.2);}
-        .auth-brand{font-family:var(--font-display);font-size:3.2rem;font-weight:900;color:var(--white);text-transform:lowercase;line-height:1;margin-bottom:0.4rem;}
+        /* ĐÃ XÓA text-transform: lowercase để hiển thị "HatHub" */
+        .auth-brand{font-family:var(--font-display);font-size:3.2rem;font-weight:900;color:var(--white);line-height:1;margin-bottom:0.4rem;}
         .auth-brand span{color:var(--rust);}
         .auth-tagline{font-size:0.75rem;color:var(--gray-400);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:2.5rem;}
         .auth-quote{font-family:var(--font-display);font-size:1.55rem;font-weight:700;color:var(--white);line-height:1.25;max-width:260px;margin:0 auto;}
@@ -92,7 +94,7 @@
 <nav>
     <a href="/" class="nav-logo" th:href="@{/}">
         <img th:src="@{/logo.jpg}" src="/logo.jpg" alt="HatHub Logo" style="height:44px;width:auto;object-fit:contain;border-radius:50%;"/>
-        <span class="nav-logo-text">hat<span>hub</span></span>
+        <span class="nav-logo-text">Hat<span>Hub</span></span>
     </a>
     <a href="/" class="nav-back" th:href="@{/}">← Về trang chủ</a>
 </nav>
@@ -103,7 +105,7 @@
     <div class="auth-left">
         <div class="auth-left-content">
             <img th:src="@{/logo.jpg}" alt="HatHub" class="auth-left-logo"/>
-            <div class="auth-brand">hat<span>hub</span></div>
+            <div class="auth-brand">Hat<span>Hub</span></div>
             <div class="auth-tagline">Mũ thời trang · Phong cách</div>
             <div class="auth-quote">Phong cách thực sự<br/>bắt đầu từ <em>đầu bạn</em></div>
         </div>

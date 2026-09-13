@@ -110,43 +110,43 @@ public class AdminProductController {
         return "redirect:/admin/products/edit/" + saved.getProductId();
     }
 
-    // POST /admin/products/{id}/detail — Thêm 1 biến thể lẻ (giữ lại phòng khi cần). SKU tự sinh, không nhận tay.
+    // POST /admin/products/{id}/detail — Thêm 1 biến thể lẻ. Nhận sizeId/colorId (FK thật), SKU tự sinh không nhận tay.
     @PostMapping("/{id}/detail")
     public String addDetail(@PathVariable Integer id,
-                            @RequestParam String size,
-                            @RequestParam String color,
+                            @RequestParam Integer sizeId,
+                            @RequestParam Integer colorId,
                             @RequestParam BigDecimal price,
                             @RequestParam(defaultValue = "0") Integer stockQuantity,
                             RedirectAttributes ra) {
 
-        adminProductService.addDetail(id, size, color, price, stockQuantity);
+        adminProductService.addDetail(id, sizeId, colorId, price, stockQuantity);
         ra.addFlashAttribute("success", "Đã thêm biến thể!");
         return "redirect:/admin/products/edit/" + id;
     }
 
     // POST /admin/products/{id}/detail/batch — Tạo nhiều biến thể cùng lúc
-    // (chọn nhiều Size + nhiều Màu trong popup — lấy từ bảng Product_Size / Product_Color,
+    // (chọn nhiều Size + nhiều Màu — nhận danh sách ID phân tách bởi dấu phẩy, VD sizeIds="1,2,3",
     //  1 mức giá & 1 tồn kho ban đầu áp dụng cho tất cả tổ hợp, SKU tự sinh không dấu + đảm bảo unique)
     @PostMapping("/{id}/detail/batch")
     public String addDetailsBatch(@PathVariable Integer id,
-                                  @RequestParam(required = false) String sizes,
-                                  @RequestParam(required = false) String colors,
+                                  @RequestParam(required = false) String sizeIds,
+                                  @RequestParam(required = false) String colorIds,
                                   @RequestParam BigDecimal price,
                                   @RequestParam(defaultValue = "0") Integer stockQuantity,
                                   RedirectAttributes ra) {
 
-        List<String> sizeList = sizes == null ? List.of() :
-                Arrays.stream(sizes.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        List<String> colorList = colors == null ? List.of() :
-                Arrays.stream(colors.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
+        List<Integer> sizeIdList = sizeIds == null ? List.of() :
+                Arrays.stream(sizeIds.split(",")).map(String::trim).filter(s -> !s.isEmpty()).map(Integer::parseInt).toList();
+        List<Integer> colorIdList = colorIds == null ? List.of() :
+                Arrays.stream(colorIds.split(",")).map(String::trim).filter(s -> !s.isEmpty()).map(Integer::parseInt).toList();
 
-        if (sizeList.isEmpty() || colorList.isEmpty()) {
+        if (sizeIdList.isEmpty() || colorIdList.isEmpty()) {
             ra.addFlashAttribute("error", "Vui lòng chọn ít nhất 1 Size và 1 Màu!");
             return "redirect:/admin/products/edit/" + id;
         }
 
-        int totalCombos = sizeList.size() * colorList.size();
-        int created = adminProductService.createVariantsBatch(id, sizeList, colorList, price, stockQuantity);
+        int totalCombos = sizeIdList.size() * colorIdList.size();
+        int created = adminProductService.createVariantsBatch(id, sizeIdList, colorIdList, price, stockQuantity);
         int skipped = totalCombos - created;
 
         String msg = "Đã tạo " + created + " biến thể mới!";
@@ -158,17 +158,26 @@ public class AdminProductController {
     }
 
     // POST /admin/products/detail/delete/{detailId} — Xóa 1 biến thể
+    // Bắt lỗi khóa ngoại (biến thể đã nằm trong đơn hàng) để không crash app,
+    // giống cách deleteProduct() đang xử lý cho sản phẩm.
     @PostMapping("/detail/delete/{detailId}")
     public String deleteDetail(@PathVariable Integer detailId,
                                @RequestParam Integer productId,
                                RedirectAttributes ra) {
 
-        adminProductService.deleteDetail(detailId);
-        ra.addFlashAttribute("success", "Đã xóa biến thể!");
+        try {
+            adminProductService.deleteDetail(detailId);
+            ra.addFlashAttribute("success", "Đã xóa biến thể!");
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            ra.addFlashAttribute("error",
+                    "Không thể xóa: biến thể này đã có trong đơn hàng. Hãy ẩn/xóa sản phẩm thay vì xóa biến thể để giữ lịch sử đơn hàng.");
+        }
         return "redirect:/admin/products/edit/" + productId;
     }
 
     // POST /admin/products/detail/delete-batch — Xóa nhanh nhiều biến thể đã chọn (checkbox trong bảng)
+    // Bắt lỗi khóa ngoại tương tự deleteDetail() — nếu trong danh sách chọn có biến thể
+    // đã nằm trong đơn hàng thì báo lỗi thân thiện, không cho crash cả request.
     @PostMapping("/detail/delete-batch")
     public String deleteDetailsBatch(@RequestParam Integer productId,
                                      @RequestParam(required = false) List<Integer> detailIds,
@@ -179,8 +188,16 @@ public class AdminProductController {
             return "redirect:/admin/products/edit/" + productId;
         }
 
-        int deleted = adminProductService.deleteDetails(detailIds);
-        ra.addFlashAttribute("success", "Đã xóa " + deleted + " biến thể đã chọn!");
+        try {
+            int deleted = adminProductService.deleteDetails(detailIds);
+            ra.addFlashAttribute("success", "Đã xóa " + deleted + " biến thể đã chọn!");
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // deleteDetails() chạy trong 1 transaction (@Transactional) nên nếu có
+            // lỗi khóa ngoại thì TOÀN BỘ batch sẽ rollback — không có biến thể nào
+            // trong danh sách đã chọn bị xóa, kể cả những biến thể hợp lệ khác.
+            ra.addFlashAttribute("error",
+                    "Không thể xóa: một hoặc nhiều biến thể đã chọn đang có trong đơn hàng nên toàn bộ thao tác bị hủy. Vui lòng bỏ chọn biến thể đó rồi thử lại.");
+        }
         return "redirect:/admin/products/edit/" + productId;
     }
 
@@ -235,17 +252,17 @@ public class AdminProductController {
         return "redirect:/admin/products";
     }
 
-    // POST /admin/products/detail/update/{detailId} — Sửa biến thể (SKU không được sửa)
+    // POST /admin/products/detail/update/{detailId} — Sửa biến thể (SKU không được sửa). Nhận sizeId/colorId (FK thật).
     @PostMapping("/detail/update/{detailId}")
     public String updateDetail(@PathVariable Integer detailId,
-                               @RequestParam String size,
-                               @RequestParam String color,
+                               @RequestParam Integer sizeId,
+                               @RequestParam Integer colorId,
                                @RequestParam BigDecimal price,
                                @RequestParam Integer stockQuantity,
                                @RequestParam Integer productId,
                                RedirectAttributes ra) {
 
-        adminProductService.updateDetail(detailId, size, color, price, stockQuantity);
+        adminProductService.updateDetail(detailId, sizeId, colorId, price, stockQuantity);
         ra.addFlashAttribute("success", "Đã cập nhật biến thể!");
         return "redirect:/admin/products/edit/" + productId;
     }

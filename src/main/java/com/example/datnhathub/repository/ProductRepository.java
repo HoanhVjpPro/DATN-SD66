@@ -1,6 +1,5 @@
 package com.example.datnhathub.repository;
 
-
 import com.example.datnhathub.dto.ProductDto;
 import com.example.datnhathub.entity.Category;
 import com.example.datnhathub.entity.Product;
@@ -66,4 +65,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             @Param("maxPrice")   BigDecimal maxPrice,
             Pageable pageable
     );
+
+    List<Product> findByCategory_CategoryIdAndProductIdNotAndStatusTrue(Integer categoryId, Integer productId, Pageable pageable);
+    List<Product> findByBrand_BrandIdAndProductIdNotAndStatusTrue(Integer brandId, Integer productId, Pageable pageable);
+    List<Product> findTop5ByStatusTrueOrderByProductIdDesc();
+    List<Product> findByStatusTrueOrderByProductIdDesc();
 }

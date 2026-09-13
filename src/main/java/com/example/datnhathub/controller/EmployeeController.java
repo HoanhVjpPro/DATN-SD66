@@ -86,12 +86,15 @@ public class EmployeeController {
             return "redirect:/employee/returns";
         }
 
-        // Cộng lại tồn kho
+        // Cộng lại tồn kho — CHỈ cộng đúng số lượng khách yêu cầu trả ở từng dòng
+        // (không hoàn toàn bộ số lượng đã đặt, để hỗ trợ trả hàng một phần)
         if (order.getDetails() != null) {
             for (OrderDetail od : order.getDetails()) {
-                ProductDetail pd = od.getProductDetail();
-                pd.setStockQuantity(pd.getStockQuantity() + od.getQuantity());
-                productDetailRepository.save(pd);
+                if (od.getReturnQuantity() != null && od.getReturnQuantity() > 0) {
+                    ProductDetail pd = od.getProductDetail();
+                    pd.setStockQuantity(pd.getStockQuantity() + od.getReturnQuantity());
+                    productDetailRepository.save(pd);
+                }
             }
         }
 

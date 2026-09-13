@@ -84,4 +84,20 @@ public class Orders {
                 .map(d -> d.getUnitPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+    // ── Trả hàng một phần ──
+
+    // Tổng số lượng sản phẩm đã được khách yêu cầu trả (cộng dồn theo từng dòng OrderDetail)
+    public Integer getReturnRequestedQuantity() {
+        if (details == null) return 0;
+        return details.stream()
+                .mapToInt(d -> d.getReturnQuantity() == null ? 0 : d.getReturnQuantity())
+                .sum();
+    }
+
+    // true nếu khách chỉ yêu cầu trả một phần đơn hàng (không phải toàn bộ số lượng đã đặt)
+    public boolean isPartialReturn() {
+        int returned = getReturnRequestedQuantity();
+        return returned > 0 && returned < getTotalQuantity();
+    }
 }

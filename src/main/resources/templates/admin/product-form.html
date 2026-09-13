@@ -342,10 +342,9 @@
     .sku-readonly { font-family:'Courier New',monospace; font-size:0.8rem; background:#f0f0f0; padding:4px 8px; border-radius:6px; white-space:nowrap; }
     .variant-img-thumb { width:50px; height:50px; object-fit:cover; border-radius:8px; display:block; margin-bottom:4px; }
     .variant-img-empty { font-size:0.7rem; color:#999; display:block; margin-bottom:4px; }
-    .variant-img-form { display:none; margin-top:6px; }
-    .variant-img-form input[type=file] { font-size:0.7rem; padding:2px; margin-bottom:4px; }
-    .variant-img-form label { font-weight:400; font-size:0.75rem; margin:2px 0; }
-    .variant-img-form label input { width:auto; margin-right:4px; }
+    .variant-img-form-inline { margin-top:6px; }
+    .variant-img-form-inline label { font-weight:400; font-size:0.75rem; margin:2px 0; display:block; }
+    .variant-img-form-inline label input { width:auto; margin-right:4px; }
 
     .modal-overlay {
       display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55);
@@ -527,14 +526,14 @@
         <div class="form-group">
           <label>Danh mục</label>
           <select name="categoryId" required>
-            <option value="" disabled>-- chưa có --</option>
+            <option value="" selected disabled>-- chưa có --</option>
             <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.categoryName}" th:selected="${product.category != null and product.category.categoryId == c.categoryId}"></option>
           </select>
         </div>
         <div class="form-group">
           <label>Thương hiệu</label>
           <select name="brandId">
-            <option value="" disabled>-- chưa có --</option>
+            <option value="" selected disabled>-- chưa có --</option>
             <option th:each="b : ${brands}" th:value="${b.brandId}" th:text="${b.brandName}" th:selected="${product.brand != null and product.brand.brandId == b.brandId}"></option>
           </select>
         </div>
@@ -544,14 +543,14 @@
         <div class="form-group">
           <label>Chất liệu</label>
           <select name="materialId">
-            <option value="">-- chưa có --</option>
+            <option value="" disabled selected>-- chưa có --</option>
             <option th:each="m : ${materials}" th:value="${m.materialId}" th:text="${m.materialName}" th:selected="${product.material != null and product.material.materialId == m.materialId}"></option>
           </select>
         </div>
         <div class="form-group">
           <label>Kiểu mũ</label>
           <select name="hatTypeId">
-            <option value="">-- chưa có --</option>
+            <option value="" disabled selected>-- chưa có --</option>
             <option th:each="h : ${hatTypes}" th:value="${h.hatTypeId}" th:text="${h.hatTypeName}" th:selected="${product.hatType != null and product.hatType.hatTypeId == h.hatTypeId}"></option>
           </select>
         </div>
@@ -613,8 +612,14 @@
             <input type="checkbox" class="variant-checkbox" th:value="${d.productDetailId}" />
           </td>
           <td><span class="sku-readonly" th:text="${d.sku}"></span></td>
-          <td><input name="size" type="text" th:value="${d.size}" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:100%;" /></td>
-          <td><input name="color" type="text" th:value="${d.color}" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:100%;" /></td>
+          <td>
+            <span th:text="${d.size}"></span>
+            <input type="hidden" name="sizeId" th:value="${d.sizeEntity != null ? d.sizeEntity.sizeId : ''}" th:attr="form=|detailForm${d.productDetailId}|" />
+          </td>
+          <td>
+            <span th:text="${d.color}"></span>
+            <input type="hidden" name="colorId" th:value="${d.colorEntity != null ? d.colorEntity.colorId : ''}" th:attr="form=|detailForm${d.productDetailId}|" />
+          </td>
           <td><input name="price" type="number" th:value="${d.price}" step="1000" min="0" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:100%;" /></td>
           <td>
             <input name="stockQuantity" type="number" th:value="${d.stockQuantity != null ? d.stockQuantity : 0}" min="0" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:70px;" />
@@ -624,12 +629,14 @@
           <td>
             <img th:if="${!#lists.isEmpty(variantImages)}" th:src="${variantImages[0].imageURL}" class="variant-img-thumb" />
             <span th:if="${#lists.isEmpty(variantImages)}" class="variant-img-empty">Chưa có ảnh</span>
-            <button type="button" class="btn btn-info btn-sm" th:onclick="|toggleImgForm(${d.productDetailId})|">Chọn ảnh</button>
-            <form th:id="|imgForm${d.productDetailId}|" class="variant-img-form" th:action="@{/admin/products/{id}/image(id=${product.productId})}" method="post" enctype="multipart/form-data">
+            <form th:id="|imgForm${d.productDetailId}|" class="variant-img-form-inline" th:action="@{/admin/products/{id}/image(id=${product.productId})}" method="post" enctype="multipart/form-data">
               <input type="hidden" name="productDetailId" th:value="${d.productDetailId}" />
-              <input type="file" name="file" accept="image/*" required />
+              <input type="file" name="file" accept="image/*" required
+                     th:id="|imgInput${d.productDetailId}|"
+                     style="display:none;"
+                     onchange="this.form.submit()" />
               <label><input type="checkbox" name="isDefault" value="true" /> Ảnh mặc định</label>
-              <button type="submit" class="btn btn-success btn-sm" style="margin-top:4px;">Lưu ảnh</button>
+              <button type="button" class="btn btn-info btn-sm" th:onclick="|document.getElementById('imgInput${d.productDetailId}').click()|">Chọn ảnh</button>
             </form>
           </td>
           <td style="text-align:right; white-space:nowrap;">
@@ -668,7 +675,7 @@
         <div class="picker-panel" id="sizePickerPanel">
           <div class="picker-list" id="sizePickerList">
             <label class="picker-item" th:each="s : ${allSizes}">
-              <input type="checkbox" th:value="${s.sizeName}" onchange="onPickerChange('size')" />
+              <input type="checkbox" th:value="${s.sizeId}" th:attr="data-name=${s.sizeName}" onchange="onPickerChange('size')" />
               <span th:text="${s.sizeName}"></span>
             </label>
           </div>
@@ -691,7 +698,7 @@
         <div class="picker-panel" id="colorPickerPanel">
           <div class="picker-list" id="colorPickerList">
             <label class="picker-item" th:each="c : ${allColors}">
-              <input type="checkbox" th:value="${c.colorName}" th:attr="data-code=${c.colorCode}" onchange="onPickerChange('color')" />
+              <input type="checkbox" th:value="${c.colorId}" th:attr="data-code=${c.colorCode},data-name=${c.colorName}" onchange="onPickerChange('color')" />
               <span class="color-dot" th:if="${c.colorCode != null}" th:style="'background:' + ${c.colorCode}"></span>
               <span th:text="${c.colorName}"></span>
             </label>
@@ -718,8 +725,8 @@
           </div>
         </div>
 
-        <input type="hidden" name="sizes" id="sizesHidden" />
-        <input type="hidden" name="colors" id="colorsHidden" />
+        <input type="hidden" name="sizeIds" id="sizesHidden" />
+        <input type="hidden" name="colorIds" id="colorsHidden" />
 
         <div class="modal-actions">
           <button type="button" class="btn btn-neutral" onclick="closeVariantModal()">Hủy</button>
@@ -795,7 +802,7 @@
           chip.appendChild(dot);
         }
       }
-      chip.appendChild(document.createTextNode(cb.value));
+      chip.appendChild(document.createTextNode(cb.getAttribute('data-name') || cb.value));
       const removeBtn = document.createElement('button');
       removeBtn.type = 'button';
       removeBtn.innerHTML = '&times;';
@@ -806,9 +813,10 @@
     });
   }
 
-  function addOrCheckPickerItem(type, name, code) {
+  function addOrCheckPickerItem(type, id, name, code) {
     const list = document.getElementById(type + 'PickerList');
-    const existingCb = Array.from(list.querySelectorAll('input[type=checkbox]')).find(cb => cb.value.toLowerCase() === name.toLowerCase());
+    const existingCb = Array.from(list.querySelectorAll('input[type=checkbox]'))
+            .find(cb => (cb.getAttribute('data-name') || '').toLowerCase() === name.toLowerCase());
     if (existingCb) {
       existingCb.checked = true;
     } else {
@@ -816,7 +824,8 @@
       label.className = 'picker-item';
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
-      checkbox.value = name;
+      checkbox.value = id;
+      checkbox.setAttribute('data-name', name);
       checkbox.checked = true;
       if (type === 'color' && code) checkbox.setAttribute('data-code', code);
       checkbox.addEventListener('change', () => onPickerChange(type));
@@ -843,14 +852,14 @@
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'sizeName=' + encodeURIComponent(value)
     })
-    .then(res => res.json())
-    .then(data => {
-      if (!data.success) { alert(data.message || 'Không thể thêm size!'); return; }
-      addOrCheckPickerItem('size', data.sizeName, null);
-      input.value = '';
-      input.focus();
-    })
-    .catch(() => alert('Lỗi kết nối, không thể thêm size!'));
+            .then(res => res.json())
+            .then(data => {
+              if (!data.success) { alert(data.message || 'Không thể thêm size!'); return; }
+              addOrCheckPickerItem('size', data.sizeId, data.sizeName, null);
+              input.value = '';
+              input.focus();
+            })
+            .catch(() => alert('Lỗi kết nối, không thể thêm size!'));
   }
 
   function quickAddColor() {
@@ -863,14 +872,14 @@
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'colorName=' + encodeURIComponent(value) + '&colorCode=' + encodeURIComponent(codeInput.value || '')
     })
-    .then(res => res.json())
-    .then(data => {
-      if (!data.success) { alert(data.message || 'Không thể thêm màu!'); return; }
-      addOrCheckPickerItem('color', data.colorName, data.colorCode);
-      input.value = '';
-      input.focus();
-    })
-    .catch(() => alert('Lỗi kết nối, không thể thêm màu!'));
+            .then(res => res.json())
+            .then(data => {
+              if (!data.success) { alert(data.message || 'Không thể thêm màu!'); return; }
+              addOrCheckPickerItem('color', data.colorId, data.colorName, data.colorCode);
+              input.value = '';
+              input.focus();
+            })
+            .catch(() => alert('Lỗi kết nối, không thể thêm màu!'));
   }
 
   document.getElementById('newSizeInput')?.addEventListener('keydown', function (e) {
@@ -890,13 +899,6 @@
     document.getElementById('sizesHidden').value = sizes.join(',');
     document.getElementById('colorsHidden').value = colors.join(',');
     return true;
-  }
-
-  // ===== ẢNH BIẾN THỂ =====
-  function toggleImgForm(detailId) {
-    const form = document.getElementById('imgForm' + detailId);
-    if (!form) return;
-    form.style.display = (form.style.display === 'block') ? 'none' : 'block';
   }
 
   // ===== CHỌN NHIỀU XÓA =====

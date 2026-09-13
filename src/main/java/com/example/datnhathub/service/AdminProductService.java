@@ -129,51 +129,60 @@ public class AdminProductService {
         productRepository.deleteById(productId);
     }
 
-    // Thêm 1 biến thể lẻ — SKU luôn tự sinh, không nhận input tay (giữ lại phòng khi cần thêm bổ sung 1 dòng riêng)
+    // Thêm 1 biến thể lẻ — nhận sizeId/colorId (FK thật tới Product_Size/Product_Color), SKU luôn tự sinh
     public void addDetail(Integer productId,
-                          String size,
-                          String color,
+                          Integer sizeId,
+                          Integer colorId,
                           BigDecimal price,
                           Integer stockQuantity) {
 
         Product product = getProductById(productId);
+        Size size = sizeRepository.findById(sizeId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy size ID: " + sizeId));
+        Color color = colorRepository.findById(colorId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy màu ID: " + colorId));
+
         ProductDetail detail = new ProductDetail();
         detail.setProduct(product);
-        detail.setSize(size);
-        detail.setColor(color);
+        detail.setSizeEntity(size);
+        detail.setColorEntity(color);
         detail.setPrice(price);
-        detail.setSku(buildSku(product, size, color));
+        detail.setSku(buildSku(product, size.getSizeName(), color.getColorName()));
         detail.setStockQuantity(stockQuantity);
 
         productDetailRepository.save(detail);
     }
 
-    // Tạo nhiều biến thể cùng lúc theo tổ hợp (Size x Màu), dùng chung 1 giá + 1 tồn kho ban đầu.
+    // Tạo nhiều biến thể cùng lúc theo tổ hợp (Size x Màu, nhận sizeIds/colorIds), dùng chung 1 giá + 1 tồn kho ban đầu.
     // Bỏ qua các tổ hợp Size+Màu đã tồn tại sẵn cho sản phẩm này (tránh tạo trùng).
-    public int createVariantsBatch(Integer productId, List<String> sizes, List<String> colors,
+    public int createVariantsBatch(Integer productId, List<Integer> sizeIds, List<Integer> colorIds,
                                    BigDecimal price, Integer stockQuantity) {
         Product product = getProductById(productId);
         List<ProductDetail> existing = productDetailRepository.findByProductProductId(productId);
 
         int created = 0;
-        for (String rawSize : sizes) {
-            String size = rawSize == null ? null : rawSize.trim();
-            if (size == null || size.isEmpty()) continue;
+        for (Integer sizeId : sizeIds) {
+            if (sizeId == null) continue;
+            Size size = sizeRepository.findById(sizeId).orElse(null);
+            if (size == null) continue;
 
-            for (String rawColor : colors) {
-                String color = rawColor == null ? null : rawColor.trim();
-                if (color == null || color.isEmpty()) continue;
+            for (Integer colorId : colorIds) {
+                if (colorId == null) continue;
+                Color color = colorRepository.findById(colorId).orElse(null);
+                if (color == null) continue;
 
                 boolean alreadyExists = existing.stream().anyMatch(d ->
-                        size.equalsIgnoreCase(d.getSize()) && color.equalsIgnoreCase(d.getColor()));
+                        d.getSizeEntity() != null && d.getColorEntity() != null
+                                && sizeId.equals(d.getSizeEntity().getSizeId())
+                                && colorId.equals(d.getColorEntity().getColorId()));
                 if (alreadyExists) continue;
 
                 ProductDetail detail = new ProductDetail();
                 detail.setProduct(product);
-                detail.setSize(size);
-                detail.setColor(color);
+                detail.setSizeEntity(size);
+                detail.setColorEntity(color);
                 detail.setPrice(price);
-                detail.setSku(buildSku(product, size, color));
+                detail.setSku(buildSku(product, size.getSizeName(), color.getColorName()));
                 detail.setStockQuantity(stockQuantity == null ? 0 : stockQuantity);
                 productDetailRepository.save(detail);
                 created++;
@@ -281,18 +290,23 @@ public class AdminProductService {
         productImageRepository.deleteById(imageId);
     }
 
-    // UC13 — Sửa biến thể (SKU KHÔNG được sửa — giữ nguyên giá trị đã sinh lúc tạo)
+    // UC13 — Sửa biến thể (SKU KHÔNG được sửa — giữ nguyên giá trị đã sinh lúc tạo), nhận sizeId/colorId (FK thật)
     public void updateDetail(Integer detailId,
-                             String size,
-                             String color,
+                             Integer sizeId,
+                             Integer colorId,
                              BigDecimal price,
                              Integer stockQuantity) {
 
         ProductDetail detail = productDetailRepository.findById(detailId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy biến thể ID: " + detailId));
 
-        detail.setSize(size);
-        detail.setColor(color);
+        Size size = sizeRepository.findById(sizeId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy size ID: " + sizeId));
+        Color color = colorRepository.findById(colorId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy màu ID: " + colorId));
+
+        detail.setSizeEntity(size);
+        detail.setColorEntity(color);
         detail.setPrice(price);
         detail.setStockQuantity(stockQuantity);
         // SKU: không đổi

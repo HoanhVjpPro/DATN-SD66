@@ -19,6 +19,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class ReturnRequestController {
@@ -53,9 +55,14 @@ public class ReturnRequestController {
     }
 
     // ── Customer gửi yêu cầu trả hàng ──
+    // Cho phép chọn TỪNG sản phẩm (orderDetailIds) kèm số lượng muốn trả (quantities),
+    // thay vì bắt buộc trả toàn bộ đơn hàng. Ví dụ: đặt 3 sản phẩm nhưng cửa hàng chỉ
+    // giao sai 1 sản phẩm -> khách chỉ tick chọn đúng sản phẩm đó và nhập số lượng cần trả.
     @PostMapping("/orders/{id}/return")
     public String submitReturn(@PathVariable Integer id,
                                @RequestParam String reason,
+                               @RequestParam List<Integer> orderDetailIds,
+                               @RequestParam List<Integer> quantities,
                                HttpSession session,
                                RedirectAttributes ra) {
 
@@ -77,10 +84,43 @@ public class ReturnRequestController {
             return "redirect:/orders/" + id + "/return";
         }
 
+        if (orderDetailIds == null || quantities == null || orderDetailIds.size() != quantities.size()) {
+            ra.addFlashAttribute("error", "Dữ liệu trả hàng không hợp lệ!");
+            return "redirect:/orders/" + id + "/return";
+        }
+
+        Map<Integer, OrderDetail> detailMap = order.getDetails().stream()
+                .collect(Collectors.toMap(OrderDetail::getOrderDetailId, d -> d));
+
+        boolean anySelected = false;
+        for (int i = 0; i < orderDetailIds.size(); i++) {
+            Integer detailId = orderDetailIds.get(i);
+            Integer qty = quantities.get(i);
+            if (qty == null || qty <= 0) continue;
+
+            OrderDetail detail = detailMap.get(detailId);
+            if (detail == null) continue;
+
+            if (qty > detail.getQuantity()) {
+                ra.addFlashAttribute("error",
+                        "Số lượng trả của \"" + detail.getProductDetail().getProduct().getProductName()
+                                + "\" vượt quá số lượng đã đặt!");
+                return "redirect:/orders/" + id + "/return";
+            }
+
+            detail.setReturnQuantity(qty);
+            anySelected = true;
+        }
+
+        if (!anySelected) {
+            ra.addFlashAttribute("error", "Vui lòng chọn ít nhất 1 sản phẩm và số lượng muốn trả!");
+            return "redirect:/orders/" + id + "/return";
+        }
+
         order.setReturnStatus("Chờ xác nhận");
         order.setReturnReason(reason);
         order.setReturnDate(LocalDateTime.now());
-        ordersRepository.save(order);
+        ordersRepository.save(order); // cascade ALL -> lưu luôn returnQuantity của các OrderDetail đã chỉnh
 
         ra.addFlashAttribute("success", "Đã gửi yêu cầu trả hàng!");
         return "redirect:/orders/" + id + "/return";
@@ -106,12 +146,15 @@ public class ReturnRequestController {
             return "redirect:/admin/returns";
         }
 
-        // Cộng lại tồn kho
+        // Cộng lại tồn kho — CHỈ cộng đúng số lượng khách yêu cầu trả ở từng dòng
+        // (không hoàn toàn bộ số lượng đã đặt, để hỗ trợ trả hàng một phần)
         if (order.getDetails() != null) {
             for (OrderDetail od : order.getDetails()) {
-                ProductDetail pd = od.getProductDetail();
-                pd.setStockQuantity(pd.getStockQuantity() + od.getQuantity());
-                productDetailRepository.save(pd);
+                if (od.getReturnQuantity() != null && od.getReturnQuantity() > 0) {
+                    ProductDetail pd = od.getProductDetail();
+                    pd.setStockQuantity(pd.getStockQuantity() + od.getReturnQuantity());
+                    productDetailRepository.save(pd);
+                }
             }
         }
 

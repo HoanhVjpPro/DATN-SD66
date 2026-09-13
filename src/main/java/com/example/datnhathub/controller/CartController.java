@@ -1,16 +1,11 @@
 package com.example.datnhathub.controller;
 
-import com.example.datnhathub.entity.Cart;
-import com.example.datnhathub.entity.CartDetail;
-import com.example.datnhathub.entity.Orders;
-import com.example.datnhathub.entity.ProductDetail;
+import com.example.datnhathub.entity.*;
 import com.example.datnhathub.repository.ProductRepository;
 import com.example.datnhathub.service.CartService;
 import com.example.datnhathub.service.OrderService;
-import com.example.datnhathub.service.ProductService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -79,7 +74,10 @@ public class CartController {
         model.addAttribute("loggedIn", true);
         model.addAttribute("roleName", session.getAttribute("roleName"));
 
-        return "cart/index"; // templates/cart/index.html
+        List<Product> recommendProducts = productRepository.findAll();
+        model.addAttribute("recommendProducts", recommendProducts);
+
+        return "cart/index";
     }
 
     // UC18 — Cập nhật số lượng trong giỏ
@@ -187,8 +185,56 @@ public class CartController {
     }
 
     @GetMapping("/cart/recommend")
-    public String viewAllRecommendations(Model model, @PageableDefault(size = 15, sort = "productId", direction = Sort.Direction.DESC) Pageable pageable) {
-        model.addAttribute("allRecommendProducts", productRepository.findAll(pageable));
+    public String viewAllRecommendations(HttpSession session, Model model) {
+        Integer productId = (Integer) session.getAttribute("productid");
+
+        List<Product> categoryProducts = new ArrayList<>();
+        List<Product> brandProducts = new ArrayList<>();
+        List<Product> latestProducts = productRepository.findByStatusTrueOrderByProductIdDesc();
+
+        if (productId != null) {
+            Product product = productRepository.findById(productId).orElse(null);
+            if (product != null) {
+                if (product.getCategory() != null) {
+                    categoryProducts = productRepository.findByCategory_CategoryIdAndProductIdNotAndStatusTrue(
+                            product.getCategory().getCategoryId(), productId, org.springframework.data.domain.Pageable.unpaged()
+                    );
+                }
+                if (product.getBrand() != null) {
+                    brandProducts = productRepository.findByBrand_BrandIdAndProductIdNotAndStatusTrue(
+                            product.getBrand().getBrandId(), productId, org.springframework.data.domain.Pageable.unpaged()
+                    );
+                }
+            }
+        }
+
+        latestProducts.removeIf(p -> productId != null && p.getProductId().equals(productId));
+
+        model.addAttribute("categoryProducts", categoryProducts);
+        model.addAttribute("brandProducts", brandProducts);
+        model.addAttribute("latestProducts", latestProducts);
+
+        // Bổ sung thêm biến này để dự phòng trường hợp file HTML cũ đang gọi
+        model.addAttribute("allRecommendProducts", latestProducts);
+
+        Boolean loggedIn = session.getAttribute("userId") != null;
+        model.addAttribute("loggedIn", loggedIn);
+        model.addAttribute("roleName", session.getAttribute("roleName"));
+
         return "cart/recommendations";
+    }
+
+    // Cập nhật biến thể sản phẩm trong giỏ hàng
+    @PostMapping("/cart/update-variation")
+    public String updateCartVariation(@RequestParam Integer cartDetailId,
+                                      @RequestParam Integer productDetailId,
+                                      RedirectAttributes ra) {
+        try {
+            cartService.updateVariation(cartDetailId, productDetailId);
+            ra.addFlashAttribute("success", "Đã cập nhật biến thể thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/cart";
     }
 }
