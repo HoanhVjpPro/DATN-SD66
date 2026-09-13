@@ -24,11 +24,14 @@ public class ProductDetail {
     @JoinColumn(name = "ProductID", nullable = false)
     private Product product;
 
-    @Column(name = "Size", length = 10)
-    private String size;
+    // FK THẬT tới bảng master Product_Size / Product_Color (trước đây lưu String tự do, không ràng buộc)
+    @ManyToOne
+    @JoinColumn(name = "SizeID")
+    private Size sizeEntity;
 
-    @Column(name = "Color", length = 50)
-    private String color;
+    @ManyToOne
+    @JoinColumn(name = "ColorID")
+    private Color colorEntity;
 
     @Column(name = "Price", precision = 18, scale = 2)
     private BigDecimal price;
@@ -38,4 +41,12 @@ public class ProductDetail {
 
     @Column(name = "StockQuantity", nullable = false)
     private Integer stockQuantity = 0;
+
+    public String getSize() {
+        return sizeEntity != null ? sizeEntity.getSizeName() : null;
+    }
+
+    public String getColor() {
+        return colorEntity != null ? colorEntity.getColorName() : null;
+    }
 }

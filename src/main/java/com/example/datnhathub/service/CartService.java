@@ -124,4 +124,22 @@ public class CartService {
         Cart cart = getOrCreateCart(customer);
         cartDetailRepository.deleteAll(cart.getDetails());
     }
+
+    // Cập nhật biến thể sản phẩm trong giỏ hàng
+    public void updateVariation(Integer cartDetailId, Integer productDetailId) {
+        CartDetail cartDetail = cartDetailRepository.findById(cartDetailId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chi tiết giỏ hàng"));
+
+        ProductDetail newProductDetail = productDetailRepository.findById(productDetailId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy biến thể sản phẩm mới"));
+
+        // Kiểm tra tồn kho của biến thể mới
+        int requiredQty = cartDetail.getQuantity();
+        if (newProductDetail.getStockQuantity() == null || newProductDetail.getStockQuantity() < requiredQty) {
+            throw new RuntimeException("Biến thể mới không đủ số lượng trong kho!");
+        }
+
+        cartDetail.setProductDetail(newProductDetail);
+        cartDetailRepository.save(cartDetail);
+    }
 }

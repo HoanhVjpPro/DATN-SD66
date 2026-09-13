@@ -33,4 +33,11 @@ public class OrderDetail {
 
     @Column(name = "UnitPrice", precision = 18, scale = 2)
     private BigDecimal unitPrice;
+
+    // Số lượng khách yêu cầu trả hàng cho riêng dòng sản phẩm này.
+    // null hoặc 0 = dòng này không nằm trong yêu cầu trả hàng.
+    // Cho phép khách trả một phần đơn hàng (VD: đặt 3 sản phẩm nhưng chỉ 1 sản phẩm bị giao sai)
+    // thay vì bắt buộc phải trả toàn bộ đơn.
+    @Column(name = "ReturnQuantity")
+    private Integer returnQuantity;
 }

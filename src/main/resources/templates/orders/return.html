@@ -3,68 +3,303 @@
 <head>
   <meta charset="UTF-8"/>
   <title th:text="'Trả hàng #' + ${order.orderCode} + ' | HatHub'">Trả hàng</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
   <style>
-    body { font-family:'Nunito',sans-serif; background:#F5F0EA; margin:0; }
-    nav { background:#111; padding:1rem 2rem; display:flex; align-items:center; gap:1rem; }
-    nav a { color:#fff; text-decoration:none; font-weight:700; }
-    .container { max-width:700px; margin:2rem auto; padding:0 1rem; }
-    .card { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1rem; }
-    .card h3 { margin-bottom:1rem; font-size:1.1rem; }
-    .info-row { display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid #eee; font-size:0.9rem; }
-    .info-row:last-child { border-bottom:none; }
-    .alert { padding:1rem; border-radius:4px; margin-bottom:1rem; font-weight:700; }
-    .alert-success { background:#d4edda; color:#155724; }
-    .alert-error   { background:#f8d7da; color:#721c24; }
+    * { box-sizing: border-box; }
 
-    /* STATUS TIMELINE */
-    .status-bar { display:flex; align-items:center; gap:0; margin:1.2rem 0; }
-    .status-step { display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; }
-    .status-dot { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem; font-weight:700; }
-    .status-dot.done    { background:#C0633A; color:#fff; }
-    .status-dot.active  { background:#111; color:#fff; }
-    .status-dot.inactive{ background:#ddd; color:#999; }
-    .status-label { font-size:0.72rem; font-weight:700; text-align:center; color:#666; }
-    .status-label.active { color:#111; }
-    .status-line { flex:1; height:2px; background:#ddd; }
-    .status-line.done { background:#C0633A; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #F5F0EA;
+      margin: 0;
+      color: #1a1a1a;
+    }
 
-    /* FORM */
-    label { display:block; font-weight:700; margin:0.75rem 0 0.25rem; font-size:0.9rem; }
-    textarea { width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; resize:vertical; font-family:'Nunito',sans-serif; }
-    .btn-submit { background:#C0633A; color:#fff; border:none; padding:12px 28px; font-weight:700; font-size:0.95rem; cursor:pointer; border-radius:4px; margin-top:0.5rem; }
-    .btn-submit:hover { background:#9B4A27; }
-    .btn-back { display:inline-block; color:#666; text-decoration:none; font-size:0.85rem; margin-top:0.8rem; }
+    /* ===== NAV ===== */
+    nav {
+      background: #111;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: .3px;
+      transition: color .2s ease;
+    }
+    nav a:hover { color: #C0633A; }
+    nav .sep { color: #C0633A; font-weight: 900; }
+    nav .code { color: #ccc; font-size: .9rem; font-weight: 700; }
 
-    /* STATUS BADGE */
-    .badge { padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:700; display:inline-block; }
-    .badge-waiting  { background:#fff3cd; color:#856404; }
-    .badge-accepted { background:#d4edda; color:#155724; }
-    .badge-rejected { background:#f8d7da; color:#721c24; }
+    /* ===== LAYOUT ===== */
+    .container { max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
 
-    table { width:100%; border-collapse:collapse; }
-    td, th { padding:0.6rem; border-bottom:1px solid #eee; font-size:0.88rem; text-align:left; }
+    h1 {
+      font-weight: 900;
+      letter-spacing: -.5px;
+      margin: 0 0 1.5rem;
+    }
+
+    .card {
+      background: #fff;
+      padding: 1.5rem;
+      border-radius: 14px;
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, .06);
+    }
+
+    .card h3 {
+      margin: 0 0 1.2rem;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -.2px;
+    }
+
+    /* Viền trái màu cho card trạng thái kết quả */
+    .card--accepted { border-left: 4px solid #27ae60; }
+    .card--rejected { border-left: 4px solid #C0392B; }
+
+    /* ===== ALERT ===== */
+    .alert {
+      padding: 1rem 1.25rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    .alert-success {
+      background: #E8F5EC;
+      color: #1E7A42;
+      border-left: 4px solid #27ae60;
+    }
+    .alert-error {
+      background: #FDEAEA;
+      color: #C0392B;
+      border-left: 4px solid #C0392B;
+    }
+
+    /* ===== INFO ROW ===== */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: .65rem 0;
+      border-bottom: 1px solid #f0ebe5;
+      font-size: .92rem;
+    }
+    .info-row:last-of-type { border-bottom: none; }
+    .info-row > span:first-child { color: #666; font-weight: 700; }
+    .info-row strong { font-weight: 800; }
+
+    /* ===== PRODUCT TABLE ===== */
+    table { width: 100%; border-collapse: collapse; margin-top: .8rem; }
+    td, th { padding: .6rem .4rem; text-align: left; font-size: .9rem; }
+    thead th { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: #999; font-weight: 800; border-bottom: 2px solid #f0ebe5; }
+    tbody tr:not(:last-child) td { border-bottom: 1px solid #f0ebe5; }
+    tbody tr td:last-child { text-align: right; font-weight: 700; white-space: nowrap; }
+    tbody tr td:nth-child(3) { color: #888; font-weight: 700; }
+
+    .qty-input {
+      width: 70px;
+      padding: 6px 8px;
+      border: 1.5px solid #E7E2DC;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: .88rem;
+      text-align: center;
+    }
+    .qty-input:disabled,
+    .qty-input[readonly] { background: #f5f3f0; color: #bbb; }
+
+    .select-checkbox {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #C0633A;
+    }
+
+    .return-tag {
+      color: #C0392B;
+      font-weight: 800;
+      font-size: .78rem;
+    }
+
+    /* ===== STATUS BAR (timeline ngang) ===== */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      margin: 1.2rem 0;
+    }
+    .status-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 0 0 auto;
+    }
+    .status-dot {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .9rem;
+      font-weight: 800;
+      transition: all .25s ease;
+    }
+    .status-dot.done     { background: #C0633A; color: #fff; box-shadow: 0 4px 10px rgba(192, 99, 58, .3); }
+    .status-dot.active   { background: #111;    color: #fff; box-shadow: 0 4px 10px rgba(0, 0, 0, .25); }
+    .status-dot.inactive { background: #E7E2DC; color: #999; }
+
+    .status-label {
+      font-size: .72rem;
+      font-weight: 800;
+      text-align: center;
+      color: #999;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .status-label.active { color: #111; }
+
+    .status-line {
+      flex: 1;
+      height: 3px;
+      background: #E7E2DC;
+      margin: 0 .35rem 26px;
+      border-radius: 2px;
+      transition: background .25s ease;
+    }
+    .status-line.done { background: #C0633A; }
+
+    /* ===== BADGE ===== */
+    .badge {
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: .78rem;
+      font-weight: 800;
+      display: inline-block;
+      letter-spacing: .2px;
+      border: 1px solid transparent;
+    }
+    .badge-waiting  { background: #FFF4D6; color: #856404; border-color: rgba(133, 100, 4, .2); }
+    .badge-accepted { background: #E8F5EC; color: #1E7A42; border-color: rgba(30, 122, 66, .25); }
+    .badge-rejected { background: #FDEAEA; color: #C0392B; border-color: rgba(192, 57, 43, .25); }
+    .badge-partial  { background: #FFF0E0; color: #C0633A; border-color: rgba(192, 99, 58, .25); }
+
+    /* ===== FORM ===== */
+    label {
+      display: block;
+      font-weight: 800;
+      margin: .75rem 0 .35rem;
+      font-size: .9rem;
+    }
+    textarea {
+      width: 100%;
+      padding: .8rem 1rem;
+      border: 1.5px solid #E7E2DC;
+      border-radius: 10px;
+      resize: vertical;
+      font-family: inherit;
+      font-size: .92rem;
+      transition: border-color .2s ease, box-shadow .2s ease;
+      min-height: 100px;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #C0633A;
+      box-shadow: 0 0 0 4px rgba(192, 99, 58, .12);
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: .55rem;
+      padding: .8rem 1.6rem;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: .95rem;
+      font-weight: 800;
+      letter-spacing: .3px;
+      text-decoration: none;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, background .2s ease;
+      white-space: nowrap;
+    }
+    .btn:active { transform: translateY(0) scale(.985); }
+    .btn:focus-visible { outline: 3px solid rgba(192, 99, 58, .4); outline-offset: 3px; }
+    .btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* Nút chính — cam accent (dùng cho gửi yêu cầu) */
+    .btn-accent {
+      color: #fff;
+      background: linear-gradient(135deg, #D5734A 0%, #C0633A 100%);
+      box-shadow: 0 6px 16px rgba(192, 99, 58, .28);
+    }
+    .btn-accent:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+      box-shadow: 0 10px 24px rgba(192, 99, 58, .38);
+    }
+
+    /* Nút phụ — xám */
+    .btn-secondary {
+      color: #fff;
+      background: #444;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+    }
+    .btn-secondary:hover {
+      background: #333;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .2);
+    }
+
+    /* Nút back dạng link */
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: .35rem;
+      color: #666;
+      text-decoration: none;
+      font-size: .88rem;
+      font-weight: 800;
+      margin-top: .5rem;
+      transition: color .2s ease;
+    }
+    .btn-back:hover { color: #C0633A; }
+
+    /* ===== HINT ===== */
+    .hint {
+      font-size: .85rem;
+      color: #888;
+      margin: .25rem 0 1rem;
+      line-height: 1.5;
+    }
+    .hint-strong { font-weight: 800; }
   </style>
 </head>
 <body>
 <nav>
   <a th:href="@{/orders/{id}(id=${order.orderId})}">← Đơn hàng</a>
-  <span style="color:#C0633A;font-weight:900;">|</span>
-  <span style="color:#ccc;font-size:0.9rem;" th:text="${order.orderCode != null ? '#' + order.orderCode : '#' + order.orderCode}">#</span>
+  <span class="sep">|</span>
+  <span class="code" th:text="'#' + ${order.orderCode}">#</span>
 </nav>
 
 <div class="container">
   <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
   <div th:if="${error}"   class="alert alert-error"   th:text="${error}"></div>
 
-  <h1 style="margin-bottom:1.5rem;">Yêu cầu trả hàng</h1>
+  <h1>Yêu cầu trả hàng</h1>
 
-  <!-- THÔNG TIN ĐƠN HÀNG -->
+  <!-- ===== THÔNG TIN ĐƠN HÀNG ===== -->
   <div class="card">
     <h3>Thông tin đơn hàng</h3>
     <div class="info-row">
       <span>Mã đơn</span>
-      <strong th:text="${order.orderCode != null ? '#' + order.orderCode : '#' + order.orderCode}">#</strong>
+      <strong th:text="'#' + ${order.orderCode}">#</strong>
     </div>
     <div class="info-row">
       <span>Ngày đặt</span>
@@ -75,104 +310,221 @@
       <strong th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
     </div>
 
-    <!-- Sản phẩm -->
-    <table style="margin-top:0.8rem;">
+    <table>
+      <thead th:if="${order.returnStatus != null}">
+      <tr>
+        <th>Sản phẩm</th>
+        <th>Biến thể</th>
+        <th>SL</th>
+        <th>Đơn giá</th>
+        <th>Yêu cầu trả</th>
+      </tr>
+      </thead>
+      <tbody>
       <tr th:each="d : ${order.details}">
         <td th:text="${d.productDetail.product.productName}">Product</td>
         <td th:text="${d.productDetail.size} + ' / ' + ${d.productDetail.color}">M/Đen</td>
         <td th:text="'x' + ${d.quantity}">x1</td>
         <td th:text="${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+        <td th:if="${order.returnStatus != null}">
+          <span th:if="${d.returnQuantity != null and d.returnQuantity > 0}"
+                class="return-tag" th:text="'Trả x' + ${d.returnQuantity}"></span>
+        </td>
       </tr>
+      </tbody>
     </table>
   </div>
 
-  <!-- TRẠNG THÁI YÊU CẦU -->
+  <!-- ===== TRẠNG THÁI YÊU CẦU (khi đã có) ===== -->
   <div class="card" th:if="${order.returnStatus != null}">
     <h3>Trạng thái yêu cầu trả hàng</h3>
 
-    <!-- Timeline -->
+    <!-- Timeline ngang -->
     <div class="status-bar">
-      <!-- Không có yêu cầu -->
+      <!-- Bước 1: Đã gửi yêu cầu -->
       <div class="status-step">
-        <div th:class="${order == null} ? 'status-dot active' : 'status-dot done'">
-          <span th:text="${order == null} ? '●' : '✓'">●</span>
+        <div class="status-dot done">
+          <span>✓</span>
         </div>
-        <span th:class="${order == null} ? 'status-label active' : 'status-label'">yêu cầu</span>
+        <span class="status-label">Đã gửi<br/>yêu cầu</span>
       </div>
 
-      <div th:class="${order != null} ? 'status-line done' : 'status-line'"></div>
+      <div class="status-line done"></div>
 
-      <!-- Chờ xác nhận -->
+      <!-- Bước 2: Chờ xác nhận / đã xử lý -->
       <div class="status-step">
-        <div th:class="${order != null and order.returnStatus == 'Chờ xác nhận'} ? 'status-dot active' :
-                        (${order != null and (order.returnStatus == 'Đã chấp nhận' or order.returnStatus == 'Đã từ chối')} ? 'status-dot done' : 'status-dot inactive')">
+        <div th:class="${order.returnStatus == 'Chờ xác nhận'} ? 'status-dot active' : 'status-dot done'">
           <span>👤</span>
         </div>
-        <span th:class="${order != null and order.returnStatus == 'Chờ xác nhận'} ? 'status-label active' : 'status-label'">Chờ<br/>xác nhận</span>
+        <span th:class="${order.returnStatus == 'Chờ xác nhận'} ? 'status-label active' : 'status-label'">
+          Chờ<br/>xác nhận
+        </span>
       </div>
 
-      <div th:class="${order != null and (order.returnStatus == 'Đã chấp nhận' or order.returnStatus == 'Đã từ chối')} ? 'status-line done' : 'status-line'"></div>
+      <div th:class="${order.returnStatus == 'Đã chấp nhận' or order.returnStatus == 'Đã từ chối'} ? 'status-line done' : 'status-line'"></div>
 
-      <!-- Đã chấp nhận / Đã từ chối -->
+      <!-- Bước 3: Kết quả -->
       <div class="status-step">
-        <div th:class="${order != null and (order.returnStatus == 'Đã chấp nhận' or order.returnStatus == 'Đã từ chối')} ? 'status-dot done' : 'status-dot inactive'">
-          <span th:text="${order != null and order.returnStatus == 'Đã từ chối'} ? '✗' : '✓'">✓</span>
+        <div th:class="${order.returnStatus == 'Đã chấp nhận' or order.returnStatus == 'Đã từ chối'} ? 'status-dot done' : 'status-dot inactive'">
+          <span th:text="${order.returnStatus == 'Đã từ chối'} ? '✗' : '✓'">✓</span>
         </div>
         <span class="status-label"
-              th:text="${order != null and order.returnStatus == 'Đã từ chối'} ? 'Đã từ chối' : 'Đã chấp nhận'">Kết quả</span>
+              th:text="${order.returnStatus == 'Đã từ chối'} ? 'Đã từ chối' : 'Đã chấp nhận'">Kết quả</span>
       </div>
     </div>
 
-    <!-- Badge trạng thái hiện tại -->
-    <div th:if="${order != null}" style="margin-top:1rem;">
-      <span th:text="'Trạng thái: '"  style="font-weight:700;font-size:0.9rem;"></span>
-      <span th:text="${order.returnStatus}"
-            th:class="${order.returnStatus == 'Chờ xác nhận'} ? 'badge badge-waiting' :
-                       (${order.returnStatus == 'Đã chấp nhận'} ? 'badge badge-accepted' : 'badge badge-rejected')">
-        Chờ xác nhận
-      </span>
-      <div style="font-size:0.82rem;color:#888;margin-top:6px;"
+    <!-- Badge trạng thái + ngày gửi + lý do -->
+    <div style="margin-top:1rem;">
+      <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+        <span style="font-weight:800;font-size:.9rem;">Trạng thái:</span>
+        <span th:text="${order.returnStatus}"
+              th:class="${order.returnStatus == 'Chờ xác nhận'} ? 'badge badge-waiting' :
+                        (${order.returnStatus == 'Đã chấp nhận'} ? 'badge badge-accepted' : 'badge badge-rejected')">
+          Chờ xác nhận
+        </span>
+        <span th:if="${order.partialReturn}" class="badge badge-partial">
+          Trả một phần (<span th:text="${order.returnRequestedQuantity}"></span>/<span th:text="${order.totalQuantity}"></span> sản phẩm)
+        </span>
+      </div>
+      <div style="font-size:.82rem;color:#888;margin-top:.5rem;"
            th:text="'Ngày gửi: ' + ${#temporals.format(order.returnDate, 'dd/MM/yyyy HH:mm')}">
       </div>
-      <div style="margin-top:0.5rem;font-size:0.9rem;">
+      <div style="margin-top:.6rem;font-size:.9rem;">
         <strong>Lý do: </strong><span th:text="${order.returnReason}">lý do</span>
       </div>
     </div>
   </div>
 
-  <!-- FORM GỬI YÊU CẦU — chỉ hiện khi chưa có yêu cầu -->
+  <!-- ===== FORM GỬI YÊU CẦU (khi chưa có) — chọn từng sản phẩm muốn trả ===== -->
   <div class="card" th:if="${order.returnStatus == null}">
-    <h3>Gửi yêu cầu trả hàng</h3>
-    <p style="font-size:0.85rem;color:#888;margin-bottom:1rem;">
-      Vui lòng mô tả lý do trả hàng. HatHub sẽ xem xét và phản hồi trong 1-3 ngày làm việc.
+    <h3>Chọn sản phẩm muốn trả hàng</h3>
+    <p class="hint">
+      Tích chọn và nhập số lượng cho sản phẩm bạn muốn trả — ví dụ đơn có 3 sản phẩm nhưng
+      cửa hàng chỉ giao sai/lỗi 1 sản phẩm, bạn chỉ cần chọn đúng sản phẩm đó, không cần trả
+      toàn bộ đơn hàng. HatHub sẽ xem xét và phản hồi trong <span class="hint-strong">1–3 ngày làm việc</span>.
     </p>
-    <form onsubmit="return confirm('Bạn có chắc muốn gửi yêu cầu trả hàng không?')" th:action="@{/orders/{id}/return(id=${order.orderId})}" method="post">
+
+    <form onsubmit="return validateReturnForm() && confirm('Bạn có chắc muốn gửi yêu cầu trả hàng cho các sản phẩm đã chọn không?')"
+          th:action="@{/orders/{id}/return(id=${order.orderId})}" method="post">
+
+      <table>
+        <thead>
+        <tr>
+          <th style="width:34px;"></th>
+          <th>Sản phẩm</th>
+          <th>Đã đặt</th>
+          <th style="width:110px;">SL muốn trả</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="d : ${order.details}">
+          <td>
+            <input type="checkbox" class="select-checkbox"
+                   th:attr="onchange=|toggleReturnQty(this, ${d.orderDetailId})|" />
+            <input type="hidden" name="orderDetailIds" th:value="${d.orderDetailId}" />
+          </td>
+          <td>
+            <span th:text="${d.productDetail.product.productName}">Product</span><br/>
+            <small style="color:#888;" th:text="${d.productDetail.size} + ' / ' + ${d.productDetail.color}">M/Đen</small>
+          </td>
+          <td th:text="'x' + ${d.quantity}">x1</td>
+          <td>
+            <input type="number" name="quantities" min="0" value="0" readonly
+                   class="qty-input"
+                   th:max="${d.quantity}"
+                   th:id="|qtyInput${d.orderDetailId}|"
+                   oninput="clampReturnQty(this)" />
+          </td>
+        </tr>
+        </tbody>
+      </table>
+
       <label for="reason">Lý do trả hàng</label>
       <textarea id="reason" name="reason" rows="4"
                 placeholder="VD: Sản phẩm bị lỗi, sai màu, sai size..." required></textarea>
-      <button type="submit" class="btn-submit">Gửi yêu cầu trả hàng</button>
+
+      <button type="submit" class="btn btn-accent" style="margin-top:1rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 2 11 13"/>
+          <path d="M22 2 15 22l-4-9-9-4 20-7Z"/>
+        </svg>
+        Gửi yêu cầu trả hàng
+      </button>
     </form>
   </div>
 
-  <!-- Thông báo khi đã từ chối -->
-  <div class="card" th:if="${order != null and order.returnStatus == 'Đã từ chối'}"
-       style="border-left:4px solid #c00;">
-    <p style="color:#721c24;font-weight:700;">❌ Yêu cầu trả hàng đã bị từ chối</p>
-    <p style="font-size:0.85rem;color:#888;margin-top:0.5rem;">
+  <!-- ===== KẾT QUẢ — ĐÃ TỪ CHỐI ===== -->
+  <div class="card card--rejected" th:if="${order.returnStatus == 'Đã từ chối'}">
+    <p style="color:#C0392B;font-weight:800;margin:0;">
+      ❌ Yêu cầu trả hàng đã bị từ chối
+    </p>
+    <p class="hint" style="margin:.5rem 0 0;">
       Nếu cần hỗ trợ thêm, vui lòng liên hệ HatHub qua email hoặc hotline.
     </p>
   </div>
 
-  <!-- Thông báo khi đã chấp nhận -->
-  <div class="card" th:if="${order != null and order.returnStatus == 'Đã chấp nhận'}"
-       style="border-left:4px solid #27ae60;">
-    <p style="color:#155724;font-weight:700;">✅ Yêu cầu trả hàng đã được chấp nhận</p>
-    <p style="font-size:0.85rem;color:#888;margin-top:0.5rem;">
-      Vui lòng gửi hàng về địa chỉ HatHub. Chúng tôi sẽ hoàn tiền trong 3-5 ngày làm việc.
+  <!-- ===== KẾT QUẢ — ĐÃ CHẤP NHẬN ===== -->
+  <div class="card card--accepted" th:if="${order.returnStatus == 'Đã chấp nhận'}">
+    <p style="color:#1E7A42;font-weight:800;margin:0;">
+      ✅ Yêu cầu trả hàng đã được chấp nhận
+    </p>
+    <p class="hint" style="margin:.5rem 0 0;">
+      Vui lòng gửi hàng về địa chỉ HatHub. Chúng tôi sẽ hoàn tiền trong <span class="hint-strong">3–5 ngày làm việc</span>.
     </p>
   </div>
 
   <a href="/orders" class="btn-back">← Về danh sách đơn hàng</a>
 </div>
+
+<script>
+  function toggleReturnQty(checkbox, detailId) {
+    var input = document.getElementById('qtyInput' + detailId);
+    // Dùng readOnly thay vì disabled: input bị "disabled" sẽ KHÔNG được gửi
+    // lên server cùng form, khiến mảng orderDetailIds và quantities lệch số
+    // lượng phần tử. readOnly vẫn gửi giá trị (mặc định 0) khi chưa tick chọn.
+    input.readOnly = !checkbox.checked;
+    input.value = checkbox.checked ? 1 : 0;
+  }
+
+  // Chặn nhập tay vượt quá số lượng đã đặt (thuộc tính HTML "max" chỉ chặn
+  // được khi bấm nút mũi tên tăng/giảm, không chặn được khi gõ trực tiếp).
+  function clampReturnQty(input) {
+    var max = parseInt(input.max, 10);
+    var min = parseInt(input.min, 10) || 0;
+    var value = parseInt(input.value, 10);
+
+    if (isNaN(value)) {
+      input.value = min;
+      return;
+    }
+    if (!isNaN(max) && value > max) {
+      input.value = max;
+    } else if (value < min) {
+      input.value = min;
+    }
+  }
+
+  // Kiểm tra lại lần cuối trước khi submit, phòng trường hợp trình duyệt
+  // không chạy sự kiện "oninput" (VD: dán số bằng chuột, tự động điền...).
+  function validateReturnForm() {
+    var inputs = document.querySelectorAll('.qty-input:not([readonly])');
+    var hasSelected = false;
+
+    for (var i = 0; i < inputs.length; i++) {
+      var input = inputs[i];
+      clampReturnQty(input);
+      if (parseInt(input.value, 10) > 0) {
+        hasSelected = true;
+      }
+    }
+
+    if (!hasSelected) {
+      alert('Vui lòng chọn ít nhất 1 sản phẩm và nhập số lượng muốn trả!');
+      return false;
+    }
+    return true;
+  }
+</script>
 </body>
 </html>

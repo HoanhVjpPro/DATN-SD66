@@ -43,6 +43,9 @@ public class ProductController {
     @Autowired
     private WishlistService wishlistService;
 
+    @Autowired
+    private ProductRepository productRepository;
+
     @GetMapping("/products")
     public String productList(
             @RequestParam(required = false) String keyword,
@@ -99,17 +102,17 @@ public class ProductController {
 
     // UC07 — Chi tiết sản phẩm
     @GetMapping("/products/{id}")
-    public String productDetail(@PathVariable Integer id,@RequestParam(defaultValue = "0") Integer pid, HttpSession session, Model model, HttpServletRequest req) {
+    public String productDetail(@PathVariable Integer id, @RequestParam(defaultValue = "0") Integer pid, HttpSession session, Model model, HttpServletRequest req) {
 
         Product product = productService.getProductById(id);
 
         ArrayList<Integer> dspdid = reviewRepository.finddspdid(id);
         Integer pd = pid;
-        if(pid == 0){
+        if(pid == 0 && dspdid != null && !dspdid.isEmpty()){
             pd = dspdid.get(0);
         }
 
-        List<ReviewDTO> dsr = reviewRepository.findcomment(pd);
+        List<ReviewDTO> dsr = (pd != null) ? reviewRepository.findcomment(pd) : new ArrayList<>();
 
         List<ProductDetail> pdid = productDetailRepository.findByProductProductId(id);
 
@@ -120,19 +123,13 @@ public class ProductController {
         if (viewedProducts == null) {
             viewedProducts = new ArrayList<>();
         }
-
-// Nếu đã có thì xóa để đưa lên đầu
         viewedProducts.removeIf(p -> p.getProductId().equals(product.getProductId()));
-// Thêm sản phẩm vừa xem lên đầu danh sách
         viewedProducts.add(0, product);
-// Chỉ lưu tối đa 8 sản phẩm
         if (viewedProducts.size() > 8) {
             viewedProducts = viewedProducts.subList(0, 8);
         }
 
         session.setAttribute("viewedProducts", viewedProducts);
-
-// Gửi sang HTML
         model.addAttribute("viewedProducts", viewedProducts);
 
         Map<Integer, String> viewedImageMap = new HashMap<>();
@@ -146,31 +143,33 @@ public class ProductController {
         var details = product.getDetails();
         var selectedDetail = (details != null && !details.isEmpty()) ? details.get(0) : null;
 
-        String iduser = "";
-        for (Cookie c : req.getCookies()) {
-            if(c.getName().equals("userId")){
-                iduser = String.valueOf(c.getValue());
+        if (req.getCookies() != null) {
+            for (Cookie c : req.getCookies()) {
+                if(c.getName().equals("userId")){
+                    String iduser = String.valueOf(c.getValue());
+                    System.out.println("UserID : "+iduser);
+                }
             }
         }
-        System.out.println("UserID : "+iduser);
 
         Integer userID = (Integer) session.getAttribute("userId");
 
         Reviews r = new Reviews();
         r.setRating(0.0);
         r.setComment("");
-        if (userID != null) {
+        if (userID != null && pd != null) {
             Reviews findr = reviewRepository.findByCustomerIDAndProductDetailID(userID, pd);
             if (findr != null) {
                 r = findr;
             }
         }
 
-
-        String imageUrl = productService.getDefaultImageUrl(product); // FIX: gọi từ Service, không phải Repository
+        String imageUrl = productService.getDefaultImageUrl(product);
 
         session.setAttribute("productid",product.getProductId());
-        session.setAttribute("selectedDetail",selectedDetail.getProductDetailId());
+        if (selectedDetail != null) {
+            session.setAttribute("selectedDetail",selectedDetail.getProductDetailId());
+        }
 
         model.addAttribute("product",        product);
         model.addAttribute("details",        details);
@@ -188,6 +187,38 @@ public class ProductController {
         Integer userId = (Integer) session.getAttribute("userId");
         model.addAttribute("inWishlist", wishlistService.isInWishlist(userId, product.getProductId()));
 
+        // --- GỘP NHÓM GỢI Ý SẢN PHẨM THÀNH MỘT DANH SÁCH DUY NHẤT ---
+        List<Product> recommendProducts = new ArrayList<>();
+        if (product.getCategory() != null) {
+            recommendProducts = productRepository.findByCategory_CategoryIdAndProductIdNotAndStatusTrue(
+                    product.getCategory().getCategoryId(),
+                    id,
+                    org.springframework.data.domain.Pageable.unpaged()
+            );
+        }
+        if (product.getBrand() != null) {
+            List<Product> brandProducts = productRepository.findByBrand_BrandIdAndProductIdNotAndStatusTrue(
+                    product.getBrand().getBrandId(),
+                    id,
+                    org.springframework.data.domain.Pageable.unpaged()
+            );
+            for (Product bp : brandProducts) {
+                if (recommendProducts.stream().noneMatch(p -> p.getProductId().equals(bp.getProductId()))
+                        && !bp.getProductId().equals(id)) {
+                    recommendProducts.add(bp);
+                }
+            }
+        }
+        List<Product> latestProducts = productRepository.findByStatusTrueOrderByProductIdDesc();
+        for (Product lp : latestProducts) {
+            if (recommendProducts.stream().noneMatch(p -> p.getProductId().equals(lp.getProductId()))
+                    && !lp.getProductId().equals(id)) {
+                recommendProducts.add(lp);
+            }
+        }
+
+        model.addAttribute("recommendProducts", recommendProducts);
+
         return "products/detail";
     }
 
@@ -201,16 +232,19 @@ public class ProductController {
             return "redirect:/login";
         }
 
-        ProductDetail pd = productDetailRepository.findById(productDetailId).get();
-        Customer customer = customerRepository.findByUserUserID(userID).get();
-        review.setProductDetailID(pd);
-        review.setCustomerID(customer);
+        ProductDetail pd = productDetailRepository.findById(productDetailId).orElse(null);
+        Customer customer = customerRepository.findByUserUserID(userID).orElse(null);
 
-        try {
-            reviewRepository.save(review);
-            ra.addFlashAttribute("Csuccess", "Cảm ơn bạn đã đánh giá!");
-        } catch (DataIntegrityViolationException e) {
-            ra.addFlashAttribute("Cerror", "Mỗi sản phẩm chỉ được đánh giá 1 lần!");
+        if (pd != null && customer != null) {
+            review.setProductDetailID(pd);
+            review.setCustomerID(customer);
+
+            try {
+                reviewRepository.save(review);
+                ra.addFlashAttribute("Csuccess", "Cảm ơn bạn đã đánh giá!");
+            } catch (DataIntegrityViolationException e) {
+                ra.addFlashAttribute("Cerror", "Mỗi sản phẩm chỉ được đánh giá 1 lần!");
+            }
         }
 
         return "redirect:/products/" + productid;
