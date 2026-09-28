@@ -262,6 +262,82 @@
 
         .count-display { font-size:0.85rem; color:var(--gray-400); margin-bottom:0.8rem; }
 
+        /* ===== Nút "+ Thêm" ở tiêu đề trang ===== */
+        .btn {
+            display:inline-flex; align-items:center; justify-content:center; gap:6px;
+            border:none; border-radius:40px; font-family:var(--font-body); font-weight:800;
+            font-size:0.85rem; text-transform:uppercase; letter-spacing:0.04em;
+            padding:11px 24px; cursor:pointer; text-decoration:none; transition:all 0.2s ease;
+        }
+        .btn:hover { transform:translateY(-2px); }
+        .btn-primary { background:var(--rust); color:var(--white); box-shadow:0 4px 12px rgba(192,99,58,0.3); }
+        .btn-primary:hover { background:var(--rust-dark); box-shadow:0 8px 20px rgba(192,99,58,0.4); }
+        .btn-primary:disabled { background:var(--gray-100); color:var(--gray-400); cursor:not-allowed; transform:none; box-shadow:none; }
+        .btn-neutral { background:#666; color:#fff; }
+        .btn-neutral:hover { background:#4d4d4d; }
+
+        /* ===== Modal "Trả hàng tại quầy" ===== */
+        .modal-overlay {
+            display:none; position:fixed; inset:0; background:rgba(17,17,17,0.55);
+            z-index:1000; align-items:center; justify-content:center; padding:20px;
+        }
+        .modal-overlay.open { display:flex; }
+        .modal-box {
+            background:var(--white); border-radius:var(--radius); width:100%; max-width:640px;
+            max-height:90vh; overflow-y:auto; padding:2rem 2.2rem; position:relative;
+            box-shadow:0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-box h3 {
+            font-family:var(--font-display); font-weight:900; font-size:1.6rem; text-transform:uppercase;
+            margin-bottom:1.2rem; color:var(--black); border-bottom:2px solid var(--rust); padding-bottom:0.6rem;
+        }
+        .modal-close {
+            position:absolute; top:1.4rem; right:1.6rem; background:none; border:none;
+            font-size:1.3rem; color:var(--gray-400); cursor:pointer; line-height:1;
+        }
+        .modal-close:hover { color:var(--rust); }
+
+        .lookup-row { display:flex; gap:8px; margin-bottom:0.4rem; }
+        .lookup-row input[type="text"] {
+            flex:1; padding:12px 16px; border:2px solid var(--gray-100); border-radius:10px;
+            font-family:var(--font-body); font-size:0.95rem; background:var(--gray-100); outline:none;
+            transition:border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+        .lookup-row input:focus { border-color:var(--rust); background:var(--white); box-shadow:0 0 0 4px rgba(192,99,58,0.1); }
+
+        .lookup-hint { font-size:0.78rem; color:var(--gray-400); margin-bottom:1.2rem; }
+
+        .counter-order-info {
+            display:flex; flex-wrap:wrap; gap:1.2rem; background:var(--gray-100); border-radius:10px;
+            padding:12px 16px; margin-bottom:1.2rem; font-size:0.86rem;
+        }
+        .counter-order-info b { color:var(--black); }
+
+        .modal-box table { width:100%; border-collapse:collapse; font-size:0.86rem; margin-bottom:1rem; }
+        .modal-box thead th {
+            background:var(--black); color:var(--white); padding:8px 10px; text-align:left;
+            font-size:0.68rem; text-transform:uppercase; letter-spacing:0.05em; font-weight:800;
+        }
+        .modal-box tbody td { padding:8px 10px; border-bottom:1px solid var(--gray-100); vertical-align:middle; }
+
+        .qty-input {
+            width:70px; padding:6px 8px; border:2px solid var(--gray-100); border-radius:8px;
+            font-family:var(--font-body); font-size:0.86rem; text-align:center; outline:none;
+        }
+        .qty-input:focus { border-color:var(--rust); }
+        .qty-input[readonly] { background:var(--gray-100); color:var(--gray-400); }
+
+        .modal-box textarea {
+            width:100%; padding:12px 16px; border:2px solid var(--gray-100); border-radius:10px;
+            font-family:var(--font-body); font-size:0.92rem; background:var(--gray-100); outline:none;
+            resize:vertical; min-height:80px; transition:border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+        .modal-box textarea:focus { border-color:var(--rust); background:var(--white); box-shadow:0 0 0 4px rgba(192,99,58,0.1); }
+        .modal-box label { display:block; font-weight:700; font-size:0.82rem; color:var(--gray-700); margin:0.8rem 0 6px; }
+
+        .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:1.4rem; }
+        .lookup-error { background:#f8dddd; color:#721c24; padding:10px 14px; border-radius:10px; font-weight:700; font-size:0.85rem; margin-bottom:1rem; }
+
         @media (max-width:992px) {
             .sidebar { width:220px; }
             .sidebar-brand { padding:1rem 1.2rem; min-height:64px; gap:10px; }
@@ -296,6 +372,7 @@
         @media (max-width:480px) {
             .page-title { font-size:1.6rem; }
             .table-card thead th, .table-card tbody td { padding:8px 10px; font-size:0.75rem; }
+            .modal-box { padding:1.4rem; }
         }
     </style>
 </head>
@@ -368,7 +445,10 @@
 
 <!-- ===== MAIN ===== -->
 <main class="main">
-    <div class="page-header"><h1 class="page-title">Yêu cầu trả hàng</h1></div>
+    <div class="page-header">
+        <h1 class="page-title">Yêu cầu trả hàng</h1>
+        <button type="button" class="btn btn-primary" onclick="openCounterReturnModal()">+ Thêm (Trả hàng tại quầy)</button>
+    </div>
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
@@ -421,6 +501,169 @@
         </table>
     </div>
 </main>
+
+<!-- ===== MODAL "TRẢ HÀNG TẠI QUẦY" ===== -->
+<div class="modal-overlay" id="counterReturnModal" onclick="closeCounterReturnModalOnOverlay(event)">
+    <div class="modal-box">
+        <button type="button" class="modal-close" onclick="closeCounterReturnModal()">✕</button>
+        <h3>Trả hàng tại quầy</h3>
+
+        <!-- Bước 1: Tra cứu theo mã đơn -->
+        <div id="counterLookupStep">
+            <label for="counterOrderCodeInput" style="margin-top:0;">Mã đơn bán tại quầy (POS)</label>
+            <div class="lookup-row">
+                <input type="text" id="counterOrderCodeInput" placeholder="VD: POS20260819-15 hoặc chỉ nhập ID đơn" />
+                <button type="button" class="btn btn-primary" onclick="lookupCounterOrder()">🔍 Tra cứu</button>
+            </div>
+            <div class="lookup-hint">Chỉ áp dụng cho đơn bán tại quầy (mua trực tiếp tại cửa hàng) và chưa được xử lý trả hàng trước đó.</div>
+            <div id="counterLookupError" class="lookup-error" style="display:none;"></div>
+        </div>
+
+        <!-- Bước 2: Chọn sản phẩm muốn trả + lý do (hiện ra sau khi tra cứu thành công) -->
+        <form id="counterReturnForm" th:action="@{/admin/returns/counter-pos}" method="post" style="display:none;">
+            <input type="hidden" name="posOrderId" id="counterOrderIdHidden" />
+
+            <div class="counter-order-info" id="counterOrderInfo"></div>
+
+            <table>
+                <thead>
+                <tr>
+                    <th style="width:34px;"></th>
+                    <th>Sản phẩm</th>
+                    <th>Đã đặt</th>
+                    <th style="width:100px;">SL muốn trả</th>
+                </tr>
+                </thead>
+                <tbody id="counterItemsBody"></tbody>
+            </table>
+
+            <label for="counterReasonInput">Lý do trả hàng</label>
+            <textarea id="counterReasonInput" name="reason" placeholder="VD: Khách mang hàng lỗi đến trả trực tiếp tại cửa hàng..."></textarea>
+
+            <div class="modal-actions">
+                <button type="button" class="btn btn-neutral" onclick="backToLookup()">← Tra cứu lại</button>
+                <button type="submit" class="btn btn-primary">✓ Xác nhận trả hàng</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCounterReturnModal() {
+        document.getElementById('counterReturnModal').classList.add('open');
+        resetCounterModal();
+    }
+    function closeCounterReturnModal() {
+        document.getElementById('counterReturnModal').classList.remove('open');
+    }
+    function closeCounterReturnModalOnOverlay(e) {
+        if (e.target === e.currentTarget) closeCounterReturnModal();
+    }
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeCounterReturnModal();
+    });
+
+    function resetCounterModal() {
+        document.getElementById('counterOrderCodeInput').value = '';
+        document.getElementById('counterLookupError').style.display = 'none';
+        document.getElementById('counterLookupStep').style.display = 'block';
+        document.getElementById('counterReturnForm').style.display = 'none';
+        document.getElementById('counterItemsBody').innerHTML = '';
+        document.getElementById('counterReasonInput').value = '';
+    }
+
+    function backToLookup() {
+        document.getElementById('counterReturnForm').style.display = 'none';
+        document.getElementById('counterLookupStep').style.display = 'block';
+    }
+
+    function lookupCounterOrder() {
+        const code = document.getElementById('counterOrderCodeInput').value.trim();
+        const errBox = document.getElementById('counterLookupError');
+        errBox.style.display = 'none';
+
+        if (!code) {
+            errBox.textContent = 'Vui lòng nhập mã đơn hàng!';
+            errBox.style.display = 'block';
+            return;
+        }
+
+        fetch('/admin/returns/lookup-pos?orderCode=' + encodeURIComponent(code))
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    errBox.textContent = data.message || 'Không tìm thấy đơn hàng!';
+                    errBox.style.display = 'block';
+                    return;
+                }
+                renderCounterOrder(data);
+            })
+            .catch(() => {
+                errBox.textContent = 'Có lỗi khi tra cứu, vui lòng thử lại.';
+                errBox.style.display = 'block';
+            });
+    }
+
+    function renderCounterOrder(data) {
+        document.getElementById('counterOrderIdHidden').value = data.posOrderId;
+
+        document.getElementById('counterOrderInfo').innerHTML =
+            '<div><b>Mã đơn:</b> #' + data.orderCode + '</div>' +
+            '<div><b>Khách hàng:</b> ' + data.customerName + '</div>' +
+            (data.customerPhone ? '<div><b>SĐT:</b> ' + data.customerPhone + '</div>' : '');
+
+        const body = document.getElementById('counterItemsBody');
+        body.innerHTML = data.details.map(d => `
+            <tr>
+                <td>
+                    <input type="checkbox" onchange="toggleCounterQty(this, ${d.posOrderDetailId})" />
+                    <input type="hidden" name="posOrderDetailIds" value="${d.posOrderDetailId}" />
+                </td>
+                <td>${d.productName}<br/><small style="color:var(--gray-400);">${d.size} / ${d.color}</small></td>
+                <td>x${d.quantity}</td>
+                <td>
+                    <input type="number" name="quantities" min="0" value="0" readonly
+                           class="qty-input" max="${d.quantity}"
+                           id="counterQty${d.posOrderDetailId}"
+                           oninput="clampCounterQty(this)" />
+                </td>
+            </tr>
+        `).join('');
+
+        document.getElementById('counterLookupStep').style.display = 'none';
+        document.getElementById('counterReturnForm').style.display = 'block';
+    }
+
+    function toggleCounterQty(checkbox, detailId) {
+        const input = document.getElementById('counterQty' + detailId);
+        input.readOnly = !checkbox.checked;
+        input.value = checkbox.checked ? 1 : 0;
+    }
+
+    function clampCounterQty(input) {
+        const max = parseInt(input.max, 10);
+        const min = parseInt(input.min, 10) || 0;
+        let value = parseInt(input.value, 10);
+        if (isNaN(value)) { input.value = min; return; }
+        if (!isNaN(max) && value > max) input.value = max;
+        else if (value < min) input.value = min;
+    }
+
+    document.getElementById('counterReturnForm').addEventListener('submit', function (e) {
+        const inputs = this.querySelectorAll('.qty-input:not([readonly])');
+        let hasSelected = false;
+        inputs.forEach(input => { clampCounterQty(input); if (parseInt(input.value, 10) > 0) hasSelected = true; });
+
+        if (!hasSelected) {
+            e.preventDefault();
+            alert('Vui lòng chọn ít nhất 1 sản phẩm và nhập số lượng muốn trả!');
+            return;
+        }
+        if (!confirm('Xác nhận trả hàng tại quầy cho đơn này? Kho sẽ được cộng lại ngay lập tức.')) {
+            e.preventDefault();
+        }
+    });
+</script>
 <script>
     function filterReturn(status) {
         document.querySelectorAll('.filter-tabs button').forEach(b => b.classList.remove('active'));

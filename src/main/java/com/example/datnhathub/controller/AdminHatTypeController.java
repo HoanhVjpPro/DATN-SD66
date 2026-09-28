@@ -20,7 +20,6 @@ public class AdminHatTypeController {
     @Autowired
     private HatTypeRepository hatTypeRepository;
 
-    // GET /admin/hat-types — Danh sách + form thêm/sửa
     @GetMapping
     public String listHatTypes(@RequestParam(required = false) Integer editId, Model model, HttpSession session) {
         Users user = (Users) session.getAttribute("user");
@@ -42,7 +41,6 @@ public class AdminHatTypeController {
         return "admin/hat-types";
     }
 
-    // POST /admin/hat-types — Thêm mới HOẶC cập nhật
     @PostMapping
     public String saveHatType(@RequestParam(required = false) Integer hatTypeId,
                               @RequestParam String hatTypeName,
@@ -62,7 +60,6 @@ public class AdminHatTypeController {
         return "redirect:/admin/hat-types";
     }
 
-    // POST /admin/hat-types/delete/{id} — Xóa kiểu mũ
     @PostMapping("/delete/{id}")
     public String deleteHatType(@PathVariable("id") Integer id, RedirectAttributes ra) {
         try {

@@ -6,7 +6,6 @@
     <title>Thanh toán | HatHub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- ĐÃ THÊM &subset=vietnamese ĐỂ HỖ TRỢ TIẾNG VIỆT -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Barlow+Condensed:wght@500;700;900&display=swap&subset=vietnamese" rel="stylesheet" />
     <style>
         /* ===== RESET & VARIABLES ===== */
@@ -24,7 +23,6 @@
             --gray-200: #8a8383;
             --gray-400: #9e9b96;
             --gray-700: #3e3d3a;
-            /* ĐÃ THÊM FALLBACK HỖ TRỢ TIẾNG VIỆT */
             --font-display: 'Barlow Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
             --font-body: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
             --shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -214,6 +212,33 @@
             resize: vertical;
             min-height: 100px;
         }
+        .form-box select:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .address-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+        .address-grid > div { margin-bottom: 0 !important; }
+
+        .fee-display-box {
+            background: var(--gray-100);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-weight: 800;
+            color: var(--rust);
+            font-size: 1rem;
+        }
+        .fee-note {
+            font-size: 0.78rem;
+            color: #e67e22;
+            margin-top: 6px;
+            font-weight: 600;
+            display: none;
+        }
 
         /* Payment options */
         .payment-options {
@@ -250,7 +275,7 @@
             background: #fff5f0;
         }
 
-        /* Voucher row - ĐÃ SỬA FONT */
+        /* Voucher row */
         .voucher-row {
             display: flex;
             gap: 10px;
@@ -264,7 +289,6 @@
             border: none;
             padding: 0 24px;
             border-radius: 40px;
-            /* GÁN RÕ RÀNG FONT CÓ FALLBACK */
             font-family: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
             font-weight: 800;
             font-size: 0.8rem;
@@ -290,7 +314,7 @@
         .voucher-message.success { color: #2e7d32; }
         .voucher-message.error { color: #c62828; }
 
-        /* Submit button - ĐÃ SỬA FONT */
+        /* Submit button */
         .btn-primary {
             display: inline-block;
             width: 100%;
@@ -431,6 +455,12 @@
             }
         }
 
+        @media (max-width: 700px) {
+            .address-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 600px) {
             .shop-nav {
                 flex-wrap: wrap;
@@ -502,21 +532,41 @@
 
         <!-- FORM -->
         <form class="checkout-card form-box" id="checkoutForm"
-              onsubmit="return confirm('Có chắc muốn đặt hàng chứ?')"
+              onsubmit="return confirmSubmit()"
               action="/checkout" method="post">
 
             <!-- Chỉ đặt hàng đúng những sản phẩm khách đã chọn từ giỏ hàng -->
             <input type="hidden" th:each="itemId : ${selectedItems}" name="selectedItems" th:value="${itemId}" />
 
-            <div>
-                <label>Tỉnh / Thành phố</label>
-                <select name="city" id="citySelect" required onchange="updateGrandTotal()">
-                    <option value="" disabled selected>-- Chọn tỉnh/thành phố --</option>
-                    <option value="Hà Nội">Hà Nội (20.000VNĐ)</option>
-                    <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh (30.000VNĐ)</option>
-                    <option value="Đà Nẵng">Đà Nẵng (25.000VNĐ)</option>
-                    <option value="Khác">Tỉnh/thành khác (35.000VNĐ)</option>
-                </select>
+            <!-- Tên tỉnh/thành để ghép vào địa chỉ hiển thị (chuỗi text, KHÔNG dùng để tính phí) -->
+            <input type="hidden" name="city" id="cityNameHidden" />
+            <!-- Tên Quận/Huyện và Phường/Xã đã chọn — dùng để ghép chuỗi địa chỉ hiển thị -->
+            <input type="hidden" name="districtName" id="districtNameHidden" />
+            <input type="hidden" name="wardName" id="wardNameHidden" />
+            <!-- District ID / Ward Code thật của GHN, dùng để server tính lại phí ship -->
+            <input type="hidden" name="ghnDistrictId" id="ghnDistrictId" required />
+            <input type="hidden" name="ghnWardCode" id="ghnWardCodeHidden" required />
+            <input type="hidden" name="shippingProvider" id="shippingProviderHidden" value="GHN" />
+
+            <div class="address-grid">
+                <div>
+                    <label>Tỉnh / Thành phố</label>
+                    <select id="provinceSelect" required>
+                        <option value="" disabled selected>-- Chọn tỉnh/thành --</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Quận / Huyện</label>
+                    <select id="districtSelect" required disabled>
+                        <option value="">-- Chọn tỉnh trước --</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Phường / Xã</label>
+                    <select id="wardSelect" required disabled>
+                        <option value="">-- Chọn quận/huyện trước --</option>
+                    </select>
+                </div>
             </div>
 
             <div>
@@ -525,8 +575,9 @@
             </div>
 
             <div>
-                <label>Quận / Huyện</label>
-                <input type="text" name="district" required placeholder="VD: Quận Đống Đa" />
+                <label>Phí vận chuyển (GHN)</label>
+                <div class="fee-display-box" id="shippingFeeDisplayGhn">-- đ</div>
+                <div class="fee-note" id="shippingFeeNote">⚠ Không kết nối được GHN, đang dùng phí ước tính.</div>
             </div>
 
             <div>
@@ -540,6 +591,12 @@
                         <input type="radio" name="paymentMethod" value="Chuyển khoản" />
                         Chuyển khoản ngân hàng
                     </label>
+                    <label class="payment-option">
+                        <input type="radio"
+                               name="paymentMethod"
+                               value="VNPAY" />
+                        Thanh toán qua VNPay
+                    </label>
                 </div>
             </div>
 
@@ -552,13 +609,12 @@
                 <label>Mã voucher</label>
                 <div class="voucher-row">
                     <input type="text" name="voucherCode" id="voucherCodeInput" placeholder="Nhập mã, VD: HATHUB30" />
-                    <!-- NÚT "ÁP DỤNG" ĐÃ ĐƯỢC GÁN FALLBACK -->
                     <button type="button" onclick="applyVoucher()">Áp dụng</button>
                 </div>
                 <p class="voucher-message" id="voucherMessage"></p>
             </div>
 
-            <button class="btn-primary" type="submit"
+            <button class="btn-primary" type="submit" id="submitBtn"
                     th:disabled="${outOfStockMessages != null and !outOfStockMessages.isEmpty()}"
                     th:text="${outOfStockMessages != null and !outOfStockMessages.isEmpty()} ? 'Vui lòng cập nhật giỏ hàng' : 'Đặt hàng'">
                 Đặt hàng
@@ -605,7 +661,7 @@
                 <strong class="summary-total" id="grandTotalDisplay" th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
             </div>
 
-            <p class="summary-note">🚚 Đơn hàng từ 500.000đ được miễn phí vận chuyển.</p>
+            <p class="summary-note">🚚 Đơn hàng từ 500.000đ được miễn phí vận chuyển (GHTK) hoặc giảm 15.000đ (GHN).</p>
         </aside>
     </div>
 </main>
@@ -614,26 +670,147 @@
 <script th:inline="javascript">
     const subtotal = /*[[${total}]]*/ 0;
     const FREESHIP_THRESHOLD = 500000;
-    const FEES = { "Hà Nội": 20000, "TP. Hồ Chí Minh": 30000, "Đà Nẵng": 25000, "Khác": 35000 };
 
     let voucherDiscount = 0;
     let voucherFreeShip = false;
+
+    // Phí ship lấy từ GHN qua API server-side proxy (/api/shipping/ghn/fee)
+    let ghnFee = 0;
+    let ghnFallback = false;
+    // Ước lượng cân nặng đơn hàng — tạm tính đơn giản theo tổng số sản phẩm hiển thị trong summary
+    let cartWeightGram = Math.max(
+        [].slice.call(document.querySelectorAll('.summary-row .product-info')).length * 250,
+        200
+    );
 
     function formatVND(n) {
         return Math.round(n).toLocaleString('vi-VN') + ' đ';
     }
 
+    // ══════════════════════════════════════════════════════════
+    // CASCADING TỈNH → HUYỆN → XÃ (dữ liệu thật từ GHN qua proxy server)
+    // ══════════════════════════════════════════════════════════
+
+    // ── Đổ danh sách Tỉnh ──
+    fetch('/api/shipping/ghn/provinces')
+        .then(res => res.json())
+        .then(list => {
+            const sel = document.getElementById('provinceSelect');
+            sel.innerHTML = '<option value="" disabled selected>-- Chọn tỉnh/thành phố --</option>' +
+                list.map(p => `<option value="${p.ProvinceID}">${p.ProvinceName}</option>`).join('');
+        })
+        .catch(() => {
+            document.getElementById('provinceSelect').innerHTML =
+                '<option value="" disabled selected>Không tải được danh sách tỉnh</option>';
+        });
+
+    document.getElementById('provinceSelect').addEventListener('change', function () {
+        const provinceId = this.value;
+        const provinceName = this.options[this.selectedIndex].textContent;
+        document.getElementById('cityNameHidden').value = provinceName;
+
+        const districtSel = document.getElementById('districtSelect');
+        const wardSel = document.getElementById('wardSelect');
+        districtSel.disabled = true;
+        wardSel.disabled = true;
+        wardSel.innerHTML = '<option value="">-- Chọn quận/huyện trước --</option>';
+        resetFeeDisplay();
+
+        fetch('/api/shipping/ghn/districts?provinceId=' + provinceId)
+            .then(res => res.json())
+            .then(list => {
+                districtSel.innerHTML = '<option value="" disabled selected>-- Chọn quận/huyện --</option>' +
+                    list.map(d => `<option value="${d.DistrictID}">${d.DistrictName}</option>`).join('');
+                districtSel.disabled = false;
+            })
+            .catch(() => {
+                districtSel.innerHTML = '<option value="" disabled selected>Không tải được danh sách huyện</option>';
+            });
+    });
+
+    document.getElementById('districtSelect').addEventListener('change', function () {
+        const districtId = this.value;
+        const districtName = this.options[this.selectedIndex].textContent;
+        document.getElementById('ghnDistrictId').value = districtId;
+        document.getElementById('districtNameHidden').value = districtName;
+
+        const wardSel = document.getElementById('wardSelect');
+        wardSel.disabled = true;
+        resetFeeDisplay();
+
+        fetch('/api/shipping/ghn/wards?districtId=' + districtId)
+            .then(res => res.json())
+            .then(list => {
+                wardSel.innerHTML = '<option value="" disabled selected>-- Chọn phường/xã --</option>' +
+                    list.map(w => `<option value="${w.WardCode}">${w.WardName}</option>`).join('');
+                wardSel.disabled = false;
+            })
+            .catch(() => {
+                wardSel.innerHTML = '<option value="" disabled selected>Không tải được danh sách xã</option>';
+            });
+    });
+
+    document.getElementById('wardSelect').addEventListener('change', function () {
+        const wardName = this.options[this.selectedIndex].textContent;
+        document.getElementById('ghnWardCodeHidden').value = this.value;
+        document.getElementById('wardNameHidden').value = wardName;
+        fetchGhnFee();
+    });
+
+    function resetFeeDisplay() {
+        ghnFee = 0;
+        document.getElementById('shippingFeeDisplayGhn').textContent = '-- đ';
+        document.getElementById('shippingFeeNote').style.display = 'none';
+        updateGrandTotal();
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // TÍNH PHÍ SHIP QUA GHN (server proxy, có fallback nếu GHN lỗi)
+    // ══════════════════════════════════════════════════════════
+    function fetchGhnFee() {
+        const districtId = document.getElementById('ghnDistrictId').value;
+        const wardCode = document.getElementById('ghnWardCodeHidden').value;
+        if (!districtId || !wardCode) return;
+
+        const feeBox = document.getElementById('shippingFeeDisplayGhn');
+        feeBox.textContent = 'Đang tính...';
+
+        fetch(`/api/shipping/ghn/fee?districtId=${districtId}&wardCode=${wardCode}&weightGram=${cartWeightGram}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    feeBox.textContent = 'Không tính được phí';
+                    ghnFee = 0;
+                    updateGrandTotal();
+                    return;
+                }
+                ghnFee = data.fee;
+                ghnFallback = data.fallback === true;
+                document.getElementById('shippingFeeNote').style.display = ghnFallback ? 'block' : 'none';
+                feeBox.textContent = formatVND(ghnFee);
+                updateGrandTotal();
+            })
+            .catch(() => {
+                feeBox.textContent = 'Lỗi kết nối';
+                ghnFee = 0;
+                updateGrandTotal();
+            });
+    }
+
+    const GHN_FREESHIP_DISCOUNT = 15000;
+
     function getShippingFee() {
         if (voucherFreeShip) return 0;
-        const city = document.getElementById('citySelect').value;
-        if (subtotal >= FREESHIP_THRESHOLD) return 0;
-        return FEES[city] !== undefined ? FEES[city] : FEES["Khác"];
+        // Đơn từ 500.000đ: giảm 15.000đ phí GHN (khớp OrderService phía server)
+        if (ghnFee > 0 && subtotal >= FREESHIP_THRESHOLD) {
+            return Math.max(0, ghnFee - GHN_FREESHIP_DISCOUNT);
+        }
+        return ghnFee;
     }
 
     function updateGrandTotal() {
         const fee = getShippingFee();
-        document.getElementById('shippingFeeDisplay').textContent =
-            fee === 0 ? 'Miễn phí' : formatVND(fee);
+        document.getElementById('shippingFeeDisplay').textContent = fee === 0 && ghnFee === 0 ? '-- đ' : formatVND(fee);
 
         const grandTotal = Math.max(0, subtotal - voucherDiscount + fee);
         document.getElementById('grandTotalDisplay').textContent = formatVND(grandTotal);
@@ -678,6 +855,14 @@
                 messageEl.textContent = '❌ Có lỗi xảy ra, vui lòng thử lại.';
                 messageEl.className = 'voucher-message error';
             });
+    }
+
+    function confirmSubmit() {
+        if (!document.getElementById('ghnWardCodeHidden').value) {
+            alert('Vui lòng chọn đầy đủ Tỉnh / Huyện / Xã để tính phí vận chuyển!');
+            return false;
+        }
+        return confirm('Có chắc muốn đặt hàng chứ?');
     }
 
     document.addEventListener('DOMContentLoaded', updateGrandTotal);

@@ -5,7 +5,7 @@ import com.example.datnhathub.dto.ReviewDTO;
 import com.example.datnhathub.entity.*;
 import com.example.datnhathub.repository.*;
 import com.example.datnhathub.service.ProductService;
-import com.example.datnhathub.service.WishlistService;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -39,9 +39,6 @@ public class ProductController {
 
     @Autowired
     private ReviewRepository reviewRepository;
-
-    @Autowired
-    private WishlistService wishlistService;
 
     @Autowired
     private ProductRepository productRepository;
@@ -101,6 +98,7 @@ public class ProductController {
     }
 
     // UC07 — Chi tiết sản phẩm
+    // UC07 — Chi tiết sản phẩm
     @GetMapping("/products/{id}")
     public String productDetail(@PathVariable Integer id, @RequestParam(defaultValue = "0") Integer pid, HttpSession session, Model model, HttpServletRequest req) {
 
@@ -108,7 +106,7 @@ public class ProductController {
 
         ArrayList<Integer> dspdid = reviewRepository.finddspdid(id);
         Integer pd = pid;
-        if(pid == 0 && dspdid != null && !dspdid.isEmpty()){
+        if (pid == 0 && dspdid != null && !dspdid.isEmpty()) {
             pd = dspdid.get(0);
         }
 
@@ -138,20 +136,25 @@ public class ProductController {
         }
         model.addAttribute("viewedImageMap", viewedImageMap);
 
+        // dsrx: TOÀN BỘ review của cả sản phẩm (mọi biến thể) — tương đương ý định
+        // của findAllcomment() ở bản cũ, findcomment() đã join theo Product.ProductID rồi.
         List<ReviewDTO> dsrx = reviewRepository.findcomment(product.getProductId());
 
         var details = product.getDetails();
         var selectedDetail = (details != null && !details.isEmpty()) ? details.get(0) : null;
 
+        // Lấy userId từ cookie CHỈ để log debug — KHÔNG dùng để xác thực/truy vấn,
+        // vì req.getCookies() có thể null và giá trị cookie không đáng tin cậy.
         if (req.getCookies() != null) {
             for (Cookie c : req.getCookies()) {
-                if(c.getName().equals("userId")){
+                if (c.getName().equals("userId")) {
                     String iduser = String.valueOf(c.getValue());
-                    System.out.println("UserID : "+iduser);
+                    System.out.println("UserID : " + iduser);
                 }
             }
         }
 
+        // Nguồn userId đáng tin cậy DUY NHẤT: session (đã đăng nhập qua UserController)
         Integer userID = (Integer) session.getAttribute("userId");
 
         Reviews r = new Reviews();
@@ -166,9 +169,9 @@ public class ProductController {
 
         String imageUrl = productService.getDefaultImageUrl(product);
 
-        session.setAttribute("productid",product.getProductId());
+        session.setAttribute("productid", product.getProductId());
         if (selectedDetail != null) {
-            session.setAttribute("selectedDetail",selectedDetail.getProductDetailId());
+            session.setAttribute("selectedDetail", selectedDetail.getProductDetailId());
         }
 
         model.addAttribute("product",        product);
@@ -180,12 +183,18 @@ public class ProductController {
         model.addAttribute("loggedIn", loggedIn);
         model.addAttribute("roleName", session.getAttribute("roleName"));
 
-        model.addAttribute("listc",dsrx);
-        model.addAttribute("listpdi",pdid);
-        model.addAttribute("cmt",r);
+        model.addAttribute("listc",  dsrx);
+        model.addAttribute("listpdi", pdid);
+        model.addAttribute("cmt",    r);
 
-        Integer userId = (Integer) session.getAttribute("userId");
-        model.addAttribute("inWishlist", wishlistService.isInWishlist(userId, product.getProductId()));
+        // "checker": ProductDetailID đang được chọn để đánh giá — dùng để dropdown
+        // "Về mẫu" trong form đánh giá tự động tô sáng đúng biến thể (xem detail.html
+        // dòng th:selected="${pdi.productDetailId == checker}"). Đây chính là "pd".
+        model.addAttribute("checker", pd);
+        // "productidchecker": id sản phẩm — dùng cho link "All" quay về xem hết review
+        // (@{/products/{id}/0(id=${productidchecker})}) ở detail.html.
+        model.addAttribute("productidchecker", id);
+
 
         // --- GỘP NHÓM GỢI Ý SẢN PHẨM THÀNH MỘT DANH SÁCH DUY NHẤT ---
         List<Product> recommendProducts = new ArrayList<>();

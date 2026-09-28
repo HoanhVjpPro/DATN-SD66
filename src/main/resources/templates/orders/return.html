@@ -398,11 +398,6 @@
   <!-- ===== FORM GỬI YÊU CẦU (khi chưa có) — chọn từng sản phẩm muốn trả ===== -->
   <div class="card" th:if="${order.returnStatus == null}">
     <h3>Chọn sản phẩm muốn trả hàng</h3>
-    <p class="hint">
-      Tích chọn và nhập số lượng cho sản phẩm bạn muốn trả — ví dụ đơn có 3 sản phẩm nhưng
-      cửa hàng chỉ giao sai/lỗi 1 sản phẩm, bạn chỉ cần chọn đúng sản phẩm đó, không cần trả
-      toàn bộ đơn hàng. HatHub sẽ xem xét và phản hồi trong <span class="hint-strong">1–3 ngày làm việc</span>.
-    </p>
 
     <form onsubmit="return validateReturnForm() && confirm('Bạn có chắc muốn gửi yêu cầu trả hàng cho các sản phẩm đã chọn không?')"
           th:action="@{/orders/{id}/return(id=${order.orderId})}" method="post">

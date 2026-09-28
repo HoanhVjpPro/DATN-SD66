@@ -20,8 +20,9 @@ public class OrderService {
     @Autowired private VoucherRepository voucherRepository;
     @Autowired private EmployeeRepository employeeRepository;
     @Autowired private ProductDetailRepository productDetailRepository;
-    @Autowired
-    private ShipperRepository shipperRepository;
+
+    // THÊM: gọi GHN tính phí ship thật
+    @Autowired private GhnShippingService ghnShippingService;
 
     @Transactional
     public void resolveIncidentByReship(Integer orderId) {
@@ -60,11 +61,21 @@ public class OrderService {
         }
     }
 
-    // Đặt hàng từ giỏ hàng
+    // Giữ bản 6 tham số để PaymentController (/checkout/submit) không lỗi biên dịch
     @Transactional
     public Orders placeOrder(Integer userId, String shippingAddress, String city,
                              String paymentMethod, String voucherCode,
                              List<Integer> selectedCartDetailIds) {
+        return placeOrder(userId, shippingAddress, city, paymentMethod, voucherCode,
+                selectedCartDetailIds, null, null);
+    }
+
+    // Đặt hàng từ giỏ hàng (bản đầy đủ, có mã GHN để tính phí ship thật)
+    @Transactional
+    public Orders placeOrder(Integer userId, String shippingAddress, String city,
+                             String paymentMethod, String voucherCode,
+                             List<Integer> selectedCartDetailIds,
+                             Integer ghnDistrictId, String ghnWardCode) {
 
         Customer customer = cartService.getCustomerByUserId(userId);
         Cart cart = cartService.getOrCreateCart(customer);
@@ -96,8 +107,9 @@ public class OrderService {
                 .map(d -> d.getProductDetail().getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Phí ship tính trên subtotal (trước khi trừ voucher)
-        BigDecimal shippingFee = calculateShippingFee(city, subtotal);
+        // SỬA: phí ship lấy từ GHN (có fallback), không còn chỉ dùng bảng cố định
+        int totalQty = itemsToOrder.stream().mapToInt(CartDetail::getQuantity).sum();
+        BigDecimal shippingFee = resolveShippingFee(city, subtotal, ghnDistrictId, ghnWardCode, totalQty);
 
         BigDecimal total = subtotal;
 
@@ -119,7 +131,7 @@ public class OrderService {
             }
 
             if (voucher.isFreeShip()) {
-                shippingFee = BigDecimal.ZERO; // ghi đè phí ship đã tính theo thành phố
+                shippingFee = BigDecimal.ZERO; // ghi đè phí ship đã tính
             }
         }
 
@@ -130,7 +142,10 @@ public class OrderService {
         order.setVoucher(voucher); // lưu lại voucher đã áp dụng (null nếu không dùng)
         order.setCustomer(customer);
         order.setOrderDate(LocalDateTime.now());
-        boolean needPayment = "Chuyển khoản".equals(paymentMethod)
+
+        // SỬA: đơn VNPAY cũng ở "Chờ thanh toán" tới khi VNPay báo thành công
+        // (nếu quá 15 phút chưa trả, scheduler tự hủy — khớp vnp_ExpireDate)
+        boolean needPayment = ("Chuyển khoản".equals(paymentMethod) || "VNPAY".equalsIgnoreCase(paymentMethod))
                 && total.compareTo(BigDecimal.ZERO) > 0;
         order.setStatus(needPayment ? "Chờ thanh toán" : "Chờ xác nhận");
         order.setTotalAmount(total);
@@ -178,12 +193,37 @@ public class OrderService {
         return orderRepository.findByCustomerCustomerIdOrderByOrderDateDesc(customer.getCustomerId());
     }
 
-    // tính phí ship
+    // ── Tính phí ship ──
     private static final BigDecimal FREESHIP_THRESHOLD = new BigDecimal("500000");
     private static final BigDecimal FEE_HANOI = new BigDecimal("20000");
     private static final BigDecimal FEE_HCM = new BigDecimal("30000");
     private static final BigDecimal FEE_DANANG = new BigDecimal("25000");
     private static final BigDecimal FEE_OTHER = new BigDecimal("35000");
+
+    // Phí dự phòng khi GHN lỗi/timeout — khớp FALLBACK_FEE ở ShippingApiController
+    private static final BigDecimal GHN_FALLBACK_FEE = new BigDecimal("30000");
+    private static final BigDecimal GHN_FREESHIP_DISCOUNT = new BigDecimal("15000");
+
+    // Ưu tiên gọi GHN bằng districtId + wardCode (giống số tiền trang checkout hiển thị).
+    // Không có mã GHN thì rơi về bảng phí cố định theo thành phố.
+    private BigDecimal resolveShippingFee(String city, BigDecimal subtotal,
+                                          Integer districtId, String wardCode, int totalQty) {
+        if (districtId != null && wardCode != null && !wardCode.isBlank()) {
+            int weightGram = Math.max(totalQty * 250, 200); // khớp cách tính ở checkout.html
+            BigDecimal fee;
+            try {
+                fee = ghnShippingService.calculateFee(districtId, wardCode, weightGram);
+            } catch (RuntimeException e) {
+                fee = GHN_FALLBACK_FEE;
+            }
+            // Đơn từ 500.000đ: giảm 15.000đ phí GHN (khớp checkout.html)
+            if (subtotal.compareTo(FREESHIP_THRESHOLD) >= 0) {
+                fee = fee.subtract(GHN_FREESHIP_DISCOUNT).max(BigDecimal.ZERO);
+            }
+            return fee;
+        }
+        return calculateShippingFee(city, subtotal);
+    }
 
     private BigDecimal calculateShippingFee(String city, BigDecimal subtotal) {
         if (subtotal.compareTo(FREESHIP_THRESHOLD) >= 0) {

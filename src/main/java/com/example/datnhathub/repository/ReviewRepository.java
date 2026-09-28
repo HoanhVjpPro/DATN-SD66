@@ -14,7 +14,7 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Reviews,Integer> {
 
     @Query(value = """
-    select u.Username as CustomerName, r.Rating as Rating, r.Comment as Comment, r.AdminReply as AdminReply
+    select u.Username as CustomerName, r.Rating as Rating, r.Comment as Comment, r.AdminReply as AdminReply, r.ReviewImage as ReviewImage
     from Review r
     join Customer c on r.CustomerID = c.CustomerID
     join Users u on c.UserID = u.UserID

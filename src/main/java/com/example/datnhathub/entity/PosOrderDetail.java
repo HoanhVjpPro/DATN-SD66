@@ -9,11 +9,11 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "POS_OrderDetail")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
+@Table(name = "POS_OrderDetail")
 public class PosOrderDetail {
 
     @Id
@@ -34,4 +34,7 @@ public class PosOrderDetail {
 
     @Column(name = "UnitPrice", precision = 18, scale = 2, nullable = false)
     private BigDecimal unitPrice;
+
+    @Column(name = "ReturnQuantity")
+    private Integer returnQuantity;
 }

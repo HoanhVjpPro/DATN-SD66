@@ -71,7 +71,7 @@ public class EmployeeController {
     @GetMapping("/returns")
     public String employeeReturnList(Model model) {
         // Lấy các đơn có ReturnStatus != null
-        List<Orders> returns = orderRepository.findByReturnStatusNotNull();
+        List<Orders> returns = orderRepository.findByReturnStatusNotNullOrderByReturnDateDesc();
         model.addAttribute("returns", returns);
         return "employee/returns";
     }

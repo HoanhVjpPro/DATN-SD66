@@ -11,9 +11,17 @@
     .container { max-width:800px; margin:2rem auto; padding:0 1rem; }
     .card { background:#fff; padding:1.5rem; border-radius:8px; margin-bottom:1rem; }
     .success { background:#d4edda; color:#155724; padding:1rem; border-radius:4px; margin-bottom:1rem; }
+    .error { background:#f8d7da; color:#721c24; padding:1rem; border-radius:4px; margin-bottom:1rem; }
     table { width:100%; border-collapse:collapse; }
     td, th { padding:0.75rem; border-bottom:1px solid #eee; text-align:left; }
     .btn-back { background:#444; color:#fff; padding:8px 18px; text-decoration:none; font-weight:700; font-size:0.85rem; border-radius:4px; }
+    .btn-review { background:#C0633A; color:#fff; border:none; padding:6px 14px; font-weight:700; font-size:0.8rem; border-radius:4px; cursor:pointer; }
+    .btn-review:hover { background:#a5522f; }
+    .review-form { display:none; flex-direction:column; gap:14px; margin-top:1.2rem; padding-top:1.2rem; border-top:1px solid #eee; }
+    .review-form label { display:block; margin-bottom:6px; font-weight:600; }
+    .review-form select, .review-form textarea { width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; font-family:inherit; box-sizing:border-box; }
+    .review-form textarea { resize:vertical; }
+    .review-form .btn-submit { background:#C0633A; color:#fff; border:none; padding:10px 24px; font-weight:700; border-radius:4px; cursor:pointer; }
 
     /* TIMELINE TRẠNG THÁI */
     .status-timeline { display:flex; align-items:flex-start; margin:0.5rem 0; padding:0 0.5rem; }
@@ -46,6 +54,7 @@
 <nav><a href="/orders">← Đơn hàng</a></nav>
 <div class="container">
   <div th:if="${success}" class="success" th:text="${success}"></div>
+  <div th:if="${error}" class="error" th:text="${error}"></div>
   <h1 th:text="'Đơn hàng #' + ${order.orderCode}">Order</h1>
 
   <!-- TIMELINE TRẠNG THÁI (luồng bình thường) -->
@@ -136,10 +145,16 @@
     </div>
   </div>
 
-  <div th:if="${order.status == 'Đang giao'}">
-    <form th:action="@{/orders/{id}/received(id=${order.orderId})}" method="post">
-      <button type="submit" class="btn btn-success">✓ Tôi đã nhận được hàng</button>
-    </form>
+  <div th:if="${order.status == 'Đang giao'}"
+       style="margin-top:1rem;padding-top:1rem;border-top:1px solid #eee;">
+    <div class="card">
+      <form th:action="@{/orders/{id}/received(id=${order.orderId})}" method="post">
+        <button type="submit"
+                style="background:#27ae60;color:#fff;border:none;padding:10px 24px;font-weight:700;cursor:pointer;border-radius:4px;">
+          ✓ Tôi đã nhận được hàng
+        </button>
+      </form>
+    </div>
   </div>
 
   <!-- Xử lý sự cố giao hàng -->
@@ -180,7 +195,8 @@
   </div>
 
   <div class="card">
-    <a th:if="${order.status == 'Đang xử lý' || order.status == 'Đang giao' || order.status == 'Hoàn thành'}" th:href="@{/admin/orders/{id}/invoice/pdf(id=${order.orderId})}" class="btn-back" style="background:#C0633A;">🧾 Xuất hóa đơn PDF</a>
+    <!-- Dùng route của Customer (/orders/{id}/invoice/pdf), không dùng route admin -->
+    <a th:if="${order.status == 'Đang xử lý' || order.status == 'Đang giao' || order.status == 'Hoàn thành'}" th:href="@{/orders/{id}/invoice/pdf(id=${order.orderId})}" class="btn-back" style="background:#C0633A;">🧾 Xuất hóa đơn PDF</a>
     <h3>Sản phẩm</h3>
     <table>
       <tr>
@@ -188,15 +204,74 @@
         <th>size</th>
         <th>màu</th>
         <th>số lượng</th>
+        <th th:if="${order.status == 'Hoàn thành'}"></th>
       </tr>
       <tr th:each="d : ${order.details}">
         <td th:text="${d.productDetail.product.productName}">Product</td>
         <td th:text="${d.productDetail.size}"></td>
         <td th:text="${d.productDetail.color}">variant</td>
         <td th:text="${d.quantity} + ' x ' + ${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">qty</td>
+        <td th:if="${order.status == 'Hoàn thành'}">
+          <!-- Chỉ đơn đã hoàn thành mới được đánh giá -->
+          <button type="button" class="btn-review" onclick="showReviewForm(this)"
+                  th:attr="data-pdid=${d.productDetail.productDetailId},
+                           data-name=${d.productDetail.product.productName + ' (' + d.productDetail.size + '/' + d.productDetail.color + ')'}">
+            Đánh giá
+          </button>
+        </td>
       </tr>
     </table>
+
+    <!-- FORM ĐÁNH GIÁ (ẩn cho tới khi bấm nút "Đánh giá" ở một dòng sản phẩm) -->
+    <form th:if="${order.status == 'Hoàn thành'}"
+          th:action="@{/ordercomment}" method="post" enctype="multipart/form-data"
+          class="review-form" id="reviewForm">
+
+      <input type="hidden" name="orderid" th:value="${order.orderId}"/>
+      <input type="hidden" name="ProductDetail" id="reviewProductDetailId"/>
+
+      <div>
+        <label>Mẫu cần đánh giá</label>
+        <div id="reviewProductName" style="font-weight:700;color:#C0633A;"></div>
+      </div>
+
+      <div>
+        <label>Hình ảnh sản phẩm (tùy chọn)</label>
+        <input type="file" accept="image/*" name="imgvl"/>
+      </div>
+
+      <div>
+        <label>Đánh giá</label>
+        <select name="Rating">
+          <option value="5">★★★★★</option>
+          <option value="4">★★★★☆</option>
+          <option value="3">★★★☆☆</option>
+          <option value="2">★★☆☆☆</option>
+          <option value="1">★☆☆☆☆</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Nhận xét</label>
+        <textarea name="Comment" rows="5"></textarea>
+      </div>
+
+      <div>
+        <button type="submit" class="btn-submit">Gửi đánh giá</button>
+      </div>
+    </form>
   </div>
+
 </div>
+<script>
+  function showReviewForm(btn) {
+    var form = document.getElementById('reviewForm');
+    if (!form) return;
+    document.getElementById('reviewProductDetailId').value = btn.getAttribute('data-pdid');
+    document.getElementById('reviewProductName').textContent = btn.getAttribute('data-name');
+    form.style.display = 'flex';
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+</script>
 </body>
 </html>

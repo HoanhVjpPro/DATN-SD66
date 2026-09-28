@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>VNPay - HatHub</title>
+</head>
+<body>
+
+<h1>Thanh toán VNPay</h1>
+
+<h2 th:if="${success}">
+    Thanh toán thành công!
+</h2>
+
+<h2 th:unless="${success}">
+    Thanh toán không thành công!
+</h2>
+
+<p th:text="${message}">
+    Kết quả thanh toán
+</p>
+
+<div th:if="${order != null}">
+    <p>
+        Mã đơn hàng:
+        <span th:text="${order.orderId}"></span>
+    </p>
+
+    <p>
+        Tổng tiền:
+        <span th:text="${order.totalAmount}"></span> VNĐ
+    </p>
+</div>
+
+<p>
+    Mã giao dịch:
+    <span th:text="${transactionNo != null ? transactionNo : '-'}"></span>
+</p>
+
+<a href="/orders">Xem đơn hàng</a>
+<a href="/">Về trang chủ</a>
+</body>
+</html>

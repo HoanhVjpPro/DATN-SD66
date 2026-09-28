@@ -20,7 +20,6 @@ public class AdminBrandController {
     @Autowired
     private BrandRepository brandRepository;
 
-    // GET /admin/brands — Danh sách + form thêm/sửa
     @GetMapping
     public String listBrands(@RequestParam(required = false) Integer editId, Model model, HttpSession session) {
         Users user =  (Users) session.getAttribute("user");
@@ -61,7 +60,6 @@ public class AdminBrandController {
         return "redirect:/admin/brands";
     }
 
-    // POST /admin/brands/delete/{id} — Xóa thương hiệu
     @PostMapping("/delete/{id}")
     public String deleteBrand(@PathVariable("id") Integer id, RedirectAttributes ra) {
         try {

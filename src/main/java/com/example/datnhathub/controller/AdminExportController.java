@@ -66,7 +66,6 @@ public class AdminExportController {
             headerStyle.setFillForegroundColor(IndexedColors.BLACK.getIndex());
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
-            // Sheet 1: Doanh thu theo tháng
             Sheet sheet1 = workbook.createSheet("Doanh thu theo thang");
             Row header1 = sheet1.createRow(0);
             String[] cols1 = {"Tháng", "Doanh thu (đ)"};

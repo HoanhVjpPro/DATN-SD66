@@ -39,7 +39,6 @@ public class AdminProductController {
     @Autowired
     private AdminProductService adminProductService;
 
-    // GET /admin/products — Danh sách sản phẩm
     @GetMapping
     public String listProducts(Model model, HttpSession session) {
         Users user = (Users) session.getAttribute("user");
@@ -54,7 +53,6 @@ public class AdminProductController {
         return "admin/products"; // templates/admin/products.html
     }
 
-    // GET /admin/products/new — Form thêm mới
     @GetMapping("/new")
     public String newProductForm(Model model) {
         model.addAttribute("product",    new Product());
@@ -67,7 +65,6 @@ public class AdminProductController {
         return "admin/product-form";
     }
 
-    // GET /admin/products/edit/{id} — Form sửa
     @GetMapping("/edit/{id}")
     public String editProductForm(@PathVariable Integer id, Model model) {
         Product product = adminProductService.getProductById(id);
@@ -84,7 +81,6 @@ public class AdminProductController {
         return "admin/product-form";
     }
 
-    // POST /admin/products/save — Lưu sản phẩm
     @PostMapping("/save")
     public String saveProduct(@RequestParam(required = false) Integer productId,
                               @RequestParam String productName,
@@ -110,7 +106,6 @@ public class AdminProductController {
         return "redirect:/admin/products/edit/" + saved.getProductId();
     }
 
-    // POST /admin/products/{id}/detail — Thêm 1 biến thể lẻ. Nhận sizeId/colorId (FK thật), SKU tự sinh không nhận tay.
     @PostMapping("/{id}/detail")
     public String addDetail(@PathVariable Integer id,
                             @RequestParam Integer sizeId,
@@ -124,9 +119,6 @@ public class AdminProductController {
         return "redirect:/admin/products/edit/" + id;
     }
 
-    // POST /admin/products/{id}/detail/batch — Tạo nhiều biến thể cùng lúc
-    // (chọn nhiều Size + nhiều Màu — nhận danh sách ID phân tách bởi dấu phẩy, VD sizeIds="1,2,3",
-    //  1 mức giá & 1 tồn kho ban đầu áp dụng cho tất cả tổ hợp, SKU tự sinh không dấu + đảm bảo unique)
     @PostMapping("/{id}/detail/batch")
     public String addDetailsBatch(@PathVariable Integer id,
                                   @RequestParam(required = false) String sizeIds,
@@ -192,16 +184,12 @@ public class AdminProductController {
             int deleted = adminProductService.deleteDetails(detailIds);
             ra.addFlashAttribute("success", "Đã xóa " + deleted + " biến thể đã chọn!");
         } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            // deleteDetails() chạy trong 1 transaction (@Transactional) nên nếu có
-            // lỗi khóa ngoại thì TOÀN BỘ batch sẽ rollback — không có biến thể nào
-            // trong danh sách đã chọn bị xóa, kể cả những biến thể hợp lệ khác.
             ra.addFlashAttribute("error",
                     "Không thể xóa: một hoặc nhiều biến thể đã chọn đang có trong đơn hàng nên toàn bộ thao tác bị hủy. Vui lòng bỏ chọn biến thể đó rồi thử lại.");
         }
         return "redirect:/admin/products/edit/" + productId;
     }
 
-    // POST /admin/products/{id}/image — Upload ảnh (dùng chung cho ảnh sản phẩm & ảnh riêng từng biến thể)
     @PostMapping("/{id}/image")
     public String uploadImage(@PathVariable Integer id,
                               @RequestParam MultipartFile file,
@@ -252,7 +240,6 @@ public class AdminProductController {
         return "redirect:/admin/products";
     }
 
-    // POST /admin/products/detail/update/{detailId} — Sửa biến thể (SKU không được sửa). Nhận sizeId/colorId (FK thật).
     @PostMapping("/detail/update/{detailId}")
     public String updateDetail(@PathVariable Integer detailId,
                                @RequestParam Integer sizeId,

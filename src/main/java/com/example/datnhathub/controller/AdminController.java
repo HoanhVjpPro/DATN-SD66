@@ -49,6 +49,10 @@ public class AdminController {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    // MỚI: dùng để lấy đơn bán tại quầy (POS) cho tab "Đơn tại quầy" của trang /admin/orders
+    @Autowired
+    private PosService posService;
+
     @GetMapping("/dashboard")
     public String dashboard(Model model, HttpSession session) {
         Users user = (Users) session.getAttribute("user");
@@ -273,7 +277,7 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
-    // ── orders ──
+    // ── orders (Online + Tại quầy gộp chung 1 trang, chuyển bằng tab) ──
     @GetMapping("/orders")
     public String orders(Model model, HttpSession session) {
         Users user = (Users) session.getAttribute("user");
@@ -283,7 +287,16 @@ public class AdminController {
         if (!user.getRole().getRoleId().equals(1)) {
             return "access-denied";
         }
+
+        // Tab "Đơn Online": đơn đặt qua website (Orders)
         model.addAttribute("orders", orderService.getAllOrders());
+
+        // Tab "Đơn tại quầy (POS)": đơn bán trực tiếp tại cửa hàng (PosOrder) — trước đây ở
+        // trang riêng /admin/pos/history, nay gộp vào cùng trang để chỉ cần 1 file orders.html
+        List<PosOrder> posOrders = posService.getAllPosOrders();
+        model.addAttribute("posOrders", posOrders);
+        model.addAttribute("totalPosRevenue", posService.getTotalRevenue(posOrders));
+
         return "admin/orders";
     }
 

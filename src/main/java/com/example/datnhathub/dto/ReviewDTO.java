@@ -10,4 +10,5 @@ public interface ReviewDTO {
     public Integer getRating();
     String getComment();
     String getAdminReply();
+    String getReviewImage();
 }

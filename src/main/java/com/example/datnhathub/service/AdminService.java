@@ -2,11 +2,9 @@ package com.example.datnhathub.service;
 
 import com.example.datnhathub.entity.Employee;
 import com.example.datnhathub.entity.Role;
-import com.example.datnhathub.entity.Shipper;
 import com.example.datnhathub.entity.Users;
 import com.example.datnhathub.repository.EmployeeRepository;
 import com.example.datnhathub.repository.RoleRepository;
-import com.example.datnhathub.repository.ShipperRepository;
 import com.example.datnhathub.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,8 +20,6 @@ public class AdminService {
     private RoleRepository roleRepository;
     @Autowired
     private EmployeeRepository employeeRepository;
-    @Autowired
-    private ShipperRepository shipperRepository;
     @Autowired
     private UserRepository userRepository;
 

@@ -18,7 +18,7 @@ public interface OrderRepository extends JpaRepository<Orders, Integer> {
     List<Orders> findByStatusAndOrderDateBefore(String status, java.time.LocalDateTime cutoff);
 
     // Lấy tất cả đơn có yêu cầu trả hàng
-    List<Orders> findByReturnStatusNotNull();
+    List<Orders> findByReturnStatusNotNullOrderByReturnDateDesc();
 
     // Lấy theo trạng thái trả hàng
     List<Orders> findByReturnStatusOrderByReturnDateDesc(String returnStatus);

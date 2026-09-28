@@ -218,6 +218,11 @@
           Nội dung đánh giá
         </p>
 
+        <!-- ẢNH KHÁCH ĐÍNH KÈM -->
+        <img th:if="${c.ReviewImage != null and !#strings.isEmpty(c.ReviewImage)}"
+             th:src="@{${c.ReviewImage}}" alt="Ảnh đánh giá"
+             style="margin-top:10px;max-width:160px;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid #eee;"/>
+
         <!-- PHẢN HỒI TỪ ADMIN -->
         <div th:if="${c.AdminReply != null and !#strings.isEmpty(c.AdminReply)}"
              style="background: #f9f9f9; border-left: 3px solid #C0633A; padding: 10px 14px; margin-top: 10px; border-radius: 4px; font-size: 13px;">
@@ -225,67 +230,6 @@
           <p style="margin: 4px 0 0 0; color: #333; line-height: 1.5;" th:text="${c.AdminReply}"></p>
         </div>
       </div>
-    </div>
-
-    <!-- Form thêm đánh giá -->
-    <div class="cart-card" style="padding:24px;margin-top:20px;">
-      <h3 style="margin-bottom:16px;">Viết đánh giá của bạn</h3>
-      <p th:text="${Csuccess}"></p>
-      <p th:text="${Cerror}"></p>
-      <form action="/comment" method="post"
-            style="display:flex;flex-direction:column;gap:14px;">
-
-        <div>
-          <label style="display:block;margin-bottom:6px;font-weight:600;">
-            Mẫu mũ
-          </label>
-
-
-          <select name="ProductDetailID"
-                  style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;">
-            <option th:each="pdi : ${listpdi}" th:value="${pdi.productDetailId}" th:text="${pdi.size}+'/'+${pdi.color}"></option>
-          </select>
-        </div>
-
-        <div>
-          <label style="display:block;margin-bottom:6px;font-weight:600;">
-            Đánh giá
-          </label>
-
-
-          <select name="Rating"
-                  style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;"
-                  text="☆☆☆☆☆"
-
-          >
-            <option value="5" th:selected="${cmt.Rating == 5}">★★★★★</option>
-            <option value="4" th:selected="${cmt.Rating == 4}">★★★★☆</option>
-            <option value="3" th:selected="${cmt.Rating == 3}">★★★☆☆</option>
-            <option value="2" th:selected="${cmt.Rating == 2}">★★☆☆☆</option>
-            <option value="1" th:selected="${cmt.Rating == 1}">★☆☆☆☆</option>
-          </select>
-        </div>
-
-        <div>
-          <label style="display:block;margin-bottom:6px;font-weight:600;">
-            Nhận xét
-          </label>
-
-          <textarea
-                  name="Comment"
-                  rows="5"
-                  style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;resize:vertical;"
-                  th:text="${cmt.Comment}"
-          ></textarea>
-        </div>
-
-        <div>
-          <button type="submit" class="btn btn-primary">
-            Gửi đánh giá
-          </button>
-        </div>
-
-      </form>
     </div>
   </section>
 </main>

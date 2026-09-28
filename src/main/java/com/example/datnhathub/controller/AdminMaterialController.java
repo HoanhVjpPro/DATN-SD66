@@ -20,7 +20,6 @@ public class AdminMaterialController {
     @Autowired
     private MaterialRepository materialRepository;
 
-    // GET /admin/materials — Danh sách + form thêm/sửa
     @GetMapping
     public String listMaterials(@RequestParam(required = false) Integer editId, Model model, HttpSession session) {
         Users user = (Users) session.getAttribute("user");
@@ -42,7 +41,6 @@ public class AdminMaterialController {
         return "admin/materials";
     }
 
-    // POST /admin/materials — Thêm mới HOẶC cập nhật
     @PostMapping
     public String saveMaterial(@RequestParam(required = false) Integer materialId,
                                @RequestParam String materialName,
@@ -62,7 +60,6 @@ public class AdminMaterialController {
         return "redirect:/admin/materials";
     }
 
-    // POST /admin/materials/delete/{id} — Xóa chất liệu
     @PostMapping("/delete/{id}")
     public String deleteMaterial(@PathVariable("id") Integer id, RedirectAttributes ra) {
         try {
