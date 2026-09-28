@@ -4,11 +4,10 @@ import com.example.datnhathub.entity.*;
 import com.example.datnhathub.repository.ProductRepository;
 import com.example.datnhathub.service.CartService;
 import com.example.datnhathub.service.OrderService;
+import com.example.datnhathub.service.VNPayService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +30,17 @@ public class CartController {
 
     @Autowired
     private ProductRepository productRepository;
+
+    // THÊM: dùng để tạo link thanh toán VNPay
+    @Autowired
+    private VNPayService vnPayService;
+
+    private static final int AVG_HAT_WEIGHT_GRAM = 250;
+
+    private int estimateWeightGram(List<CartDetail> items) {
+        int totalQty = items.stream().mapToInt(CartDetail::getQuantity).sum();
+        return Math.max(totalQty * AVG_HAT_WEIGHT_GRAM, 200); // tối thiểu 200g/đơn
+    }
 
     // Helper: lấy userId từ session, nếu chưa đăng nhập -> null
     private Integer currentUserId(HttpSession session) {
@@ -144,31 +154,42 @@ public class CartController {
         return "checkout/checkout";
     }
 
-    // UC20 — Đặt hàng từ giỏ hàng
-    // POST /checkout — Đặt hàng từ giỏ hàng
     @PostMapping("/checkout")
     public String placeOrder(@RequestParam String houseAddress,
-                             @RequestParam String district,
+                             @RequestParam String wardName,
+                             @RequestParam String districtName,
                              @RequestParam String city,
+                             @RequestParam(required = false) String shippingProvider,
                              @RequestParam String paymentMethod,
                              @RequestParam(required = false) String voucherCode,
                              @RequestParam(required = false) List<Integer> selectedItems,
+                             // THÊM: mã GHN form đã gửi lên, để server tự gọi GHN tính phí
+                             @RequestParam(required = false) Integer ghnDistrictId,
+                             @RequestParam(required = false) String ghnWardCode,
                              HttpSession session,
+                             HttpServletRequest request,   // THÊM: cần cho VNPay lấy IP
                              Model model,
                              RedirectAttributes ra) {
 
         Integer userId = currentUserId(session);
-        if (userId == null) {
-            return "redirect:/login";
-        }
+        if (userId == null) return "redirect:/login";
 
-        String fullAddress = houseAddress.trim() + ", " + district.trim() + ", " + city.trim();
+        String fullAddress = houseAddress.trim() + ", " + wardName.trim() + ", " + districtName.trim() + ", " + city.trim();
 
         try {
-            Orders order = orderService.placeOrder(userId, fullAddress, city, paymentMethod, voucherCode, selectedItems);
+            // SỬA: truyền city (không phải shippingProvider) + mã GHN
+            Orders order = orderService.placeOrder(userId, fullAddress, city,
+                    paymentMethod, voucherCode, selectedItems, ghnDistrictId, ghnWardCode);
+
+            // THÊM: chuyển sang cổng VNPay
+            if ("VNPAY".equalsIgnoreCase(paymentMethod)
+                    && order.getTotalAmount() != null
+                    && order.getTotalAmount().compareTo(BigDecimal.ZERO) > 0) {
+                return "redirect:" + vnPayService.createPaymentUrl(order, request);
+            }
 
             if ("Chuyển khoản".equals(paymentMethod)
-                    && order.getStatus().equals("Chờ thanh toán")) {
+                    && "Chờ thanh toán".equals(order.getStatus())) {
                 return "redirect:/payment/qr/" + order.getOrderId();
             }
 

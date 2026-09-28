@@ -64,8 +64,6 @@ public class AdminSizeController {
         return "redirect:/admin/sizes";
     }
 
-    // POST /admin/sizes/quick-add — Thêm size nhanh ngay trong popup "Tạo biến thể" (AJAX, trả JSON)
-    // Nếu tên đã tồn tại (không phân biệt hoa thường) thì trả về bản ghi cũ, không tạo trùng
     @PostMapping("/quick-add")
     @ResponseBody
     public Map<String, Object> quickAddSize(@RequestParam String sizeName) {

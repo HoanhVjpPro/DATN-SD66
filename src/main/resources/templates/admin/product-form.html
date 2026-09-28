@@ -620,7 +620,7 @@
             <span th:text="${d.color}"></span>
             <input type="hidden" name="colorId" th:value="${d.colorEntity != null ? d.colorEntity.colorId : ''}" th:attr="form=|detailForm${d.productDetailId}|" />
           </td>
-          <td><input name="price" type="number" th:value="${d.price}" step="1000" min="0" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:100%;" /></td>
+          <td><input name="price" type="number" th:value="${d.price != null ? #numbers.formatDecimal(d.price, 0, 'NONE', 0, 'POINT') : ''}" step="1000" min="0" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:100%;" /></td>
           <td>
             <input name="stockQuantity" type="number" th:value="${d.stockQuantity != null ? d.stockQuantity : 0}" min="0" required th:attr="form=|detailForm${d.productDetailId}|" style="padding:4px 8px; border:2px solid var(--gray-100); border-radius:6px; width:70px;" />
             <span th:if="${d.stockQuantity != null and d.stockQuantity == 0}" style="color:#c0392b; font-size:0.7rem; display:block;">Hết hàng</span>
@@ -635,7 +635,6 @@
                      th:id="|imgInput${d.productDetailId}|"
                      style="display:none;"
                      onchange="this.form.submit()" />
-              <label><input type="checkbox" name="isDefault" value="true" /> Ảnh mặc định</label>
               <button type="button" class="btn btn-info btn-sm" th:onclick="|document.getElementById('imgInput${d.productDetailId}').click()|">Chọn ảnh</button>
             </form>
           </td>

@@ -20,8 +20,6 @@ public class AdminCategoryController {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    // GET /admin/categories — Danh sách + form thêm/sửa
-    // → templates/admin/categories.html
     @GetMapping
     public String listCategories(@RequestParam(required = false) Integer editId, Model model, HttpSession session) {
         Users user  = (Users) session.getAttribute("user");
@@ -43,8 +41,6 @@ public class AdminCategoryController {
         return "admin/categories";
     }
 
-    // POST /admin/categories — Thêm mới HOẶC cập nhật
-    // (form trong categories.html luôn gửi categoryId ẩn: null = thêm mới, có giá trị = sửa)
     @PostMapping
     public String saveCategory(@RequestParam(required = false) Integer categoryId,
                                @RequestParam String categoryName,
@@ -64,7 +60,6 @@ public class AdminCategoryController {
         return "redirect:/admin/categories";
     }
 
-    // POST /admin/categories/delete/{id} — Xóa danh mục
     @PostMapping("/delete/{id}")
     public String deleteCategory(@PathVariable("id") Integer id, RedirectAttributes ra) {
         try {

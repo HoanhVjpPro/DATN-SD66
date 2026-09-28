@@ -4,55 +4,178 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Bán hàng tại quầy | HatHub Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Barlow+Condensed:wght@500;700;900&display=swap&subset=vietnamese" rel="stylesheet"/>
     <style>
-        body { font-family:'Nunito',sans-serif; margin:0; display:flex; min-height:100vh; background:#F5F0EA; }
-        aside { width:220px; background:#111; color:#fff; padding:1.5rem; position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-shrink: 0; }
-        aside a { display:block; color:#ccc; text-decoration:none; padding:0.6rem 0; }
-        aside a.active { color:#C0633A; }
-        aside a:hover { color:#C0633A; }
-        main { flex:1; padding:1.5rem 2rem 3rem; }
-        h1.page-h { font-size:1.5rem; font-weight:900; margin:0 0 1.25rem; color:#1a1a1a; }
+        *, *::before, *::after { box-sizing: border-box; }
+        :root {
+            --black: #111111;
+            --off-black: #1a1a1a;
+            --rust: #C0633A;
+            --rust-light: #D97C4E;
+            --rust-dark: #9B4A27;
+            --white: #ffffff;
+            --cream: #F5F0EA;
+            --gray-100: #f0efee;
+            --gray-400: #9e9b96;
+            --gray-500: #7a7772;
+            --gray-700: #3e3d3a;
+            --font-display: 'Barlow Condensed', 'Segoe UI', Roboto, Arial, sans-serif;
+            --font-body: 'Nunito', 'Segoe UI', Roboto, Arial, sans-serif;
+            --sidebar-width: 270px;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+            --radius: 14px;
+            --radius-sm: 10px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body { font-family: var(--font-body); margin:0; display:flex; min-height:100vh; background:var(--cream); color:var(--black); }
+        a { text-decoration:none; color:inherit; }
+
+        /* ===== SIDEBAR — đồng bộ với toàn bộ khu vực admin ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--black);
+            color: var(--white);
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            border-right: 3px solid var(--rust);
+            box-shadow: 4px 0 30px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            scrollbar-width: thin;
+            scrollbar-color: var(--rust) #2a2a2a;
+        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: #2a2a2a; border-radius: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--rust); border-radius: 4px; }
+
+        .sidebar-brand {
+            display: flex; align-items: center; gap: 12px;
+            padding: 1.2rem 1.6rem; border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0; min-height: 76px;
+        }
+        .brand-logo-wrapper {
+            width: 48px; height: 48px; border-radius: 50%; overflow: hidden;
+            border: 2px solid var(--rust); box-shadow: 0 0 0 1px rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: center; background: var(--white);
+        }
+        .brand-logo { width:100%; height:100%; object-fit:cover; display:block; }
+        .brand-text { display:flex; flex-direction:column; line-height:1.1; }
+        .brand-text .hat { font-family: var(--font-display); font-weight:900; font-size:1.8rem; color:var(--white); letter-spacing:1px; }
+        .brand-text .hub { font-family: var(--font-display); font-weight:900; font-size:1.8rem; color:var(--rust); letter-spacing:1px; margin-top:-4px; }
+        .brand-text .sub { font-size:0.55rem; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--gray-500); margin-top:2px; }
+
+        .sidebar-menu-wrapper { flex: 1; padding: 1.2rem 0.8rem 1.2rem 1.2rem; overflow-y: auto; }
+        .menu-section { margin-bottom:1.2rem; }
+        .menu-section:last-child { margin-bottom:0; }
+        .menu-section-title {
+            font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.2px;
+            color: var(--gray-500); padding: 0 0.6rem 0.6rem 0.6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.4rem;
+        }
+        .sidebar-menu { list-style:none; display:flex; flex-direction:column; gap:1px; margin:0; padding:0; }
+        .sidebar-menu li a {
+            display: flex; align-items: center; gap: 12px; padding: 9px 14px;
+            border-radius: var(--radius-sm); font-weight: 700; font-size: 0.82rem;
+            color: var(--gray-400); transition: var(--transition); border: 1px solid transparent; position: relative;
+        }
+        .sidebar-menu li a .menu-icon {
+            width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+            font-size:1rem; opacity:0.6; transition:var(--transition); font-style:normal;
+        }
+        .sidebar-menu li a .menu-label { flex:1; white-space:nowrap; }
+        .sidebar-menu li a .menu-badge {
+            background:var(--rust); color:var(--white); font-size:0.6rem; font-weight:800;
+            padding:1px 8px; border-radius:20px; line-height:1.5; letter-spacing:0.02em;
+        }
+        .sidebar-menu li a:hover {
+            background: rgba(192,99,58,0.15); color: var(--white);
+            border-color: rgba(192,99,58,0.15); transform: translateX(4px);
+        }
+        .sidebar-menu li a:hover .menu-icon { opacity:1; transform:scale(1.05); }
+        .sidebar-menu li a.active {
+            background: var(--rust); color: var(--white);
+            box-shadow: 0 4px 16px rgba(192,99,58,0.35); border-color: var(--rust);
+        }
+        .sidebar-menu li a.active .menu-icon { opacity:1; }
+        .sidebar-menu li a.active::before {
+            content:''; position:absolute; left:-8px; top:50%; transform:translateY(-50%);
+            width:4px; height:28px; background:var(--rust-light); border-radius:4px;
+        }
+
+        .sidebar-footer {
+            flex-shrink:0; padding:1rem 1.6rem 1.4rem; border-top:1px solid rgba(255,255,255,0.06);
+            display:flex; flex-direction:column; gap:4px;
+        }
+        .sidebar-footer .user-row { display:flex; align-items:center; gap:10px; padding:6px 0; }
+        .sidebar-footer .user-avatar {
+            width:34px; height:34px; border-radius:50%;
+            background: linear-gradient(135deg, var(--rust-dark), var(--rust));
+            display:flex; align-items:center; justify-content:center; font-weight:900; font-size:0.8rem;
+            color:var(--white); flex-shrink:0;
+        }
+        .sidebar-footer .user-info { flex:1; min-width:0; }
+        .sidebar-footer .user-name { font-weight:700; font-size:0.8rem; color:var(--white); line-height:1.2; }
+        .sidebar-footer .user-role { font-size:0.65rem; color:var(--gray-500); font-weight:600; letter-spacing:0.02em; }
+        .sidebar-footer .logout-link {
+            display:flex; align-items:center; gap:8px; padding:6px 10px; font-size:0.75rem; font-weight:700;
+            color:var(--gray-500); transition:var(--transition); border-radius:6px; margin-top:2px;
+        }
+        .sidebar-footer .logout-link:hover { color:var(--rust-light); background:rgba(192,99,58,0.08); }
+
+        /* ===== MAIN ===== */
+        .main { flex:1; padding:2rem 2.5rem 3rem; background:var(--cream); min-width:0; }
+        .page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.6rem; flex-wrap:wrap; gap:1rem; }
+        .page-title {
+            font-family: var(--font-display); font-weight: 900; font-size: 2.2rem;
+            text-transform: uppercase; letter-spacing: 0.02em; color: var(--black); position: relative;
+        }
+        .page-title::after { content:''; display:block; width:60px; height:4px; background:var(--rust); margin-top:4px; border-radius:4px; }
 
         .pos-layout { display:grid; grid-template-columns:1fr 340px; gap:1.25rem; align-items:start; }
 
-        .card { background:#fff; border-radius:8px; padding:1.25rem 1.4rem; box-shadow:0 1px 3px rgba(0,0,0,0.06); margin-bottom:1.25rem; }
-        .card h3 { margin:0 0 1rem; font-size:0.95rem; font-weight:900; display:flex; align-items:center; gap:8px; }
+        .card { background:var(--white); border-radius:var(--radius); padding:1.6rem 1.8rem; box-shadow:var(--shadow); margin-bottom:1.25rem; }
+        .card h3 { margin:0 0 1rem; font-size:0.95rem; font-weight:900; display:flex; align-items:center; gap:8px; color:var(--black); }
 
-        label { display:block; font-weight:700; font-size:0.82rem; margin:0 0 6px; color:#333; }
+        label { display:block; font-weight:700; font-size:0.82rem; margin:0 0 6px; color:var(--gray-700); }
         input[type=text], input[type=tel], textarea, select {
-            width:100%; padding:10px 12px; border:1px solid #ddd; border-radius:6px;
-            font-family:'Nunito',sans-serif; font-size:0.88rem; box-sizing:border-box; outline:none;
+            width:100%; padding:10px 12px; border:2px solid var(--gray-100); border-radius:10px;
+            font-family:var(--font-body); font-size:0.88rem; box-sizing:border-box; outline:none; background:var(--gray-100);
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
         }
-        input:focus, textarea:focus, select:focus { border-color:#C0633A; box-shadow:0 0 0 3px rgba(192,99,58,0.12); }
+        input:focus, textarea:focus, select:focus { border-color:var(--rust); background:var(--white); box-shadow:0 0 0 4px rgba(192,99,58,0.1); }
         textarea { resize:vertical; }
 
-        /* ===== Nút bấm — đồng bộ toàn hệ thống ===== */
-        .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:4px; font-family:'Nunito',sans-serif; font-weight:700; font-size:0.85rem; padding:9px 18px; cursor:pointer; text-decoration:none; line-height:1.2; white-space:nowrap; }
-        .btn-sm { padding:6px 12px; font-size:0.8rem; }
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:40px; font-family:var(--font-body); font-weight:800; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.04em; padding:12px 24px; cursor:pointer; text-decoration:none; line-height:1.2; white-space:nowrap; transition: all 0.2s ease; }
+        .btn:hover { transform:translateY(-2px); }
+        .btn-sm { padding:6px 16px; font-size:0.75rem; border-radius:30px; }
         .btn-block { width:100%; }
-        .btn-primary { background:#C0633A; color:#fff; }
-        .btn-primary:hover { background:#9B4A27; }
-        .btn-primary:disabled { background:#e0b7a4; cursor:not-allowed; }
-        .btn-secondary { background:#444; color:#fff; }
-        .btn-secondary:hover { background:#2c2c2c; }
-        .btn-success { background:#27ae60; color:#fff; }
+        .btn-primary { background:var(--rust); color:var(--white); box-shadow:0 4px 12px rgba(192,99,58,0.3); }
+        .btn-primary:hover { background:var(--rust-dark); box-shadow:0 8px 20px rgba(192,99,58,0.4); }
+        .btn-primary:disabled { background:#e0b7a4; cursor:not-allowed; transform:none; box-shadow:none; }
+        .btn-secondary { background:var(--gray-700); color:var(--white); }
+        .btn-secondary:hover { background:var(--black); }
+        .btn-success { background:#27ae60; color:var(--white); }
         .btn-success:hover { background:#1e8449; }
-        .btn-danger { background:#c00; color:#fff; }
+        .btn-danger { background:#c00; color:var(--white); }
         .btn-danger:hover { background:#a00; }
-        .btn-neutral { background:#666; color:#fff; }
+        .btn-neutral { background:#666; color:var(--white); }
         .btn-neutral:hover { background:#4d4d4d; }
-        .btn-outline { background:#fff; color:#333; border:1px solid #ddd; }
-        .btn-outline:hover { border-color:#C0633A; color:#C0633A; }
+        .btn-outline { background:var(--white); color:var(--gray-700); border:2px solid var(--gray-100); }
+        .btn-outline:hover { border-color:var(--rust); color:var(--rust); transform:translateY(-2px); }
 
-        .success { background:#d4edda; color:#155724; padding:1rem; border-radius:6px; margin-bottom:1rem; }
-        .error { background:#f8d7da; color:#721c24; padding:1rem; border-radius:6px; margin-bottom:1rem; }
+        .success { background:#d4edda; color:#155724; padding:14px 20px; border-radius:var(--radius); margin-bottom:1rem; font-weight:700; border-left:6px solid #28a745; }
+        .error { background:#f8dddd; color:#721c24; padding:14px 20px; border-radius:var(--radius); margin-bottom:1rem; font-weight:700; border-left:6px solid #dc3545; }
 
-        /* ===== Khách hàng: ô tra cứu ===== */
+        /* ===== Khách hàng ===== */
         .lookup-row { display:flex; gap:8px; }
         .lookup-row input { flex:1; }
-        .lookup-hint { font-size:0.78rem; color:#888; margin-top:6px; }
-        .lookup-hint b { color:#555; }
 
         .customer-found {
             display:flex; align-items:flex-start; gap:12px; background:#d4edda; border-radius:6px;
@@ -60,8 +183,7 @@
         }
         .customer-found .avatar {
             width:38px; height:38px; border-radius:50%; background:#C0633A; color:#fff;
-            display:flex; align-items:center; justify-content:center; font-weight:900; flex-shrink:0;
-            margin-top:1px;
+            display:flex; align-items:center; justify-content:center; font-weight:900; flex-shrink:0; margin-top:1px;
         }
         .customer-found .info { flex:1; min-width:0; }
         .customer-found .info strong { color:#155724; }
@@ -137,15 +259,11 @@
             padding:9px 12px; margin-top:8px; font-size:0.82rem; color:#155724;
         }
         .voucher-applied strong { color:#155724; }
-        .voucher-applied .voucher-remove {
-            margin-left:auto; background:none; border:none; color:#c00; cursor:pointer; font-size:0.95rem; font-weight:900;
-        }
+        .voucher-applied .voucher-remove { margin-left:auto; background:none; border:none; color:#c00; cursor:pointer; font-size:0.95rem; font-weight:900; }
 
-        /* ===== Giao hàng tận nơi tại quầy ===== */
+        /* ===== Giao hàng tận nơi ===== */
         .shipping-box { margin:12px 0; }
-        .shipping-toggle {
-            display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; font-weight:700; color:#333;
-        }
+        .shipping-toggle { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; font-weight:700; color:#333; }
         .shipping-toggle input { width:16px; height:16px; cursor:pointer; accent-color:#C0633A; }
         .shipping-fields { display:none; margin-top:10px; background:#f7f5f2; border-radius:6px; padding:10px 12px; }
         .shipping-fields label { margin:0 0 4px; font-size:0.78rem; }
@@ -173,11 +291,9 @@
         .pay-methods label:has(input:checked) { border-color:#C0633A; background:#fdf3ee; }
         .pay-methods .ic { font-size:1.3rem; }
 
-        @media (max-width: 1020px) {
-            .pos-layout { grid-template-columns:1fr; }
-        }
+        @media (max-width: 1020px) { .pos-layout { grid-template-columns:1fr; } }
 
-        /* ===== Popup QR thanh toán (POS) ===== */
+        /* ===== Popup QR ===== */
         .modal-overlay {
             display:none; position:fixed; inset:0; background:rgba(17,17,17,0.55);
             z-index:1000; align-items:center; justify-content:center; padding:20px;
@@ -188,43 +304,122 @@
             padding:1.6rem 1.6rem 1.4rem; text-align:center; position:relative;
             box-shadow:0 12px 40px rgba(0,0,0,0.25);
         }
-        .qr-modal .modal-close {
-            position:absolute; top:12px; right:14px; background:none; border:none;
-            font-size:1.2rem; color:#999; cursor:pointer; line-height:1;
-        }
+        .qr-modal .modal-close { position:absolute; top:12px; right:14px; background:none; border:none; font-size:1.2rem; color:#999; cursor:pointer; line-height:1; }
         .qr-modal .modal-close:hover { color:#c00; }
         .qr-modal h3 { margin:0 0 4px; font-size:1.05rem; font-weight:900; color:#1a1a1a; }
         .qr-modal .modal-sub { font-size:0.78rem; color:#999; margin-bottom:14px; }
-        .qr-modal img.qr-img-pos {
-            width:220px; height:220px; border:3px solid #C0633A; border-radius:8px; margin:0 auto 14px;
-            display:block;
-        }
+        .qr-modal img.qr-img-pos { width:220px; height:220px; border:3px solid #C0633A; border-radius:8px; margin:0 auto 14px; display:block; }
         .qr-modal .modal-amount { font-size:1.6rem; font-weight:900; color:#C0633A; margin-bottom:12px; }
-        .qr-modal .modal-info-row {
-            display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f0f0f0;
-            font-size:0.82rem; text-align:left;
-        }
+        .qr-modal .modal-info-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #f0f0f0; font-size:0.82rem; text-align:left; }
         .qr-modal .modal-info-row span:first-child { color:#888; }
         .qr-modal .modal-info-row strong { color:#1a1a1a; }
         .qr-modal .modal-actions { display:flex; gap:8px; margin-top:16px; }
         .qr-modal .modal-actions .btn { flex:1; padding:11px; }
         .qr-modal .modal-note { font-size:0.72rem; color:#aaa; margin-top:10px; line-height:1.5; }
+
+        @media (max-width:992px) {
+            .sidebar { width:220px; }
+            .sidebar-brand { padding:1rem 1.2rem; min-height:64px; gap:10px; }
+            .brand-logo-wrapper { width:40px; height:40px; }
+            .brand-text .hat, .brand-text .hub { font-size:1.5rem; }
+            .brand-text .sub { font-size:0.5rem; }
+            .sidebar-menu-wrapper { padding:0.8rem 0.4rem 0.8rem 0.8rem; }
+            .sidebar-menu li a { padding:7px 10px; font-size:0.75rem; gap:8px; }
+            .sidebar-menu li a .menu-icon { width:18px; height:18px; font-size:0.85rem; }
+            .main { padding:1.5rem; }
+            .page-title { font-size:1.8rem; }
+        }
+        @media (max-width:768px) {
+            body { flex-direction:column; }
+            .sidebar { width:100%; height:auto; position:static; border-right:none; border-bottom:3px solid var(--rust); box-shadow:0 4px 20px rgba(0,0,0,0.15); padding:0.6rem 0.8rem 0.4rem; flex-direction:row; flex-wrap:wrap; align-items:center; }
+            .sidebar-brand { padding:0.2rem 0.4rem 0.2rem 0; border-bottom:none; flex-shrink:0; min-height:auto; gap:8px; }
+            .brand-logo-wrapper { width:34px; height:34px; }
+            .brand-text .hat, .brand-text .hub { font-size:1.3rem; }
+            .brand-text .sub { display:none; }
+            .sidebar-menu-wrapper { padding:0.4rem 0; flex:1 1 100%; overflow-y:visible; max-height:220px; }
+            .menu-section { margin-bottom:0.6rem; }
+            .menu-section-title { font-size:0.5rem; padding:0 0.4rem 0.3rem 0.4rem; }
+            .sidebar-menu { flex-direction:row; flex-wrap:wrap; gap:1px; }
+            .sidebar-menu li a { padding:4px 10px; font-size:0.65rem; gap:4px; border-radius:6px; }
+            .sidebar-menu li a .menu-icon { width:16px; height:16px; font-size:0.7rem; }
+            .sidebar-menu li a .menu-label { font-size:0.6rem; }
+            .sidebar-menu li a .menu-badge { font-size:0.5rem; padding:0 5px; }
+            .sidebar-menu li a.active::before { display:none; }
+            .sidebar-footer { display:none; }
+        }
     </style>
 </head>
 <body>
 
-<aside>
-    <h2 style="color:#C0633A;">HatHub Employee</h2>
-    <a href="/employee/dashboard">Dashboard</a>
-    <a href="/employee/orders">Đơn hàng</a>
-    <a href="/employee/returns">Trả hàng</a>
-    <a href="/pos" class="active">Bán hàng tại quầy</a>
-    <a href="/pos/history">Lịch sử đơn</a>
-    <a href="/logout">Đăng xuất</a>
+<!-- ===== SIDEBAR — giống hệt các trang admin khác ===== -->
+<aside class="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-logo-wrapper">
+            <img th:src="@{/logo.jpg}" src="logo.jpg" alt="hathub Logo" class="brand-logo" />
+        </div>
+        <div class="brand-text">
+            <div><span class="hat">hat</span><span class="hub">hub</span></div>
+            <div class="sub">Admin Panel</div>
+        </div>
+    </div>
+
+    <div class="sidebar-menu-wrapper">
+        <div class="menu-section">
+            <div class="menu-section-title">Tổng quan</div>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/dashboard"><i class="menu-icon">📊</i><span class="menu-label">Dashboard</span></a></li>
+            </ul>
+        </div>
+        <div class="menu-section">
+            <div class="menu-section-title">Sản phẩm</div>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/products"><i class="menu-icon">🧢</i><span class="menu-label">Sản phẩm</span></a></li>
+                <li><a href="/admin/categories"><i class="menu-icon">📂</i><span class="menu-label">Danh mục</span></a></li>
+                <li><a href="/admin/brands"><i class="menu-icon">🏷️</i><span class="menu-label">Thương hiệu</span></a></li>
+                <li><a href="/admin/materials"><i class="menu-icon">🧵</i><span class="menu-label">Chất liệu</span></a></li>
+                <li><a href="/admin/hat-types"><i class="menu-icon">🎩</i><span class="menu-label">Kiểu mũ</span></a></li>
+            </ul>
+        </div>
+        <div class="menu-section">
+            <div class="menu-section-title">Thuộc tính</div>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/sizes"><i class="menu-icon">📏</i><span class="menu-label">Size</span></a></li>
+                <li><a href="/admin/colors"><i class="menu-icon">🎨</i><span class="menu-label">Màu sắc</span></a></li>
+            </ul>
+        </div>
+        <div class="menu-section">
+            <div class="menu-section-title">Bán hàng</div>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/orders"><i class="menu-icon">📦</i><span class="menu-label">Đơn hàng</span><span class="menu-badge" th:text="${pendingOrders}">0</span></a></li>
+                <li><a href="/admin/returns"><i class="menu-icon">↩️</i><span class="menu-label">Trả hàng</span></a></li>
+                <li><a href="/admin/vouchers"><i class="menu-icon">🎫</i><span class="menu-label">Voucher</span></a></li>
+                <li><a href="/admin/pos" class="active"><i class="menu-icon">🛒</i><span class="menu-label">Bán hàng tại quầy</span></a></li>
+            </ul>
+        </div>
+        <div class="menu-section">
+            <div class="menu-section-title">Cộng đồng</div>
+            <ul class="sidebar-menu">
+                <li><a href="/admin/reviews"><i class="menu-icon">⭐</i><span class="menu-label">Đánh giá</span></a></li>
+                <li><a href="/admin/users"><i class="menu-icon">👤</i><span class="menu-label">Người dùng</span></a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="user-row">
+            <div class="user-avatar">A</div>
+            <div class="user-info">
+                <div class="user-name">Admin</div>
+                <div class="user-role">Quản trị viên</div>
+            </div>
+        </div>
+        <a href="/logout" class="logout-link"><span>🚪</span> Đăng xuất</a>
+    </div>
 </aside>
 
-<main>
-    <h1 class="page-h">Bán hàng tại quầy</h1>
+<!-- ===== MAIN ===== -->
+<main class="main">
+    <div class="page-header"><h1 class="page-title">Bán hàng tại quầy</h1></div>
 
     <div class="pos-layout">
 
@@ -238,7 +433,6 @@
                     <button type="button" class="btn btn-outline" id="clearLookupBtn" style="display:none;" onclick="resetLookup()">✕</button>
                 </div>
 
-                <!-- Kết quả: TÌM THẤY -->
                 <div id="customerFound" class="customer-found" style="display:none;">
                     <div class="avatar" id="foundAvatar">K</div>
                     <div class="info">
@@ -249,7 +443,6 @@
                     <span class="check">✓</span>
                 </div>
 
-                <!-- Kết quả: KHÔNG TÌM THẤY -> Form tạo khách mới -->
                 <div id="customerNotFound" style="display:none;">
                     <div class="error" style="margin-top:12px;">
                         ✕ Không tìm thấy khách hàng với SĐT này.<br/>
@@ -287,7 +480,6 @@
                 </div>
 
                 <div class="product-grid" id="productGrid">
-                    <!-- Mỗi biến thể (ProductDetail) là 1 thẻ — dữ liệu đổ từ Thymeleaf -->
                     <div class="variant-card"
                          th:each="v : ${variants}"
                          th:classappend="${v.stockQuantity == null or v.stockQuantity == 0} ? 'out-of-stock' : ''"
@@ -312,9 +504,8 @@
             </div>
         </div>
 
-        <!-- ===== CỘT PHẢI: ĐƠN CHỜ + ĐƠN HIỆN TẠI ===== -->
+        <!-- ===== CỘT PHẢI ===== -->
         <div>
-            <!-- ĐƠN CHỜ (nhiều đơn song song tại quầy) -->
             <div class="card">
                 <div class="tabs-row">
                     <h3 style="margin:0;">🕒 Đơn chờ <span class="count-badge" id="orderCountBadge">1/10</span></h3>
@@ -325,7 +516,6 @@
                 <div class="progress-label" id="progressLabel">Đã dùng 1 / 10 đơn chờ</div>
             </div>
 
-            <!-- ĐƠN HIỆN TẠI -->
             <div class="card">
                 <h3>🛒 Đơn hiện tại <span style="margin-left:auto;color:#C0633A;" id="currentOrderCode">#1</span></h3>
 
@@ -341,7 +531,6 @@
                     <div class="cart-empty">Chưa có sản phẩm trong đơn</div>
                 </div>
 
-                <!-- VOUCHER -->
                 <div class="voucher-box">
                     <label style="margin-bottom:6px;">Mã giảm giá</label>
                     <div class="lookup-row">
@@ -354,7 +543,6 @@
                     </div>
                 </div>
 
-                <!-- GIAO HÀNG TẬN NƠI -->
                 <div class="shipping-box">
                     <label class="shipping-toggle">
                         <input type="checkbox" id="shippingToggle" onchange="toggleShippingPos()"/>
@@ -408,7 +596,7 @@
     </div>
 </main>
 
-<!-- ===== POPUP QR THANH TOÁN (chỉ hiện khi chọn phương thức QR Code) ===== -->
+<!-- ===== POPUP QR ===== -->
 <div class="modal-overlay" id="qrModalOverlay">
     <div class="qr-modal">
         <button type="button" class="modal-close" onclick="closeQrModal()">✕</button>
@@ -434,11 +622,6 @@
 </div>
 
 <script th:inline="javascript">
-    /* ============================================================
-       STATE — mỗi "order tab" là 1 đơn tại quầy đang xử lý song song
-       (giống nhiều máy POS thật: có thể tạm giữ nhiều đơn cùng lúc
-       trước khi thanh toán từng đơn một)
-       ============================================================ */
     let orders = [
         { id: 1, code: '#1', customer: null, items: [], paymentMethod: 'CASH', paymentLabel: '💵 Tiền mặt', voucherCode: null, discount: 0, isShipping: false, shippingAddress: '', shippingProvider: null, shippingFee: 0 }
     ];
@@ -446,16 +629,8 @@
     let nextOrderSeq = 2;
     const MAX_PARALLEL_ORDERS = 10;
 
-    function getActiveOrder() {
-        return orders.find(o => o.id === activeOrderId);
-    }
+    function getActiveOrder() { return orders.find(o => o.id === activeOrderId); }
 
-    /* ============================================================
-       TRA CỨU KHÁCH HÀNG THEO SĐT
-       Backend cần cung cấp: GET /pos/api/customer?phone=xxx
-         -> 200 { posCustomerId, fullName, phone, email, address }
-         -> 404  không tìm thấy
-       ============================================================ */
     function lookupCustomer() {
         const phone = document.getElementById('phoneInput').value.trim();
         if (!phone) { alert('Vui lòng nhập số điện thoại!'); return; }
@@ -513,12 +688,6 @@
         updateOrderMetaDisplay();
     }
 
-    /* ============================================================
-       TẠO KHÁCH HÀNG MỚI
-       Backend cần cung cấp: POST /pos/customer
-         body { phone, fullName, address, email }
-         -> 200 { posCustomerId, fullName, phone, email, address }
-       ============================================================ */
     function saveNewCustomer() {
         const fullName = document.getElementById('newCustomerName').value.trim();
         const phone = document.getElementById('newCustomerPhone').value.trim();
@@ -543,9 +712,6 @@
             .catch(() => alert('Lưu khách hàng thất bại, vui lòng thử lại.'));
     }
 
-    /* ============================================================
-       GIỎ HÀNG TẠM (client-side, chưa lưu DB cho tới khi thanh toán)
-       ============================================================ */
     function addToCart(productDetailId, name, size, color, price, stock, image) {
         const order = getActiveOrder();
         const existing = order.items.find(i => i.productDetailId === productDetailId);
@@ -614,7 +780,6 @@
         document.getElementById('sumShipping').textContent = shippingFee > 0 ? '+' + formatVND(shippingFee) : '0đ';
         document.getElementById('sumTotal').textContent = formatVND(total);
 
-        // Cập nhật nhãn phí hiển thị trên 2 thẻ GHTK/GHN theo tạm tính hiện tại (freeship nếu đủ 500k)
         const eligibleFreeship = subtotal >= FREESHIP_THRESHOLD;
         document.getElementById('feeGHTK').textContent = eligibleFreeship ? 'Miễn phí' : '15.000đ';
         document.getElementById('feeGHN').textContent = eligibleFreeship ? '15.000đ' : '30.000đ';
@@ -623,21 +788,13 @@
         renderOrderTabs();
     }
 
-    /* ============================================================
-       GIAO HÀNG TẬN NƠI — nội bộ, chọn GHTK (15.000đ) hoặc GHN (30.000đ)
-       Đơn từ 500.000đ: GHTK miễn phí, GHN giảm 15.000đ (khớp PosService.resolveShippingFee)
-       (không tích hợp API hãng vận chuyển ngoài)
-       ============================================================ */
     const SHIPPING_FEES = { GHTK: 15000, GHN: 30000 };
     const FREESHIP_THRESHOLD = 500000;
 
-    // Tính phí ship ước tính hiển thị cho nhân viên — server vẫn là nơi tính chính thức lúc checkout
     function computeShippingFee(provider, subtotal) {
         if (!provider || !SHIPPING_FEES[provider]) return 0;
         const baseFee = SHIPPING_FEES[provider];
-
         if (subtotal < FREESHIP_THRESHOLD) return baseFee;
-
         if (provider === 'GHTK') return 0;
         if (provider === 'GHN') return Math.max(baseFee - 15000, 0);
         return baseFee;
@@ -647,10 +804,7 @@
         const order = getActiveOrder();
         const checked = document.getElementById('shippingToggle').checked;
         order.isShipping = checked;
-
         document.getElementById('shippingFields').style.display = checked ? 'block' : 'none';
-
-        // Prefill địa chỉ từ khách đã tra cứu (nếu có) khi vừa bật lên và chưa nhập gì
         if (checked && !order.shippingAddress && order.customer && order.customer.address) {
             order.shippingAddress = order.customer.address;
             document.getElementById('shippingAddressInput').value = order.customer.address;
@@ -669,22 +823,14 @@
         renderCart();
     }
 
-    // Đồng bộ khối giao hàng theo đơn đang được chọn (khi chuyển tab)
     function updateShippingDisplay() {
         const order = getActiveOrder();
         document.getElementById('shippingToggle').checked = !!order.isShipping;
         document.getElementById('shippingFields').style.display = order.isShipping ? 'block' : 'none';
         document.getElementById('shippingAddressInput').value = order.shippingAddress || '';
-
-        document.querySelectorAll('input[name=shippingProvider]').forEach(r => {
-            r.checked = (r.value === order.shippingProvider);
-        });
+        document.querySelectorAll('input[name=shippingProvider]').forEach(r => { r.checked = (r.value === order.shippingProvider); });
     }
 
-    /* ============================================================
-       VOUCHER — tái sử dụng endpoint /api/vouchers/check đã có sẵn
-       cho luồng đặt hàng online (VoucherApiController)
-       ============================================================ */
     function applyVoucherPos() {
         const codeInput = document.getElementById('voucherInput');
         const code = codeInput.value.trim();
@@ -697,10 +843,7 @@
         fetch('/api/vouchers/check?code=' + encodeURIComponent(code) + '&subtotal=' + subtotal)
             .then(res => res.json())
             .then(data => {
-                if (!data.valid) {
-                    alert(data.message || 'Voucher không hợp lệ!');
-                    return;
-                }
+                if (!data.valid) { alert(data.message || 'Voucher không hợp lệ!'); return; }
                 order.voucherCode = data.code;
                 order.discount = data.discount;
                 codeInput.value = '';
@@ -718,12 +861,10 @@
         renderCart();
     }
 
-    // Đồng bộ khối hiển thị voucher theo đơn đang được chọn (khi chuyển tab hoặc áp/gỡ voucher)
     function updateVoucherDisplay() {
         const order = getActiveOrder();
         const box = document.getElementById('voucherAppliedBox');
         const text = document.getElementById('voucherAppliedText');
-
         if (order.voucherCode) {
             text.innerHTML = '✓ Đã áp dụng mã <strong>' + order.voucherCode + '</strong> — giảm ' + formatVND(order.discount || 0);
             box.style.display = 'flex';
@@ -743,11 +884,8 @@
         updateVoucherDisplay();
         updateShippingDisplay();
 
-        document.querySelectorAll('input[name=payMethod]').forEach(r => {
-            r.checked = (r.value === order.paymentMethod);
-        });
+        document.querySelectorAll('input[name=payMethod]').forEach(r => { r.checked = (r.value === order.paymentMethod); });
 
-        // Đồng bộ lại ô tra cứu khách theo đơn đang chọn
         if (order.customer) {
             document.getElementById('phoneInput').value = order.customer.phone;
             showFoundSilently(order.customer);
@@ -785,9 +923,6 @@
         document.getElementById('metaPaymentLabel').textContent = label;
     }
 
-    /* ============================================================
-       QUẢN LÝ NHIỀU ĐƠN CHỜ SONG SONG (tab)
-       ============================================================ */
     function renderOrderTabs() {
         const tabsEl = document.getElementById('orderTabs');
         tabsEl.innerHTML = orders.map(o => {
@@ -812,18 +947,9 @@
             return;
         }
         const newOrder = {
-            id: nextOrderSeq,
-            code: '#' + nextOrderSeq,
-            customer: null,
-            items: [],
-            paymentMethod: 'CASH',
-            paymentLabel: '💵 Tiền mặt',
-            voucherCode: null,
-            discount: 0,
-            isShipping: false,
-            shippingAddress: '',
-            shippingProvider: null,
-            shippingFee: 0
+            id: nextOrderSeq, code: '#' + nextOrderSeq, customer: null, items: [],
+            paymentMethod: 'CASH', paymentLabel: '💵 Tiền mặt', voucherCode: null, discount: 0,
+            isShipping: false, shippingAddress: '', shippingProvider: null, shippingFee: 0
         };
         orders.push(newOrder);
         activeOrderId = newOrder.id;
@@ -847,9 +973,6 @@
         renderCart();
     }
 
-    /* ============================================================
-       LỌC SẢN PHẨM
-       ============================================================ */
     function filterVariants() {
         const kw = document.getElementById('productSearch').value.trim().toLowerCase();
         document.querySelectorAll('#productGrid .variant-card').forEach(card => {
@@ -858,38 +981,20 @@
         });
     }
 
-    /* ============================================================
-       THANH TOÁN
-       - Tiền mặt (CASH): gọi checkout ngay như trước.
-       - QR Code (CARD): hiện popup mã QR trước, nhân viên xác nhận
-         "Đã nhận thanh toán" trong popup mới thực sự gọi API tạo đơn.
-       Backend cần cung cấp: POST /pos/checkout
-         body { posCustomerId, paymentMethod,
-                items: [{productDetailId, quantity}] }
-         -> 200 { posOrderId, orderCode }
-         -> 400 { message } (VD: hết hàng)
-       ============================================================ */
     function checkout() {
         const order = getActiveOrder();
         if (order.items.length === 0) { alert('Đơn hàng chưa có sản phẩm nào!'); return; }
         if (!order.customer) { alert('Vui lòng tra cứu hoặc tạo khách hàng trước khi thanh toán!'); return; }
         if (order.isShipping && (!order.shippingAddress || !order.shippingAddress.trim())) {
-            alert('Vui lòng nhập địa chỉ giao hàng!');
-            return;
+            alert('Vui lòng nhập địa chỉ giao hàng!'); return;
         }
         if (order.isShipping && !order.shippingProvider) {
-            alert('Vui lòng chọn đơn vị vận chuyển (GHTK hoặc GHN)!');
-            return;
+            alert('Vui lòng chọn đơn vị vận chuyển (GHTK hoặc GHN)!'); return;
         }
 
-        if (order.paymentMethod === 'CARD') {
-            openQrModal(order);
-        } else {
-            doCheckout(order);
-        }
+        if (order.paymentMethod === 'CARD') { openQrModal(order); } else { doCheckout(order); }
     }
 
-    // Xây link ảnh QR VietQR — dùng chung thông tin ngân hàng với trang thanh toán online (PaymentController)
     function buildQrUrl(amount, addInfo) {
         const bankId = 'MBBank';
         const accountNo = '0984085074';
@@ -900,7 +1005,6 @@
             + '&accountName=' + encodeURIComponent(accountName);
     }
 
-    // Mở popup QR — số tiền lấy từ giỏ hàng hiện tại, nội dung CK là mã đơn tạm thời để nhân viên đối chiếu
     function openQrModal(order) {
         const subtotal = order.items.reduce((s, i) => s + i.price * i.quantity, 0);
         const discount = order.discount || 0;
@@ -920,26 +1024,20 @@
         document.getElementById('qrModalOverlay').classList.add('open');
     }
 
-    function closeQrModal() {
-        document.getElementById('qrModalOverlay').classList.remove('open');
-    }
+    function closeQrModal() { document.getElementById('qrModalOverlay').classList.remove('open'); }
 
-    // Nhân viên bấm xác nhận trong popup -> mới thực sự gọi API tạo đơn
     function confirmQrPayment() {
         const order = getActiveOrder();
         const confirmBtn = document.getElementById('qrModalConfirmBtn');
         confirmBtn.disabled = true;
         confirmBtn.textContent = 'Đang xử lý...';
 
-        doCheckout(order, () => {
-            closeQrModal();
-        }, () => {
+        doCheckout(order, () => { closeQrModal(); }, () => {
             confirmBtn.disabled = false;
             confirmBtn.textContent = '✓ Đã nhận thanh toán';
         });
     }
 
-    // Gọi API tạo đơn thực sự — dùng chung cho cả luồng tiền mặt (trực tiếp) và luồng QR (sau khi xác nhận popup)
     function doCheckout(order, onSuccess, onError) {
         const payload = {
             posCustomerId: order.customer.posCustomerId,
@@ -963,7 +1061,6 @@
             })
             .then(data => {
                 alert('Thanh toán thành công! Mã đơn: ' + data.orderCode);
-                // Xoá tab đơn vừa thanh toán, chuyển sang tab kế tiếp (hoặc tạo tab trống mới)
                 orders = orders.filter(o => o.id !== order.id);
                 if (orders.length === 0) {
                     orders.push({ id: nextOrderSeq, code: '#' + nextOrderSeq, customer: null, items: [], paymentMethod: 'CASH', paymentLabel: '💵 Tiền mặt', voucherCode: null, discount: 0, isShipping: false, shippingAddress: '', shippingProvider: null, shippingFee: 0 });
@@ -975,23 +1072,13 @@
                 updateOrderMetaDisplay();
                 renderCart();
                 if (onSuccess) onSuccess();
-                // window.location.href = '/pos/orders/' + data.posOrderId + '/receipt'; // in hoá đơn
             })
-            .catch(err => {
-                alert(err.message);
-                if (onError) onError();
-            });
+            .catch(err => { alert(err.message); if (onError) onError(); });
     }
 
-    // Đóng popup khi bấm ra ngoài vùng modal hoặc nhấn Esc
-    document.getElementById('qrModalOverlay').addEventListener('click', function (e) {
-        if (e.target === this) closeQrModal();
-    });
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeQrModal();
-    });
+    document.getElementById('qrModalOverlay').addEventListener('click', function (e) { if (e.target === this) closeQrModal(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeQrModal(); });
 
-    // Khởi tạo hiển thị ban đầu
     renderOrderTabs();
     renderCart();
 </script>

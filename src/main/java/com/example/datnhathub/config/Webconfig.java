@@ -9,8 +9,6 @@ public class Webconfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Map URL "/uploads/**" -> thư mục thật "uploads/" ở gốc project
-        // (đúng với cách AdminProductService đang lưu file: user.dir + "/uploads/products/")
         String uploadDir = System.getProperty("user.dir") + "/uploads/";
 
         registry.addResourceHandler("/uploads/**")

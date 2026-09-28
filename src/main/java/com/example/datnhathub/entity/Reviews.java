@@ -37,4 +37,8 @@ public class Reviews {
 
     @Column(name = "AdminReply", columnDefinition = "NVARCHAR(MAX)")
     public String adminReply;
+
+    // Đường dẫn ảnh khách đính kèm khi đánh giá, vd: /uploads/feedbackIMG/xxx.jpg (có thể null)
+    @Column(name = "ReviewImage", length = 255)
+    public String reviewImage;
 }

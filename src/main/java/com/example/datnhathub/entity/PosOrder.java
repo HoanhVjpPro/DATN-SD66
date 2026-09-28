@@ -73,10 +73,22 @@ public class PosOrder {
     @Column(name = "ShippingStatus", length = 30)
     private String shippingStatus;
 
+    // ── Trả hàng tại quầy (MỚI) ──
+    // Khác với đơn online (có bước "Chờ xác nhận" rồi admin duyệt), trả hàng POS được
+    // nhân viên xử lý và chấp nhận NGAY tại quầy nên chỉ có 1 trạng thái cuối cùng:
+    // null = chưa trả, "Đã chấp nhận" = đã xử lý trả hàng xong.
+    @Column(name = "ReturnStatus", length = 50)
+    private String returnStatus;
+
+    @Column(name = "ReturnReason", length = 500)
+    private String returnReason;
+
+    @Column(name = "ReturnDate")
+    private LocalDateTime returnDate;
+
     @OneToMany(mappedBy = "posOrder", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PosOrderDetail> details;
 
-    // Mã đơn hiển thị cho khách, VD: POS20260819-15
     public String getOrderCode() {
         String datePart = orderDate.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         return "POS" + datePart + "-" + posOrderId;
@@ -88,11 +100,22 @@ public class PosOrder {
     }
 
     // Tạm tính trước khi trừ voucher và cộng phí ship
-    // subtotal = totalAmount - shippingFee + discountAmount
     public BigDecimal getSubtotal() {
         BigDecimal discount = discountAmount == null ? BigDecimal.ZERO : discountAmount;
         BigDecimal ship = shippingFee == null ? BigDecimal.ZERO : shippingFee;
         BigDecimal total = totalAmount == null ? BigDecimal.ZERO : totalAmount;
         return total.subtract(ship).add(discount);
+    }
+
+    public Integer getReturnRequestedQuantity() {
+        if (details == null) return 0;
+        return details.stream()
+                .mapToInt(d -> d.getReturnQuantity() == null ? 0 : d.getReturnQuantity())
+                .sum();
+    }
+
+    public boolean isPartialReturn() {
+        int returned = getReturnRequestedQuantity();
+        return returned > 0 && returned < getTotalQuantity();
     }
 }

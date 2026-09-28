@@ -22,7 +22,6 @@ public class AdminColorController {
     @Autowired
     private ColorRepository colorRepository;
 
-    // GET /admin/colors — Danh sách + form thêm/sửa
     @GetMapping
     public String listColors(@RequestParam(required = false) Integer editId, Model model, HttpSession session) {
         Users user = (Users) session.getAttribute("user");
@@ -44,7 +43,6 @@ public class AdminColorController {
         return "admin/colors";
     }
 
-    // POST /admin/colors — Thêm mới HOẶC cập nhật (dùng cho trang quản lý Màu)
     @PostMapping
     public String saveColor(@RequestParam(required = false) Integer colorId,
                             @RequestParam String colorName,
@@ -66,8 +64,6 @@ public class AdminColorController {
         return "redirect:/admin/colors";
     }
 
-    // POST /admin/colors/quick-add — Thêm màu nhanh ngay trong popup "Tạo biến thể" (AJAX, trả JSON)
-    // Nếu tên đã tồn tại (không phân biệt hoa thường) thì trả về bản ghi cũ, không tạo trùng
     @PostMapping("/quick-add")
     @ResponseBody
     public Map<String, Object> quickAddColor(@RequestParam String colorName,
